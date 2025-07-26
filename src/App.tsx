@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Search, Bell, ChevronDown, Users, Package, RefreshCw, TrendingUp, TrendingDown, MoreVertical, ChevronRight, Settings, HelpCircle, MessageCircle, LogOut, DollarSign, Zap, User, Share2, Star, BarChart3 } from 'lucide-react';
 import TotalSalesChart from './components/OrdersAnalyticsChart';
 import RevenueGrowthCard from './components/RevenueGrowthCard';
+import TopProductsChart from './components/TopProductsChart';
 
 function App() {
   const [salesTimeUnit, setSalesTimeUnit] = useState('Monthly');
@@ -223,59 +224,12 @@ function App() {
             </div>
           </div>
 
-          {/* Order List */}
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-gray-900">Order List</h3>
-                <select className="text-sm text-gray-600 border border-gray-200 rounded px-2 py-1">
-                  <option>Monthly</option>
-                </select>
-              </div>
+          {/* Top Products Sold */}
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-medium text-gray-900">Top Products Sold</h3>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      ID <ChevronDown className="w-3 h-3 inline ml-1" />
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Customer Name <ChevronDown className="w-3 h-3 inline ml-1" />
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount <ChevronDown className="w-3 h-3 inline ml-1" />
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status Order <ChevronDown className="w-3 h-3 inline ml-1" />
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#12594</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Oct 15, 2023</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Frank Murlo</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">312 S Wilmette Ave</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$847.69</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                        <div className="w-2 h-2 bg-orange-500 rounded-full mr-1"></div>
-                        New Order
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                      <MoreVertical className="w-4 h-4" />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <TopProductsChart />
           </div>
         </div>
       </div>
