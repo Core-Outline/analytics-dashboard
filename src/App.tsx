@@ -4,6 +4,7 @@ import { Search, Bell, ChevronDown, Users, Package, RefreshCw, TrendingUp, Trend
 import TotalSalesChart from './components/OrdersAnalyticsChart';
 import RevenueGrowthCard from './components/RevenueGrowthCard';
 import TopProductsChart from './components/TopProductsChart';
+import GrossRevenueCard from './components/GrossRevenueCard';
 
 function App() {
   const [salesTimeUnit, setSalesTimeUnit] = useState('Monthly');
@@ -222,6 +223,14 @@ function App() {
               </div>
               <RevenueGrowthCard />
             </div>
+          </div>
+
+          {/* Gross Revenue */}
+          <div className="bg-white p-6 rounded-lg shadow-sm mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-medium text-gray-900">Gross Revenue</h3>
+            </div>
+            <GrossRevenueCard />
           </div>
 
           {/* Top Products Sold */}
