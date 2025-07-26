@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Users, Heart, MessageCircle, Share2, TrendingUp } from 'lucide-react';
+import { Users, Heart, MessageCircle, Share2, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const InfluencersCard: React.FC = () => {
   const [selectedInfluencer, setSelectedInfluencer] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const influencersPerPage = 5;
 
   // Sample influencer data
   const influencers = [
@@ -70,11 +72,152 @@ const InfluencersCard: React.FC = () => {
       avgComments: '3.2K',
       category: 'Travel',
       avatar: 'LA'
+    },
+    {
+      id: 'gaming_alex',
+      name: 'Alex Rodriguez',
+      handle: '@gaming_alex',
+      platform: 'Twitch',
+      followers: '1.5M',
+      engagement: '8.2%',
+      posts: 145,
+      avgLikes: '78K',
+      avgComments: '3.7K',
+      category: 'Gaming',
+      avatar: 'AR'
+    },
+    {
+      id: 'beauty_sophia',
+      name: 'Sophia Martinez',
+      handle: '@beauty_sophia',
+      platform: 'Instagram',
+      followers: '2.1M',
+      engagement: '5.9%',
+      posts: 312,
+      avgLikes: '124K',
+      avgComments: '2.8K',
+      category: 'Beauty',
+      avatar: 'SM'
+    },
+    {
+      id: 'business_james',
+      name: 'James Thompson',
+      handle: '@business_james',
+      platform: 'LinkedIn',
+      followers: '890K',
+      engagement: '4.3%',
+      posts: 78,
+      avgLikes: '38K',
+      avgComments: '1.2K',
+      category: 'Business',
+      avatar: 'JT'
+    },
+    {
+      id: 'music_taylor',
+      name: 'Taylor Swift Fan',
+      handle: '@music_taylor',
+      platform: 'TikTok',
+      followers: '4.2M',
+      engagement: '9.1%',
+      posts: 567,
+      avgLikes: '312K',
+      avgComments: '8.9K',
+      category: 'Music',
+      avatar: 'TS'
+    },
+    {
+      id: 'fashion_olivia',
+      name: 'Olivia Brown',
+      handle: '@fashion_olivia',
+      platform: 'Instagram',
+      followers: '1.9M',
+      engagement: '6.7%',
+      posts: 289,
+      avgLikes: '127K',
+      avgComments: '3.4K',
+      category: 'Fashion',
+      avatar: 'OB'
+    },
+    {
+      id: 'sports_marcus',
+      name: 'Marcus Johnson',
+      handle: '@sports_marcus',
+      platform: 'YouTube',
+      followers: '2.3M',
+      engagement: '5.8%',
+      posts: 134,
+      avgLikes: '156K',
+      avgComments: '4.2K',
+      category: 'Sports',
+      avatar: 'MJ'
+    },
+    {
+      id: 'art_emma',
+      name: 'Emma Wilson',
+      handle: '@art_emma',
+      platform: 'Instagram',
+      followers: '756K',
+      engagement: '7.4%',
+      posts: 198,
+      avgLikes: '56K',
+      avgComments: '1.8K',
+      category: 'Art',
+      avatar: 'EW'
+    },
+    {
+      id: 'comedy_ryan',
+      name: 'Ryan Davis',
+      handle: '@comedy_ryan',
+      platform: 'TikTok',
+      followers: '3.8M',
+      engagement: '11.2%',
+      posts: 423,
+      avgLikes: '425K',
+      avgComments: '12.1K',
+      category: 'Comedy',
+      avatar: 'RD'
+    },
+    {
+      id: 'pets_anna',
+      name: 'Anna Garcia',
+      handle: '@pets_anna',
+      platform: 'Instagram',
+      followers: '1.4M',
+      engagement: '8.9%',
+      posts: 345,
+      avgLikes: '124K',
+      avgComments: '5.6K',
+      category: 'Pets',
+      avatar: 'AG'
+    },
+    {
+      id: 'diy_kevin',
+      name: 'Kevin Lee',
+      handle: '@diy_kevin',
+      platform: 'YouTube',
+      followers: '1.1M',
+      engagement: '6.5%',
+      posts: 87,
+      avgLikes: '71K',
+      avgComments: '2.9K',
+      category: 'DIY',
+      avatar: 'KL'
     }
   ];
 
+  // Calculate pagination
+  const totalPages = Math.ceil(influencers.length / influencersPerPage);
+  const startIndex = (currentPage - 1) * influencersPerPage;
+  const endIndex = startIndex + influencersPerPage;
+  const currentInfluencers = influencers.slice(startIndex, endIndex);
+
   const handleInfluencerSelect = (influencerId: string) => {
     setSelectedInfluencer(influencerId);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setSelectedInfluencer(''); // Clear selection when changing pages
   };
 
   const getPlatformColor = (platform: string) => {
@@ -85,6 +228,10 @@ const InfluencersCard: React.FC = () => {
         return 'bg-red-100 text-red-800';
       case 'TikTok':
         return 'bg-gray-100 text-gray-800';
+      case 'Twitch':
+        return 'bg-purple-100 text-purple-800';
+      case 'LinkedIn':
+        return 'bg-blue-100 text-blue-800';
       default:
         return 'bg-blue-100 text-blue-800';
     }
@@ -93,12 +240,17 @@ const InfluencersCard: React.FC = () => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-medium text-gray-900">Top Influencers</h3>
+        <div>
+          <h3 className="text-lg font-medium text-gray-900">Top Influencers</h3>
+          <div className="text-sm text-gray-500">
+            Showing {startIndex + 1}-{Math.min(endIndex, influencers.length)} of {influencers.length} influencers
+          </div>
+        </div>
         <div className="text-sm text-gray-500">Last 30 days</div>
       </div>
 
       <div className="space-y-4">
-        {influencers.map((influencer) => (
+        {currentInfluencers.map((influencer) => (
           <div
             key={influencer.id}
             className={`p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
@@ -192,11 +344,56 @@ const InfluencersCard: React.FC = () => {
         ))}
       </div>
 
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            currentPage === 1
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          <ChevronLeft className="w-4 h-4" />
+          <span>Previous</span>
+        </button>
+
+        <div className="flex items-center space-x-2">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                currentPage === page
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            currentPage === totalPages
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          <span>Next</span>
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+
       {/* Selected Influencer Info */}
       {selectedInfluencer && (
         <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
           <div className="text-sm text-blue-800">
-            <strong>Selected:</strong> {influencers.find(i => i.id === selectedInfluencer)?.name}
+            <strong>Selected:</strong> {currentInfluencers.find(i => i.id === selectedInfluencer)?.name}
           </div>
         </div>
       )}
