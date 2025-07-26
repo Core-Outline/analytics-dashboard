@@ -3,6 +3,7 @@ import SocialMediaMetricsCard from '../components/SocialMediaMetricsCard';
 import TrendingKeywordsCard from '../components/TrendingKeywordsCard';
 import ConversionsDistributionCard from '../components/ConversionsDistributionCard';
 import SentimentAnalysisCard from '../components/SentimentAnalysisCard';
+import InfluencersCard from '../components/InfluencersCard';
 
 const SocialMediaPage: React.FC = () => {
   return (
@@ -21,6 +22,10 @@ const SocialMediaPage: React.FC = () => {
 
       <div className="mt-8">
         <SentimentAnalysisCard />
+      </div>
+
+      <div className="mt-8">
+        <InfluencersCard />
       </div>
     </div>
   );
