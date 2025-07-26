@@ -104,15 +104,15 @@ function App() {
         {/* Stats Cards */}
         <div className="p-8">
           <div className="grid grid-cols-4 gap-6 mb-8">
-            {/* Total Users */}
+            {/* Recurring Revenue */}
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-5 h-5 text-blue-600" />
+                  <DollarSign className="w-5 h-5 text-blue-600" />
                 </div>
               </div>
               <div className="text-2xl font-bold text-gray-900 mb-1">89,935</div>
-              <div className="text-gray-600 text-sm mb-2">Total users</div>
+              <div className="text-gray-600 text-sm mb-2">Recurring Revenue</div>
               <div className="flex items-center space-x-2 text-sm">
                 <TrendingUp className="w-4 h-4 text-green-500" />
                 <span className="text-green-500 font-normal">10.2</span>
@@ -120,15 +120,15 @@ function App() {
               </div>
             </div>
 
-            {/* Total Products */}
+            {/* Revenue Growth */}
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
-                  <Package className="w-5 h-5 text-pink-600" />
+                  <TrendingUp className="w-5 h-5 text-pink-600" />
                 </div>
               </div>
               <div className="text-2xl font-bold text-gray-900 mb-1">23,283.5</div>
-              <div className="text-gray-600 text-sm mb-2">Total products</div>
+              <div className="text-gray-600 text-sm mb-2">Revenue Growth</div>
               <div className="flex items-center space-x-2 text-sm">
                 <TrendingUp className="w-4 h-4 text-green-500" />
                 <span className="text-green-500 font-normal">3.1</span>
@@ -136,15 +136,15 @@ function App() {
               </div>
             </div>
 
-            {/* Total Users */}
+            {/* Total Sales */}
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-5 h-5 text-purple-600" />
+                  <BarChart3 className="w-5 h-5 text-purple-600" />
                 </div>
               </div>
               <div className="text-2xl font-bold text-gray-900 mb-1">46,827</div>
-              <div className="text-gray-600 text-sm mb-2">Total users</div>
+              <div className="text-gray-600 text-sm mb-2">Total Sales</div>
               <div className="flex items-center space-x-2 text-sm">
                 <TrendingDown className="w-4 h-4 text-red-500" />
                 <span className="text-red-500 font-normal">2.56</span>
@@ -152,15 +152,15 @@ function App() {
               </div>
             </div>
 
-            {/* Refunded */}
+            {/* Annual Run Rate */}
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <RefreshCw className="w-5 h-5 text-orange-600" />
+                  <DollarSign className="w-5 h-5 text-orange-600" />
                 </div>
               </div>
               <div className="text-2xl font-bold text-gray-900 mb-1">124,854</div>
-              <div className="text-gray-600 text-sm mb-2">Refunded</div>
+              <div className="text-gray-600 text-sm mb-2">Annual Run Rate</div>
               <div className="flex items-center space-x-2 text-sm">
                 <TrendingUp className="w-4 h-4 text-green-500" />
                 <span className="text-green-500 font-normal">7.2</span>
