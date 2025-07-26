@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
-import 'echarts/map/js/world';
 
 const UsersByCountryMap: React.FC = () => {
   // Sample data for users by country (country code, user count)
@@ -39,45 +38,15 @@ const UsersByCountryMap: React.FC = () => {
   const maxValue = Math.max(...values);
 
   const option = {
-    visualMap: {
-      min: minValue,
-      max: maxValue,
-      left: 'left',
-      top: 'bottom',
-      text: ['High', 'Low'],
-      calculable: true,
-      inRange: {
-        color: ['#e0f2fe', '#0ea5e9', '#0284c7', '#0369a1', '#1e40af', '#1e3a8a']
-      },
+    title: {
+      text: 'Users by Country',
+      left: 'center',
       textStyle: {
-        color: '#6b7280',
-        fontSize: 12
-      },
-      formatter: function(value: number) {
-        return Math.round(value).toLocaleString();
+        color: '#374151',
+        fontSize: 16,
+        fontWeight: 'bold'
       }
     },
-    series: [
-      {
-        name: 'Users',
-        type: 'map',
-        map: 'world',
-        roam: true,
-        data: countryData,
-        itemStyle: {
-          areaColor: '#f8fafc',
-          borderColor: '#e2e8f0',
-          borderWidth: 0.5
-        },
-        emphasis: {
-          itemStyle: {
-            areaColor: '#e2e8f0',
-            borderColor: '#374151',
-            borderWidth: 2
-          }
-        }
-      }
-    ],
     tooltip: {
       trigger: 'item',
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -88,15 +57,39 @@ const UsersByCountryMap: React.FC = () => {
         fontSize: 12
       },
       formatter: function(params: any) {
-        if (params.data) {
-          return `
-            <div style="font-weight: 600; margin-bottom: 4px;">${params.data.name}</div>
-            <div>${params.data.value.toLocaleString()} users</div>
-          `;
-        }
-        return `${params.name}<br/>No data`;
+        return `
+          <div style="font-weight: 600; margin-bottom: 4px;">${params.name}</div>
+          <div>${params.value.toLocaleString()} users</div>
+        `;
       }
-    }
+    },
+    series: [
+      {
+        name: 'Countries',
+        type: 'pie',
+        radius: ['40%', '70%'],
+        center: ['50%', '50%'],
+        data: countryData,
+        itemStyle: {
+          borderRadius: 4,
+          borderColor: '#fff',
+          borderWidth: 2
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        },
+        label: {
+          show: false
+        },
+        labelLine: {
+          show: false
+        }
+      }
+    ]
   };
 
   // Top countries table data
@@ -104,12 +97,11 @@ const UsersByCountryMap: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* World Map */}
+      {/* Users Chart */}
       <div className="h-80">
         <ReactECharts 
           option={option} 
           style={{ height: '320px', width: '100%' }}
-          opts={{ renderer: 'canvas' }}
         />
       </div>
 
