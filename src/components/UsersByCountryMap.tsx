@@ -1,7 +1,100 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
+import * as echarts from 'echarts';
+
+// World map GeoJSON data (simplified version)
+const worldGeoJson = {
+  type: "FeatureCollection",
+  features: [
+    {
+      type: "Feature",
+      properties: { name: "United States" },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[-158.0, 22.0], [-158.0, 50.0], [-68.0, 50.0], [-68.0, 22.0], [-158.0, 22.0]]]
+      }
+    },
+    {
+      type: "Feature", 
+      properties: { name: "China" },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[73.0, 18.0], [135.0, 18.0], [135.0, 54.0], [73.0, 54.0], [73.0, 18.0]]]
+      }
+    },
+    {
+      type: "Feature",
+      properties: { name: "India" },
+      geometry: {
+        type: "Polygon", 
+        coordinates: [[[68.0, 6.0], [97.0, 6.0], [97.0, 37.0], [68.0, 37.0], [68.0, 6.0]]]
+      }
+    },
+    {
+      type: "Feature",
+      properties: { name: "Germany" },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[5.0, 47.0], [15.0, 47.0], [15.0, 55.0], [5.0, 55.0], [5.0, 47.0]]]
+      }
+    },
+    {
+      type: "Feature",
+      properties: { name: "United Kingdom" },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[-8.0, 49.0], [2.0, 49.0], [2.0, 61.0], [-8.0, 61.0], [-8.0, 49.0]]]
+      }
+    },
+    {
+      type: "Feature",
+      properties: { name: "France" },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[-5.0, 42.0], [8.0, 42.0], [8.0, 51.0], [-5.0, 51.0], [-5.0, 42.0]]]
+      }
+    },
+    {
+      type: "Feature",
+      properties: { name: "Japan" },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[129.0, 31.0], [146.0, 31.0], [146.0, 46.0], [129.0, 46.0], [129.0, 31.0]]]
+      }
+    },
+    {
+      type: "Feature",
+      properties: { name: "Canada" },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[-141.0, 42.0], [-52.0, 42.0], [-52.0, 84.0], [-141.0, 84.0], [-141.0, 42.0]]]
+      }
+    },
+    {
+      type: "Feature",
+      properties: { name: "Australia" },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[113.0, -44.0], [154.0, -44.0], [154.0, -10.0], [113.0, -10.0], [113.0, -44.0]]]
+      }
+    },
+    {
+      type: "Feature",
+      properties: { name: "Brazil" },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[-74.0, -34.0], [-34.0, -34.0], [-34.0, 5.0], [-74.0, 5.0], [-74.0, -34.0]]]
+      }
+    }
+  ]
+};
 
 const UsersByCountryMap: React.FC = () => {
+  useEffect(() => {
+    // Register the world map with ECharts
+    echarts.registerMap('world', worldGeoJson);
+  }, []);
+
   // Sample data for users by country (country code, user count)
   const countryData = [
     { name: 'United States', value: 15420, code: 'US' },
