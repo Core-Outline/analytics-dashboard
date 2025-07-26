@@ -5,6 +5,7 @@ import TotalSalesChart from './components/OrdersAnalyticsChart';
 import RevenueGrowthCard from './components/RevenueGrowthCard';
 import TopProductsChart from './components/TopProductsChart';
 import GrossRevenueCard from './components/GrossRevenueCard';
+import AdCampaignsCard from './components/AdCampaignsCard';
 
 function App() {
   const [salesTimeUnit, setSalesTimeUnit] = useState('Monthly');
@@ -239,6 +240,14 @@ function App() {
               <h3 className="text-lg font-medium text-gray-900">Top Products Sold</h3>
             </div>
             <TopProductsChart />
+          </div>
+
+          {/* Ad Campaigns Performance */}
+          <div className="bg-white p-6 rounded-lg shadow-sm mt-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-medium text-gray-900">Ad Campaigns Performance</h3>
+            </div>
+            <AdCampaignsCard />
           </div>
         </div>
       </div>
