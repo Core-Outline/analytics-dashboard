@@ -82,8 +82,8 @@ const ConversionsDistributionCard: React.FC = () => {
       {/* Horizontal Stacked Bar Chart */}
       <div className="mb-6">
         <ReactECharts 
-          option={chartOption} 
-          style={{ height: '80px', width: '100%' }}
+          option={chartOption}
+          style={{ height: '40px', width: '100%' }}
           opts={{ renderer: 'canvas' }}
         />
       </div>
