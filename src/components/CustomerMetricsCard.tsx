@@ -31,14 +31,14 @@ const CustomerMetricsCard: React.FC = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-      <div className="grid grid-cols-3 divide-x divide-gray-200">
+      <div className="grid grid-cols-3 divide-x divide-gray-100">
         {metrics.map((metric, index) => {
           const Icon = metric.icon;
           
           return (
-            <div key={index} className="p-6">
+            <div key={index} className="p-4">
               {/* Header */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <div className={`w-10 h-10 ${metric.iconBg} rounded-lg flex items-center justify-center`}>
                     <Icon className={`w-5 h-5 ${metric.iconColor}`} />
@@ -49,9 +49,9 @@ const CustomerMetricsCard: React.FC = () => {
               </div>
 
               {/* Content */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="text-sm text-gray-600">{metric.label}</div>
-                <div className="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+                <div className="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
                   Target: {metric.target.toLocaleString()}
                 </div>
               </div>
