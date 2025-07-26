@@ -13,35 +13,69 @@ const SentimentAnalysisCard: React.FC = () => {
 
   const chartOption = {
     grid: {
-      left: '0%',
-      right: '0%',
-      bottom: '0%',
-      top: '0%',
+      left: '15%',
+      right: '5%',
+      bottom: '10%',
+      top: '5%',
       containLabel: false
     },
     xAxis: {
       type: 'value',
-      show: false,
-      max: 100
+      show: true,
+      max: Math.max(...sentimentData.map(s => s.count)),
+      axisLine: {
+        show: false
+      },
+      axisTick: {
+        show: false
+      },
+      axisLabel: {
+        color: '#9ca3af',
+        fontSize: 12,
+        fontFamily: 'Inter, system-ui, sans-serif',
+        formatter: function(value: number) {
+          return value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value.toString();
+        }
+      },
+      splitLine: {
+        lineStyle: {
+          color: '#f1f5f9',
+          width: 1
+        }
+      }
     },
     yAxis: {
       type: 'category',
-      data: ['Sentiment'],
-      show: false
-    },
-    series: sentimentData.map((sentiment, index) => ({
-      name: sentiment.name,
-      type: 'bar',
-      stack: 'total',
-      data: [sentiment.value],
-      itemStyle: {
-        color: sentiment.color,
-        borderRadius: index === 0 ? [8, 0, 0, 8] : index === sentimentData.length - 1 ? [0, 8, 8, 0] : [0, 0, 0, 0]
+      data: sentimentData.map(s => s.name).reverse(),
+      show: true,
+      axisLine: {
+        show: false
       },
-      barWidth: '60px'
-    })),
+      axisTick: {
+        show: false
+      },
+      axisLabel: {
+        color: '#374151',
+        fontSize: 12,
+        fontFamily: 'Inter, system-ui, sans-serif',
+        fontWeight: 'medium'
+      }
+    },
+    series: [{
+      name: 'Comments',
+      type: 'bar',
+      data: sentimentData.map(s => s.count).reverse(),
+      itemStyle: {
+        color: function(params: any) {
+          const reversedData = [...sentimentData].reverse();
+          return reversedData[params.dataIndex].color;
+        },
+        borderRadius: [0, 8, 8, 0]
+      },
+      barWidth: '60%'
+    }],
     tooltip: {
-      trigger: 'axis',
+      trigger: 'item',
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
       borderColor: '#e5e7eb',
       borderWidth: 1,
@@ -50,12 +84,12 @@ const SentimentAnalysisCard: React.FC = () => {
         fontSize: 12
       },
       formatter: function(params: any) {
-        let result = '<div style="font-weight: 600; margin-bottom: 4px;">Sentiment Distribution</div>';
-        params.forEach((param: any) => {
-          const sentiment = sentimentData.find(s => s.name === param.seriesName);
-          result += `<div>${param.marker} ${param.seriesName}: ${sentiment?.count.toLocaleString()} comments (${param.value}%)</div>`;
-        });
-        return result;
+        const reversedData = [...sentimentData].reverse();
+        const sentiment = reversedData[params.dataIndex];
+        return `
+          <div style="font-weight: 600; margin-bottom: 4px;">${sentiment.name} Sentiment</div>
+          <div>${sentiment.count.toLocaleString()} comments (${sentiment.value}%)</div>
+        `;
       }
     },
     legend: {
@@ -84,22 +118,9 @@ const SentimentAnalysisCard: React.FC = () => {
           <div className="mb-6">
             <ReactECharts 
               option={chartOption}
-              style={{ height: '60px', width: '100%' }}
+              style={{ height: '180px', width: '100%' }}
               opts={{ renderer: 'canvas' }}
             />
-          </div>
-
-          {/* Sentiment Labels */}
-          <div className="flex justify-between text-sm">
-            {sentimentData.map((sentiment, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <div 
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: sentiment.color }}
-                ></div>
-                <span className="text-gray-700 font-medium">{sentiment.name}</span>
-              </div>
-            ))}
           </div>
         </div>
 
