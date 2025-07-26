@@ -2,6 +2,7 @@ import React from 'react';
 import SocialMediaMetricsCard from '../components/SocialMediaMetricsCard';
 import TrendingKeywordsCard from '../components/TrendingKeywordsCard';
 import ConversionsDistributionCard from '../components/ConversionsDistributionCard';
+import SentimentAnalysisCard from '../components/SentimentAnalysisCard';
 
 const SocialMediaPage: React.FC = () => {
   return (
