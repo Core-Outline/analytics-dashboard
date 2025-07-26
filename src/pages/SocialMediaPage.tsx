@@ -8,9 +8,13 @@ const SocialMediaPage: React.FC = () => {
     <div className="p-8">
       <SocialMediaMetricsCard />
       
-      {/* Second Row - Trending Keywords and Conversions */}
-      <div className="grid grid-cols-2 gap-6 mt-8">
+      {/* Trending Keywords - Full Width */}
+      <div className="mt-8">
         <TrendingKeywordsCard />
+      </div>
+      
+      {/* Conversions Distribution - Full Width */}
+      <div className="mt-8">
         <ConversionsDistributionCard />
       </div>
     </div>
