@@ -172,3 +172,5 @@ const TotalSalesChart: React.FC<TotalSalesChartProps> = ({ timeUnit }) => {
     </div>
   );
 };
+
+export default TotalSalesChart;
