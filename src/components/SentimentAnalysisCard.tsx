@@ -70,9 +70,9 @@ const SentimentAnalysisCard: React.FC = () => {
           const reversedData = [...sentimentData].reverse();
           return reversedData[params.dataIndex].color;
         },
-        borderRadius: [0, 8, 8, 0]
+        borderRadius: [12, 12, 12, 12]
       },
-      barWidth: '60%'
+      barWidth: '30%'
     }],
     tooltip: {
       trigger: 'item',
