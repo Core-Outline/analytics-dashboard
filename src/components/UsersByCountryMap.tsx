@@ -1,9 +1,14 @@
 import React, { useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
-import 'echarts/map/js/world';
+import * as echarts from 'echarts';
+import worldJson from 'echarts/map/json/world.json';
 
 const UsersByCountryMap: React.FC = () => {
+  useEffect(() => {
+    echarts.registerMap('world', worldJson);
+  }, []);
+
   // Sample data for users by country (country code, user count)
   const countryData = [
     { name: 'United States', value: 15420, code: 'US' },
