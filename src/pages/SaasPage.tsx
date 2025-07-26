@@ -12,7 +12,7 @@ const SaasPage: React.FC = () => {
       </div>
 
       {/* Active Users Card */}
-      <div className="mb-8">
+      <div className="mb-8 w-1/2">
         <ActiveUsersCard />
       </div>
 

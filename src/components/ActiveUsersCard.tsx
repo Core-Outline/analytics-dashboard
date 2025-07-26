@@ -93,12 +93,7 @@ const ActiveUsersCard: React.FC = () => {
   const mostVisitedPages = [
     { page: '/dashboard', users: 1245 },
     { page: '/analytics', users: 987 },
-    { page: '/settings', users: 756 },
-    { page: '/profile', users: 634 },
-    { page: '/reports', users: 523 },
-    { page: '/billing', users: 445 },
-    { page: '/support', users: 321 },
-    { page: '/integrations', users: 298 }
+    { page: '/settings', users: 756 }
   ];
 
   return (
