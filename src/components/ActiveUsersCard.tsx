@@ -26,7 +26,7 @@ const ActiveUsersCard: React.FC = () => {
         newData.push(newValue);
         return newData;
       });
-    }, 60000); // Update every minute
+    }, 3000); // Update every 3 seconds for demo purposes
 
     return () => clearInterval(interval);
   }, []);
