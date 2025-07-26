@@ -18,6 +18,10 @@ const SocialMediaPage: React.FC = () => {
       <div className="mt-8">
         <ConversionsDistributionCard />
       </div>
+
+      <div className="mt-8">
+        <SentimentAnalysisCard />
+      </div>
     </div>
   );
 };
