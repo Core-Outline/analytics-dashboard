@@ -1,9 +1,15 @@
 import React from 'react';
 import { Users, DollarSign, TrendingUp, Activity, UserPlus, CreditCard, Calendar, Target } from 'lucide-react';
+import TabbedMetricsCard from '../components/TabbedMetricsCard';
 
 const SaasPage: React.FC = () => {
   return (
     <div className="p-8">
+      {/* Tabbed Metrics Card */}
+      <div className="mb-8">
+        <TabbedMetricsCard />
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-4 gap-6 mb-8">
         {/* Monthly Recurring Revenue */}
