@@ -16,7 +16,7 @@ const ProductRevenueSharesCard: React.FC = () => {
   const chartOption = {
     grid: {
       left: '0%',
-      right: '60%',
+      right: '0%',
       bottom: '15%',
       top: '10%',
       containLabel: true
