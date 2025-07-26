@@ -68,11 +68,11 @@ const ActiveUsersCard: React.FC = () => {
             colorStops: [
               {
                 offset: 0,
-                color: '#3b82f6'
+               color: '#ffffff'
               },
               {
                 offset: 1,
-                color: '#93c5fd'
+               color: 'rgba(255, 255, 255, 0.6)'
               }
             ]
           },
@@ -97,11 +97,11 @@ const ActiveUsersCard: React.FC = () => {
   ];
 
   return (
-    <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-100/50 p-6 rounded-lg shadow-sm">
+    <div className="bg-blue-500/90 backdrop-blur-sm border border-blue-400/50 p-6 rounded-lg shadow-sm">
       {/* Active Users Count */}
       <div className="mb-6">
-        <div className="text-sm text-gray-600 mb-2">Currently Active Users</div>
-        <div className="text-4xl font-bold text-gray-900 transition-all duration-1000">
+        <div className="text-sm text-white/80 mb-2">Currently Active Users</div>
+        <div className="text-4xl font-bold text-white transition-all duration-1000">
           {activeUsers.toLocaleString()}
         </div>
       </div>
@@ -117,20 +117,20 @@ const ActiveUsersCard: React.FC = () => {
 
       {/* Most Visited Pages Table */}
       <div>
-        <h4 className="text-lg font-medium text-gray-900 mb-4">Most Visited Pages</h4>
+        <h4 className="text-lg font-medium text-white mb-4">Most Visited Pages</h4>
         <div className="overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left text-sm font-medium text-gray-600 pb-3">Page</th>
-                <th className="text-right text-sm font-medium text-gray-600 pb-3">Users</th>
+              <tr className="border-b border-white/20">
+                <th className="text-left text-sm font-medium text-white/80 pb-3">Page</th>
+                <th className="text-right text-sm font-medium text-white/80 pb-3">Users</th>
               </tr>
             </thead>
             <tbody>
               {mostVisitedPages.map((page, index) => (
-                <tr key={index} className="border-b border-gray-100 last:border-b-0">
-                  <td className="text-sm text-gray-900 py-3 font-mono">{page.page}</td>
-                  <td className="text-sm text-gray-900 py-3 text-right font-medium">
+                <tr key={index} className="border-b border-white/10 last:border-b-0">
+                  <td className="text-sm text-white py-3 font-mono">{page.page}</td>
+                  <td className="text-sm text-white py-3 text-right font-medium">
                     {page.users.toLocaleString()}
                   </td>
                 </tr>
