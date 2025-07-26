@@ -39,7 +39,8 @@ const TopProductsChart: React.FC = () => {
       type: 'bar',
       data: config.data,
       itemStyle: {
-        color: config.color
+        color: config.color,
+        borderRadius: [4, 4, 0, 0]
       },
       barWidth: '15%'
     }));
