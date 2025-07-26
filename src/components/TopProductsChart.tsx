@@ -5,9 +5,7 @@ const TopProductsChart: React.FC = () => {
   const [visibleProducts, setVisibleProducts] = useState({
     'Wireless Headphones': true,
     'Smart Watch': true,
-    'Laptop Stand': true,
-    'Phone Case': true,
-    'Bluetooth Speaker': true
+    'Laptop Stand': true
   });
 
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
@@ -24,14 +22,6 @@ const TopProductsChart: React.FC = () => {
     'Laptop Stand': {
       data: [150, 232, 201, 154, 190, 330],
       color: '#10b981'
-    },
-    'Phone Case': {
-      data: [98, 87, 105, 78, 167, 142],
-      color: '#f59e0b'
-    },
-    'Bluetooth Speaker': {
-      data: [85, 95, 125, 98, 145, 165],
-      color: '#8b5cf6'
     }
   };
 
