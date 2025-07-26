@@ -2,6 +2,46 @@ import React from 'react';
 import { Users, Camera, Zap, MessageCircle, ThumbsUp, RefreshCw, Megaphone, MoreHorizontal } from 'lucide-react';
 
 const SocialMediaMetricsCard: React.FC = () => {
+  // Sample data for engagement metrics
+  const engagementMetrics = [
+    {
+      title: 'Comments',
+      icon: MessageCircle,
+      iconColor: 'text-blue-500',
+      borderColor: 'border-blue-500',
+      currentValue: 2847,
+      lastMonthValue: 2156,
+      growth: '+32.0%'
+    },
+    {
+      title: 'Likes',
+      icon: ThumbsUp,
+      iconColor: 'text-cyan-500',
+      borderColor: 'border-cyan-500',
+      currentValue: 18420,
+      lastMonthValue: 15680,
+      growth: '+17.5%'
+    },
+    {
+      title: 'Conversions',
+      icon: RefreshCw,
+      iconColor: 'text-green-500',
+      borderColor: 'border-green-500',
+      currentValue: 1256,
+      lastMonthValue: 987,
+      growth: '+27.3%'
+    },
+    {
+      title: 'Mentions',
+      icon: Megaphone,
+      iconColor: 'text-green-500',
+      borderColor: 'border-cyan-500',
+      currentValue: 892,
+      lastMonthValue: 743,
+      growth: '+20.1%'
+    }
+  ];
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Top Section - Main Metrics */}
@@ -49,41 +89,33 @@ const SocialMediaMetricsCard: React.FC = () => {
       {/* Bottom Section - Engagement Metrics Grid */}
       <div className="p-8">
         <div className="grid grid-cols-2 gap-8">
-          {/* Comments */}
-          <div className="text-center">
-            <div className="w-16 h-16 bg-white border-2 border-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <MessageCircle className="w-6 h-6 text-blue-500" />
-            </div>
-            <h4 className="text-xl font-medium text-gray-700 mb-1">Comments</h4>
-            <p className="text-sm text-gray-500">last month</p>
-          </div>
-
-          {/* Likes */}
-          <div className="text-center">
-            <div className="w-16 h-16 bg-white border-2 border-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ThumbsUp className="w-6 h-6 text-cyan-500" />
-            </div>
-            <h4 className="text-xl font-medium text-gray-700 mb-1">Likes</h4>
-            <p className="text-sm text-gray-500">last month</p>
-          </div>
-
-          {/* Conversions */}
-          <div className="text-center">
-            <div className="w-16 h-16 bg-white border-2 border-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <RefreshCw className="w-6 h-6 text-green-500" />
-            </div>
-            <h4 className="text-xl font-medium text-gray-700 mb-1">Conversions</h4>
-            <p className="text-sm text-gray-500">last month</p>
-          </div>
-
-          {/* Mentions */}
-          <div className="text-center">
-            <div className="w-16 h-16 bg-white border-2 border-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Megaphone className="w-6 h-6 text-green-500" />
-            </div>
-            <h4 className="text-xl font-medium text-gray-700 mb-1">Mentions</h4>
-            <p className="text-sm text-gray-500">last month</p>
-          </div>
+          {engagementMetrics.map((metric, index) => {
+            const Icon = metric.icon;
+            
+            return (
+              <div key={index} className="text-center">
+                <div className={`w-16 h-16 bg-white border-2 ${metric.borderColor} rounded-full flex items-center justify-center mx-auto mb-4`}>
+                  <Icon className={`w-6 h-6 ${metric.iconColor}`} />
+                </div>
+                <h4 className="text-xl font-medium text-gray-700 mb-2">{metric.title}</h4>
+                
+                {/* Current Value */}
+                <div className="text-2xl font-bold text-gray-900 mb-1">
+                  {metric.currentValue.toLocaleString()}
+                </div>
+                
+                {/* Last Month Comparison */}
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-500">
+                    Last month: {metric.lastMonthValue.toLocaleString()}
+                  </p>
+                  <p className="text-sm font-medium text-green-600">
+                    {metric.growth}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
