@@ -13,7 +13,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
     { id: 'customer', label: 'Customer', icon: User },
     { id: 'social-media', label: 'Social Media', icon: Share2 },
     { id: 'customer-feedback', label: 'Customer Feedback', icon: Star, badge: 2 },
-    { id: 'customer-dashboard', label: 'Customer Dashboard', icon: Settings },
+    { id: 'custom-dashboard', label: 'Custom Dashboard', icon: Settings },
     { id: 'integrations', label: 'Integrations', icon: Plug }
   ];
 
