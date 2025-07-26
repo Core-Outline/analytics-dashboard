@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Search, FileText, MoreHorizontal, Sparkles, BarChart3, PieChart, MapPin, Send, Paperclip, Brain } from 'lucide-react';
+import { Search, FileText, MoreHorizontal, Sparkles, BarChart3, PieChart, MapPin, Send, Paperclip, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const CustomDashboardPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedQuery, setSelectedQuery] = useState('');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Sample queries data
   const queries = [
@@ -61,9 +62,9 @@ const CustomDashboardPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex relative">
       {/* Left Sidebar */}
-      <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+      <div className={`${isSidebarCollapsed ? 'w-0' : 'w-80'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300 overflow-hidden`}>
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center space-x-2 mb-4">
@@ -124,36 +125,28 @@ const CustomDashboardPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Sidebar Toggle Button */}
+      <button
+        onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white border border-gray-200 rounded-r-lg p-2 shadow-md hover:bg-gray-50 transition-colors"
+        style={{ left: isSidebarCollapsed ? '0px' : '320px' }}
+      >
+        {isSidebarCollapsed ? (
+          <ChevronRight className="w-4 h-4 text-gray-600" />
+        ) : (
+          <ChevronLeft className="w-4 h-4 text-gray-600" />
+        )}
+      </button>
+
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Top Header */}
         <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div className="text-lg font-medium text-gray-900">transaction_data.csv</div>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">AI Learning:</span>
-              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
-                Completed
-              </span>
-            </div>
-          </div>
         </div>
 
         {/* Content Area */}
         <div className="flex-1 p-6">
-          {/* Right Sidebar Info */}
-          <div className="mb-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <div className="text-sm text-gray-600 mb-2">Tables synced (1/1)</div>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-900">📊 transaction_data</span>
-                <MoreHorizontal className="w-4 h-4 text-gray-400" />
-              </div>
-              <div className="mt-2 text-xs text-gray-500">📄 transaction_data</div>
-            </div>
-          </div>
-
           {/* Suggested Queries */}
           <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
             <div className="flex items-center space-x-2 mb-4">
@@ -192,10 +185,6 @@ const CustomDashboardPage: React.FC = () => {
                 />
               </div>
               <div className="flex items-center space-x-2">
-                <div className="flex items-center space-x-2 px-3 py-1 bg-gray-100 rounded-full">
-                  <Brain className="w-4 h-4 text-gray-600" />
-                  <span className="text-xs text-gray-600">PromptBI: Reasoning</span>
-                </div>
                 <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
                   <Send className="w-4 h-4 text-white" />
                 </button>
