@@ -21,7 +21,7 @@ function App() {
           <div className="space-y-1">
             <div className="flex items-center space-x-3 px-4 py-3 text-orange-500 bg-slate-700 rounded-lg font-medium">
               <div className="w-5 h-5 flex items-center justify-center">
-                <BarChart3 className="w-5 h-5" />
+                <BarChart3 className="w-5 h-2" />
               </div>
               <span>Financials</span>
             </div>
