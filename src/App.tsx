@@ -2,7 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { Search, Bell, ChevronDown, Users, Package, RefreshCw, TrendingUp, TrendingDown, MoreVertical, ChevronRight, Settings, HelpCircle, MessageCircle, LogOut, DollarSign, Zap, User, Share2, Star, BarChart3 } from 'lucide-react';
 import TotalSalesChart from './components/OrdersAnalyticsChart';
-import EarningsChart from './components/EarningsChart';
+import RevenueGrowthCard from './components/RevenueGrowthCard';
 
 function App() {
   const [salesTimeUnit, setSalesTimeUnit] = useState('Monthly');
@@ -213,13 +213,13 @@ function App() {
               <TotalSalesChart timeUnit={salesTimeUnit} />
             </div>
 
-            {/* Earnings Donut Chart */}
+            {/* Revenue Growth Card */}
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-medium text-gray-900">Earnings</h3>
+                <h3 className="text-lg font-medium text-gray-900">Revenue Growth</h3>
                 <MoreVertical className="w-5 h-5 text-gray-400 cursor-pointer" />
               </div>
-              <EarningsChart />
+              <RevenueGrowthCard />
             </div>
           </div>
 
