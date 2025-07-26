@@ -4,6 +4,7 @@ import TabbedMetricsCard from '../components/TabbedMetricsCard';
 import ActiveUsersCard from '../components/ActiveUsersCard';
 import UsersByDeviceCard from '../components/UsersByDeviceCard';
 import ActiveUsersHeatmap from '../components/ActiveUsersHeatmap';
+import UsersByCountryMap from '../components/UsersByCountryMap';
 
 const SaasPage: React.FC = () => {
   return (
@@ -20,7 +21,7 @@ const SaasPage: React.FC = () => {
       </div>
 
       {/* Recent Activity */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-6 mb-8">
         {/* Recent Subscriptions */}
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <h3 className="text-lg font-medium text-gray-900 mb-6">Users Online</h3>
@@ -66,6 +67,12 @@ const SaasPage: React.FC = () => {
           <h3 className="text-lg font-medium text-gray-900 mb-6">Active Users by Hour</h3>
           <ActiveUsersHeatmap />
         </div>
+      </div>
+
+      {/* Users by Country */}
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <h3 className="text-lg font-medium text-gray-900 mb-6">Users by Country</h3>
+        <UsersByCountryMap />
       </div>
     </div>
   );
