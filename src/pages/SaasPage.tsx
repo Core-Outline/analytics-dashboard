@@ -1,6 +1,7 @@
 import React from 'react';
 import { Users, DollarSign, TrendingUp, Activity, UserPlus, CreditCard, Calendar, Target } from 'lucide-react';
 import TabbedMetricsCard from '../components/TabbedMetricsCard';
+import ActiveUsersCard from '../components/ActiveUsersCard';
 
 const SaasPage: React.FC = () => {
   return (
@@ -8,6 +9,11 @@ const SaasPage: React.FC = () => {
       {/* Tabbed Metrics Card */}
       <div className="mb-8">
         <TabbedMetricsCard />
+      </div>
+
+      {/* Active Users Card */}
+      <div className="mb-8">
+        <ActiveUsersCard />
       </div>
 
       {/* Stats Cards */}
