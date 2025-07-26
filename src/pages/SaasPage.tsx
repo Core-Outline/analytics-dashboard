@@ -2,6 +2,7 @@ import React from 'react';
 import { Users, DollarSign, TrendingUp, Activity, UserPlus, CreditCard, Calendar, Target } from 'lucide-react';
 import TabbedMetricsCard from '../components/TabbedMetricsCard';
 import ActiveUsersCard from '../components/ActiveUsersCard';
+import UsersByDeviceCard from '../components/UsersByDeviceCard';
 
 const SaasPage: React.FC = () => {
   return (
@@ -12,8 +13,9 @@ const SaasPage: React.FC = () => {
       </div>
 
       {/* Active Users Card */}
-      <div className="mb-8 w-1/2">
+      <div className="grid grid-cols-2 gap-6 mb-8">
         <ActiveUsersCard />
+        <UsersByDeviceCard />
       </div>
 
       {/* Stats Cards */}
