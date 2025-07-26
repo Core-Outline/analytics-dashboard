@@ -1,5 +1,7 @@
 import React from 'react';
 import { Search, Bell, ChevronDown, Users, Package, RefreshCw, TrendingUp, TrendingDown, MoreVertical, ChevronRight, Settings, HelpCircle, MessageCircle, LogOut, DollarSign, Zap, User, Share2, Star, BarChart3 } from 'lucide-react';
+import OrdersAnalyticsChart from './components/OrdersAnalyticsChart';
+import EarningsChart from './components/EarningsChart';
 
 function App() {
   return (
@@ -187,56 +189,7 @@ function App() {
                   </select>
                 </div>
               </div>
-              <div className="relative h-64">
-                {/* Chart placeholder with SVG */}
-                <svg className="w-full h-full" viewBox="0 0 600 200">
-                  {/* Grid lines */}
-                  <defs>
-                    <pattern id="grid" width="100" height="40" patternUnits="userSpaceOnUse">
-                      <path d="M 100 0 L 0 0 0 40" fill="none" stroke="#f1f5f9" strokeWidth="1"/>
-                    </pattern>
-                  </defs>
-                  <rect width="100%" height="100%" fill="url(#grid)" />
-                  
-                  {/* Y-axis labels */}
-                  <text x="20" y="20" className="text-xs fill-gray-400">100</text>
-                  <text x="20" y="60" className="text-xs fill-gray-400">80</text>
-                  <text x="20" y="100" className="text-xs fill-gray-400">60</text>
-                  <text x="20" y="140" className="text-xs fill-gray-400">40</text>
-                  <text x="20" y="180" className="text-xs fill-gray-400">20</text>
-                  <text x="20" y="200" className="text-xs fill-gray-400">0</text>
-                  
-                  {/* X-axis labels */}
-                  <text x="80" y="195" className="text-xs fill-gray-400">Jan</text>
-                  <text x="150" y="195" className="text-xs fill-gray-400">Feb</text>
-                  <text x="220" y="195" className="text-xs fill-gray-400">Mar</text>
-                  <text x="290" y="195" className="text-xs fill-gray-400">Apr</text>
-                  <text x="360" y="195" className="text-xs fill-gray-400">May</text>
-                  <text x="430" y="195" className="text-xs fill-gray-400">Jun</text>
-                  <text x="500" y="195" className="text-xs fill-gray-400">Jul</text>
-                  
-                  {/* Orange line (Online orders) */}
-                  <polyline
-                    fill="none"
-                    stroke="#f59e0b"
-                    strokeWidth="2"
-                    points="50,160 100,140 150,120 200,100 250,90 300,110 350,100 400,90 450,80 500,85 550,75"
-                  />
-                  
-                  {/* Dark line (Offline orders) */}
-                  <polyline
-                    fill="none"
-                    stroke="#1f2937"
-                    strokeWidth="2"
-                    points="50,180 100,170 150,150 200,140 250,120 300,130 350,120 400,110 450,100 500,105 550,95"
-                  />
-                  
-                  {/* Highlighted area for Mar */}
-                  <rect x="200" y="40" width="50" height="140" fill="#e5e7eb" opacity="0.3" />
-                  <text x="225" y="30" className="text-xs fill-gray-600 font-medium">15 Aug 2022</text>
-                  <text x="225" y="45" className="text-sm fill-gray-900 font-bold">$59,492.10</text>
-                </svg>
-              </div>
+              <OrdersAnalyticsChart />
             </div>
 
             {/* Earnings Donut Chart */}
@@ -245,85 +198,7 @@ function App() {
                 <h3 className="text-lg font-medium text-gray-900">Earnings</h3>
                 <MoreVertical className="w-5 h-5 text-gray-400 cursor-pointer" />
               </div>
-              <div className="flex items-center justify-center mb-6">
-                <div className="relative w-32 h-32">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                    {/* Background circle */}
-                    <circle cx="50" cy="50" r="40" fill="none" stroke="#f1f5f9" strokeWidth="8" />
-                    
-                    {/* Blue segment (largest) */}
-                    <circle 
-                      cx="50" 
-                      cy="50" 
-                      r="40" 
-                      fill="none" 
-                      stroke="#3b82f6" 
-                      strokeWidth="8"
-                      strokeDasharray="75.4 251.2"
-                      strokeDashoffset="0"
-                    />
-                    
-                    {/* Pink segment */}
-                    <circle 
-                      cx="50" 
-                      cy="50" 
-                      r="40" 
-                      fill="none" 
-                      stroke="#ec4899" 
-                      strokeWidth="8"
-                      strokeDasharray="50.3 251.2"
-                      strokeDashoffset="-75.4"
-                    />
-                    
-                    {/* Orange segment */}
-                    <circle 
-                      cx="50" 
-                      cy="50" 
-                      r="40" 
-                      fill="none" 
-                      stroke="#f59e0b" 
-                      strokeWidth="8"
-                      strokeDasharray="37.7 251.2"
-                      strokeDashoffset="-125.7"
-                    />
-                    
-                    {/* Light blue segment */}
-                    <circle 
-                      cx="50" 
-                      cy="50" 
-                      r="40" 
-                      fill="none" 
-                      stroke="#8b5cf6" 
-                      strokeWidth="8"
-                      strokeDasharray="62.8 251.2"
-                      strokeDashoffset="-163.4"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-gray-900">$452</span>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-gray-800 rounded-full"></div>
-                    <span className="text-sm text-gray-600">Offline</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600">Online</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-pink-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600">Trade</span>
-                  </div>
-                </div>
-              </div>
+              <EarningsChart />
             </div>
           </div>
 
