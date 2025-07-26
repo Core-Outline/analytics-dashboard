@@ -1,9 +1,12 @@
 import React from 'react';
+import { useState } from 'react';
 import { Search, Bell, ChevronDown, Users, Package, RefreshCw, TrendingUp, TrendingDown, MoreVertical, ChevronRight, Settings, HelpCircle, MessageCircle, LogOut, DollarSign, Zap, User, Share2, Star, BarChart3 } from 'lucide-react';
-import OrdersAnalyticsChart from './components/OrdersAnalyticsChart';
+import TotalSalesChart from './components/OrdersAnalyticsChart';
 import EarningsChart from './components/EarningsChart';
 
 function App() {
+  const [salesTimeUnit, setSalesTimeUnit] = useState('Monthly');
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
@@ -171,25 +174,43 @@ function App() {
 
           {/* Charts Row */}
           <div className="grid grid-cols-3 gap-6 mb-8">
-            {/* Orders Analytics */}
+            {/* Total Sales */}
             <div className="col-span-2 bg-white p-6 rounded-lg shadow-sm">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-medium text-gray-900">Orders Analytics</h3>
+                <h3 className="text-lg font-medium text-gray-900">Total Sales</h3>
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-2">
                     <div className="w-3 h-3 bg-gray-800 rounded-full"></div>
-                    <span className="text-sm text-gray-600">Offline orders</span>
+                    <span className="text-sm text-gray-600">
+                      {salesTimeUnit === 'Monthly' ? '2023' : 
+                       salesTimeUnit === 'Yearly' ? '2023' :
+                       salesTimeUnit === 'Quarterly' ? '2023' :
+                       salesTimeUnit === 'Weekly' ? 'Last Month' : 'Last Week'}
+                    </span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600">Online orders</span>
+                    <span className="text-sm text-gray-600">
+                      {salesTimeUnit === 'Monthly' ? '2024' : 
+                       salesTimeUnit === 'Yearly' ? '2024' :
+                       salesTimeUnit === 'Quarterly' ? '2024' :
+                       salesTimeUnit === 'Weekly' ? 'This Month' : 'This Week'}
+                    </span>
                   </div>
-                  <select className="text-sm text-gray-600 border border-gray-200 rounded px-2 py-1">
-                    <option>Monthly</option>
+                  <select 
+                    className="text-sm text-gray-600 border border-gray-200 rounded px-2 py-1"
+                    value={salesTimeUnit}
+                    onChange={(e) => setSalesTimeUnit(e.target.value)}
+                  >
+                    <option value="Monthly">Monthly</option>
+                    <option value="Yearly">Yearly</option>
+                    <option value="Quarterly">Quarterly</option>
+                    <option value="Weekly">Weekly</option>
+                    <option value="Daily">Daily</option>
                   </select>
                 </div>
               </div>
-              <OrdersAnalyticsChart />
+              <TotalSalesChart timeUnit={salesTimeUnit} />
             </div>
 
             {/* Earnings Donut Chart */}
