@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import FinancialsPage from './pages/FinancialsPage';
 import SaasPage from './pages/SaasPage';
+import CustomerPage from './pages/CustomerPage';
 
 function App() {
   const [activeSection, setActiveSection] = useState('financials');
@@ -11,6 +12,8 @@ function App() {
     switch (activeSection) {
       case 'saas':
         return <SaasPage />;
+      case 'customer':
+        return <CustomerPage />;
       case 'financials':
       default:
         return <FinancialsPage />;
