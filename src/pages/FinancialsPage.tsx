@@ -5,6 +5,7 @@ import RevenueGrowthCard from '../components/RevenueGrowthCard';
 import TopProductsChart from '../components/TopProductsChart';
 import GrossRevenueCard from '../components/GrossRevenueCard';
 import AdCampaignsCard from '../components/AdCampaignsCard';
+import ProductRevenueSharesCard from '../components/ProductRevenueSharesCard';
 
 const FinancialsPage: React.FC = () => {
   const [salesTimeUnit, setSalesTimeUnit] = useState('Monthly');
@@ -127,6 +128,11 @@ const FinancialsPage: React.FC = () => {
           </div>
           <RevenueGrowthCard />
         </div>
+      </div>
+
+      {/* Product Revenue Shares */}
+      <div className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <ProductRevenueSharesCard />
       </div>
 
       {/* Gross Revenue */}
