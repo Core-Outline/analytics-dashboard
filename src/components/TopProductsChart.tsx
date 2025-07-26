@@ -40,7 +40,7 @@ const TopProductsChart: React.FC = () => {
       data: config.data,
       itemStyle: {
         color: config.color,
-        borderRadius: [12, 12, 0, 0]
+        borderRadius: [12, 12, 12, 12]
       },
       barWidth: '15%'
     }));
@@ -80,12 +80,6 @@ const TopProductsChart: React.FC = () => {
         color: '#9ca3af',
         fontSize: 12,
         fontFamily: 'Inter, system-ui, sans-serif'
-      },
-      splitLine: {
-        lineStyle: {
-          color: '#f1f5f9',
-          width: 1
-        }
       }
     },
     series: series,
