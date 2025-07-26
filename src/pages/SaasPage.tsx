@@ -22,18 +22,78 @@ const SaasPage: React.FC = () => {
       <div className="grid grid-cols-2 gap-6">
         {/* Recent Subscriptions */}
         <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h3 className="text-lg font-medium text-gray-900 mb-6">Recent Subscriptions</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-6">Users Online</h3>
           <div className="space-y-4">
             {[
-              { name: 'Sarah Johnson', plan: 'Pro Plan', date: '2 hours ago', amount: '$29' },
-              { name: 'Michael Chen', plan: 'Basic Plan', date: '4 hours ago', amount: '$9' },
-              { name: 'Emily Davis', plan: 'Enterprise', date: '6 hours ago', amount: '$99' },
-              { name: 'David Wilson', plan: 'Pro Plan', date: '8 hours ago', amount: '$29' },
-              { name: 'Lisa Anderson', plan: 'Basic Plan', date: '1 day ago', amount: '$9' }
-            ].map((subscription, index) => (
+              { name: 'Sarah Johnson', location: 'New York, US', status: 'Active', duration: '2h 15m' },
+              { name: 'Michael Chen', location: 'Toronto, CA', status: 'Active', duration: '1h 42m' },
+              { name: 'Emily Davis', location: 'London, UK', status: 'Idle', duration: '45m' },
+              { name: 'David Wilson', location: 'Sydney, AU', status: 'Active', duration: '3h 8m' },
+              { name: 'Lisa Anderson', location: 'Berlin, DE', status: 'Active', duration: '1h 23m' }
+            ].map((user, index) => (
               <div key={index} className="flex items-center justify-between py-2">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                  <div className="relative">
+                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-medium text-gray-600">
+                        {user.name.split(' ').map(n => n[0]).join('')}
+                      </span>
+                    </div>
+                    <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
+                      user.status === 'Active' ? 'bg-green-500' : 'bg-yellow-500'
+                    }`}></div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                    <div className="text-xs text-gray-500">{user.location}</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className={`text-sm font-medium ${
+                    user.status === 'Active' ? 'text-green-600' : 'text-yellow-600'
+                  }`}>{user.status}</div>
+                  <div className="text-xs text-gray-500">{user.duration}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Upcoming Renewals */}
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h3 className="text-lg font-medium text-gray-900 mb-6">Upcoming Renewals</h3>
+          <div className="space-y-4">
+            {[
+              { name: 'TechCorp Inc.', plan: 'Enterprise', date: 'Tomorrow', amount: '$99' },
+              { name: 'StartupXYZ', plan: 'Pro Plan', date: 'In 2 days', amount: '$29' },
+              { name: 'Design Studio', plan: 'Pro Plan', date: 'In 3 days', amount: '$29' },
+              { name: 'Marketing Agency', plan: 'Enterprise', date: 'In 5 days', amount: '$99' },
+              { name: 'Freelancer Pro', plan: 'Basic Plan', date: 'In 1 week', amount: '$9' }
+            ].map((renewal, index) => (
+              <div key={index} className="flex items-center justify-between py-2">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Calendar className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{renewal.name}</div>
+                    <div className="text-xs text-gray-500">{renewal.plan}</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-medium text-gray-900">{renewal.amount}</div>
+                  <div className="text-xs text-gray-500">{renewal.date}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SaasPage;
                     <span className="text-sm font-medium text-gray-600">
                       {subscription.name.split(' ').map(n => n[0]).join('')}
                     </span>
