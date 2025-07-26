@@ -97,7 +97,7 @@ const ActiveUsersCard: React.FC = () => {
   ];
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm">
+    <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-100/50 p-6 rounded-lg shadow-sm">
       {/* Active Users Count */}
       <div className="mb-6">
         <div className="text-sm text-gray-600 mb-2">Currently Active Users</div>
