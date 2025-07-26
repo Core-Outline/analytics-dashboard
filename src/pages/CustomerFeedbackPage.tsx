@@ -3,6 +3,8 @@ import FeedbackMetricsCard from '../components/FeedbackMetricsCard';
 import FeedbackTopicsCard from '../components/FeedbackTopicsCard';
 import UserSentimentsCard from '../components/UserSentimentsCard';
 import CustomerSatisfactionCard from '../components/CustomerSatisfactionCard';
+import IssuesListCard from '../components/IssuesListCard';
+import UnsolvedTicketsCard from '../components/UnsolvedTicketsCard';
 
 const CustomerFeedbackPage: React.FC = () => {
   return (
@@ -29,6 +31,19 @@ const CustomerFeedbackPage: React.FC = () => {
         {/* Customer Satisfaction - spans 1 column */}
         <div className="col-span-1">
           <CustomerSatisfactionCard />
+        </div>
+      </div>
+
+      {/* Third Row - Issues and Tickets */}
+      <div className="grid grid-cols-3 gap-6 mt-8">
+        {/* Issues List - spans 1 column */}
+        <div className="col-span-1">
+          <IssuesListCard />
+        </div>
+        
+        {/* Unsolved Tickets - spans 2 columns */}
+        <div className="col-span-2">
+          <UnsolvedTicketsCard />
         </div>
       </div>
     </div>
