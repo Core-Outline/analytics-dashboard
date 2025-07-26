@@ -83,6 +83,7 @@ const TotalSalesChart: React.FC<TotalSalesChartProps> = ({ timeUnit }) => {
     yAxis: {
       type: 'value',
       axisLine: {
+      }
       axisLine: {
         show: false
       },
