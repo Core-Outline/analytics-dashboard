@@ -423,11 +423,3 @@ const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect })
 };
 
 export default InfluencersCard;
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default InfluencersCard;
