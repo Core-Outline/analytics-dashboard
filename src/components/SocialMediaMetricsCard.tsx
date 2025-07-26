@@ -2,6 +2,37 @@ import React from 'react';
 import { Users, Camera, Zap, MessageCircle, ThumbsUp, RefreshCw, Megaphone, MoreHorizontal } from 'lucide-react';
 
 const SocialMediaMetricsCard: React.FC = () => {
+  // Sample data for top metrics
+  const topMetrics = [
+    {
+      title: 'Followers',
+      icon: Users,
+      iconBg: 'bg-blue-100',
+      iconColor: 'text-blue-600',
+      currentValue: 45280,
+      lastMonthValue: 42150,
+      growth: '+7.4%'
+    },
+    {
+      title: 'Posts',
+      icon: Camera,
+      iconBg: 'bg-blue-100',
+      iconColor: 'text-blue-600',
+      currentValue: 156,
+      lastMonthValue: 142,
+      growth: '+9.9%'
+    },
+    {
+      title: 'Conversions',
+      icon: Zap,
+      iconBg: 'bg-green-100',
+      iconColor: 'text-green-600',
+      currentValue: 1256,
+      lastMonthValue: 987,
+      growth: '+27.3%'
+    }
+  ];
+
   // Sample data for engagement metrics
   const engagementMetrics = [
     {
@@ -46,41 +77,38 @@ const SocialMediaMetricsCard: React.FC = () => {
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Top Section - Main Metrics */}
       <div className="grid grid-cols-3 divide-x divide-gray-100">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Users className="w-5 h-5 text-blue-600" />
+        {topMetrics.map((metric, index) => {
+          const Icon = metric.icon;
+          
+          return (
+            <div key={index} className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-10 h-10 ${metric.iconBg} rounded-lg flex items-center justify-center`}>
+                    <Icon className={`w-5 h-5 ${metric.iconColor}`} />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900">{metric.title}</h3>
+                </div>
+                <MoreHorizontal className="w-5 h-5 text-gray-400 cursor-pointer" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900">Followers</h3>
-            </div>
-            <MoreHorizontal className="w-5 h-5 text-gray-400 cursor-pointer" />
-          </div>
-        </div>
-
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Camera className="w-5 h-5 text-blue-600" />
+              
+              {/* Metric Values */}
+              <div className="space-y-2">
+                <div className="text-2xl font-bold text-gray-900">
+                  {metric.currentValue.toLocaleString()}
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-500">
+                    Last month: {metric.lastMonthValue.toLocaleString()}
+                  </p>
+                  <p className="text-sm font-medium text-green-600">
+                    {metric.growth}
+                  </p>
+                </div>
               </div>
-              <h3 className="text-lg font-medium text-gray-900">Posts</h3>
             </div>
-            <MoreHorizontal className="w-5 h-5 text-gray-400 cursor-pointer" />
-          </div>
-        </div>
-
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <Zap className="w-5 h-5 text-green-600" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900">Conversions</h3>
-            </div>
-            <MoreHorizontal className="w-5 h-5 text-gray-400 cursor-pointer" />
-          </div>
-        </div>
+          );
+        })}
       </div>
 
       {/* Divider */}
