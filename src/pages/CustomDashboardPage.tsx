@@ -175,8 +175,14 @@ const CustomDashboardPage: React.FC = () => {
       </div>
 
       {/* Fixed Query Input at Bottom */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50">
-        <div className="max-w-4xl mx-auto">
+      <div 
+        className="fixed bottom-0 bg-white border-t border-gray-200 p-6 shadow-lg z-50"
+        style={{ 
+          left: isSidebarCollapsed ? '0px' : '320px',
+          right: '0px'
+        }}
+      >
+        <div>
           <div className="flex items-center space-x-3">
             <Paperclip className="w-5 h-5 text-gray-400" />
             <div className="flex-1">
