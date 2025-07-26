@@ -1,71 +1,82 @@
 import React from 'react';
-import { Search, Bell, ChevronDown, Users, Package, RefreshCw, TrendingUp, TrendingDown, MoreVertical, ChevronRight, Settings, HelpCircle, MessageCircle, LogOut } from 'lucide-react';
+import { Search, Bell, ChevronDown, Users, Package, RefreshCw, TrendingUp, TrendingDown, MoreVertical, ChevronRight, Settings, HelpCircle, MessageCircle, LogOut, DollarSign, Zap, User, Share2, Star, BarChart3 } from 'lucide-react';
 
 function App() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className="w-64 bg-slate-800 text-white flex flex-col">
+      <div className="w-64 bg-slate-800 text-white flex flex-col rounded-r-2xl">
         {/* Logo */}
         <div className="p-6 flex items-center space-x-3">
           <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center font-bold text-lg">
             M
           </div>
-          <span className="text-xl font-semibold">Mboard</span>
+          <span className="text-xl font-medium">Mboard</span>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 px-4">
           <div className="space-y-1">
-            <div className="flex items-center space-x-3 px-4 py-3 text-orange-500 bg-slate-700 rounded-lg">
+            <div className="flex items-center space-x-3 px-4 py-3 text-orange-500 bg-slate-700 rounded-lg font-medium">
               <div className="w-5 h-5 flex items-center justify-center">
-                <div className="w-4 h-3 border-l-2 border-b-2 border-orange-500"></div>
+                <BarChart3 className="w-5 h-5" />
               </div>
-              <span className="font-medium">Overview</span>
+              <span>Financials</span>
             </div>
             
-            <div className="flex items-center justify-between px-4 py-3 text-gray-300 hover:text-white cursor-pointer">
+            <div className="flex items-center justify-between px-4 py-3 text-gray-300 hover:text-white cursor-pointer font-medium">
               <div className="flex items-center space-x-3">
-                <Package className="w-5 h-5" />
-                <span>Product</span>
+                <Zap className="w-5 h-5" />
+                <span>Saas</span>
               </div>
               <ChevronRight className="w-4 h-4" />
             </div>
 
-            <div className="flex items-center justify-between px-4 py-3 text-gray-300 hover:text-white cursor-pointer">
+            <div className="flex items-center justify-between px-4 py-3 text-gray-300 hover:text-white cursor-pointer font-medium">
               <div className="flex items-center space-x-3">
-                <div className="w-5 h-5 rounded border border-gray-400"></div>
-                <span>Orders</span>
+                <User className="w-5 h-5" />
+                <span>Customer</span>
               </div>
               <ChevronRight className="w-4 h-4" />
             </div>
 
-            <div className="flex items-center justify-between px-4 py-3 text-gray-300 hover:text-white cursor-pointer">
+            <div className="flex items-center justify-between px-4 py-3 text-gray-300 hover:text-white cursor-pointer font-medium">
               <div className="flex items-center space-x-3">
-                <div className="w-5 h-5 border-2 border-gray-400 rounded"></div>
-                <span>Checkout</span>
+                <Share2 className="w-5 h-5" />
+                <span>Social Media</span>
+              </div>
+              <ChevronRight className="w-4 h-4" />
+            </div>
+
+            <div className="flex items-center justify-between px-4 py-3 text-gray-300 hover:text-white cursor-pointer font-medium">
+              <div className="flex items-center space-x-3">
+                <Star className="w-5 h-5" />
+                <span>Customer Feedback</span>
               </div>
               <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center text-xs font-bold text-white">2</div>
             </div>
 
-            <div className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:text-white cursor-pointer">
-              <Settings className="w-5 h-5" />
-              <span>Setting</span>
+            <div className="flex items-center justify-between px-4 py-3 text-gray-300 hover:text-white cursor-pointer font-medium">
+              <div className="flex items-center space-x-3">
+                <Settings className="w-5 h-5" />
+                <span>Customer Dashboard</span>
+              </div>
+              <ChevronRight className="w-4 h-4" />
             </div>
           </div>
         </nav>
 
         {/* Bottom Navigation */}
         <div className="p-4 space-y-1">
-          <div className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:text-white cursor-pointer">
+          <div className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:text-white cursor-pointer font-medium">
             <HelpCircle className="w-5 h-5" />
             <span>Help Centre</span>
           </div>
-          <div className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:text-white cursor-pointer">
+          <div className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:text-white cursor-pointer font-medium">
             <MessageCircle className="w-5 h-5" />
             <span>Contact us</span>
           </div>
-          <div className="flex items-center space-x-3 px-4 py-3 text-orange-500 hover:text-orange-400 cursor-pointer">
+          <div className="flex items-center space-x-3 px-4 py-3 text-orange-500 hover:text-orange-400 cursor-pointer font-medium">
             <LogOut className="w-5 h-5" />
             <span>Log out</span>
           </div>
@@ -76,13 +87,13 @@ function App() {
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <header className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-gray-900">Welcome Back, Anthony</h1>
+          <h1 className="text-2xl font-medium text-gray-900">Welcome Back, Anthony</h1>
           <div className="flex items-center space-x-4">
             <Search className="w-6 h-6 text-gray-400 cursor-pointer" />
             <Bell className="w-6 h-6 text-gray-400 cursor-pointer" />
             <div className="flex items-center space-x-2 cursor-pointer">
               <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
-              <span className="text-gray-700 font-medium">Anthony</span>
+              <span className="text-gray-700 font-normal">Anthony</span>
               <ChevronDown className="w-4 h-4 text-gray-400" />
             </div>
           </div>
@@ -102,7 +113,7 @@ function App() {
               <div className="text-gray-600 text-sm mb-2">Total users</div>
               <div className="flex items-center space-x-2 text-sm">
                 <TrendingUp className="w-4 h-4 text-green-500" />
-                <span className="text-green-500 font-medium">10.2</span>
+                <span className="text-green-500 font-normal">10.2</span>
                 <span className="text-gray-500">+1.01% this week</span>
               </div>
             </div>
@@ -118,7 +129,7 @@ function App() {
               <div className="text-gray-600 text-sm mb-2">Total products</div>
               <div className="flex items-center space-x-2 text-sm">
                 <TrendingUp className="w-4 h-4 text-green-500" />
-                <span className="text-green-500 font-medium">3.1</span>
+                <span className="text-green-500 font-normal">3.1</span>
                 <span className="text-gray-500">+0.49% this week</span>
               </div>
             </div>
@@ -134,7 +145,7 @@ function App() {
               <div className="text-gray-600 text-sm mb-2">Total users</div>
               <div className="flex items-center space-x-2 text-sm">
                 <TrendingDown className="w-4 h-4 text-red-500" />
-                <span className="text-red-500 font-medium">2.56</span>
+                <span className="text-red-500 font-normal">2.56</span>
                 <span className="text-gray-500">-0.91% this week</span>
               </div>
             </div>
@@ -150,7 +161,7 @@ function App() {
               <div className="text-gray-600 text-sm mb-2">Refunded</div>
               <div className="flex items-center space-x-2 text-sm">
                 <TrendingUp className="w-4 h-4 text-green-500" />
-                <span className="text-green-500 font-medium">7.2</span>
+                <span className="text-green-500 font-normal">7.2</span>
                 <span className="text-gray-500">+1.51% this week</span>
               </div>
             </div>
@@ -161,7 +172,7 @@ function App() {
             {/* Orders Analytics */}
             <div className="col-span-2 bg-white p-6 rounded-lg shadow-sm">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Orders Analytics</h3>
+                <h3 className="text-lg font-medium text-gray-900">Orders Analytics</h3>
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-2">
                     <div className="w-3 h-3 bg-gray-800 rounded-full"></div>
@@ -231,7 +242,7 @@ function App() {
             {/* Earnings Donut Chart */}
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Earnings</h3>
+                <h3 className="text-lg font-medium text-gray-900">Earnings</h3>
                 <MoreVertical className="w-5 h-5 text-gray-400 cursor-pointer" />
               </div>
               <div className="flex items-center justify-center mb-6">
@@ -320,7 +331,7 @@ function App() {
           <div className="bg-white rounded-lg shadow-sm">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Order List</h3>
+                <h3 className="text-lg font-medium text-gray-900">Order List</h3>
                 <select className="text-sm text-gray-600 border border-gray-200 rounded px-2 py-1">
                   <option>Monthly</option>
                 </select>
