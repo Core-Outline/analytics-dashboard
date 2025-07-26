@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, BarChart3, Zap, User, Share2, Star, Settings, HelpCircle, MessageCircle, LogOut } from 'lucide-react';
+import { ChevronRight, BarChart3, Zap, User, Share2, Star, Settings, HelpCircle, MessageCircle, LogOut, Plug } from 'lucide-react';
 
 interface SidebarProps {
   activeSection: string;
@@ -13,7 +13,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
     { id: 'customer', label: 'Customer', icon: User },
     { id: 'social-media', label: 'Social Media', icon: Share2 },
     { id: 'customer-feedback', label: 'Customer Feedback', icon: Star, badge: 2 },
-    { id: 'customer-dashboard', label: 'Customer Dashboard', icon: Settings }
+    { id: 'customer-dashboard', label: 'Customer Dashboard', icon: Settings },
+    { id: 'integrations', label: 'Integrations', icon: Plug }
   ];
 
   return (

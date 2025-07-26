@@ -6,6 +6,7 @@ import SaasPage from './pages/SaasPage';
 import CustomerPage from './pages/CustomerPage';
 import SocialMediaPage from './pages/SocialMediaPage';
 import CustomerFeedbackPage from './pages/CustomerFeedbackPage';
+import IntegrationsPage from './pages/IntegrationsPage';
 
 function App() {
   const [activeSection, setActiveSection] = useState('financials');
@@ -20,6 +21,8 @@ function App() {
         return <SocialMediaPage />;
       case 'customer-feedback':
         return <CustomerFeedbackPage />;
+      case 'integrations':
+        return <IntegrationsPage />;
       case 'financials':
       default:
         return <FinancialsPage />;
