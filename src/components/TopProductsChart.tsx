@@ -128,7 +128,7 @@ const TopProductsChart: React.FC = () => {
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: config.color }}
             ></div>
-            <span className={`text-sm font-medium ${
+            <span className={`text-xs font-medium ${
               visibleProducts[name] ? 'text-gray-900' : 'text-gray-500'
             }`}>
               {name}
