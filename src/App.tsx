@@ -4,6 +4,7 @@ import Header from './components/Header';
 import FinancialsPage from './pages/FinancialsPage';
 import SaasPage from './pages/SaasPage';
 import CustomerPage from './pages/CustomerPage';
+import SocialMediaPage from './pages/SocialMediaPage';
 
 function App() {
   const [activeSection, setActiveSection] = useState('financials');
@@ -14,6 +15,8 @@ function App() {
         return <SaasPage />;
       case 'customer':
         return <CustomerPage />;
+      case 'social-media':
+        return <SocialMediaPage />;
       case 'financials':
       default:
         return <FinancialsPage />;
