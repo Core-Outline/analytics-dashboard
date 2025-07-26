@@ -139,14 +139,14 @@ const CustomDashboardPage: React.FC = () => {
       </button>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-screen">
         {/* Top Header */}
         <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div className="text-lg font-medium text-gray-900">transaction_data.csv</div>
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-6 pb-24 overflow-y-auto">
           {/* Suggested Queries */}
           <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
             <div className="flex items-center space-x-2 mb-4">
@@ -171,8 +171,10 @@ const CustomDashboardPage: React.FC = () => {
               })}
             </div>
           </div>
+        </div>
 
-          {/* Query Input */}
+        {/* Query Input - Fixed to Bottom */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-6" style={{ left: isSidebarCollapsed ? '0px' : '320px' }}>
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center space-x-3">
               <Paperclip className="w-5 h-5 text-gray-400" />
