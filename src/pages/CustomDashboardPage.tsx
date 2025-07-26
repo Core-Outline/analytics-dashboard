@@ -146,7 +146,7 @@ const CustomDashboardPage: React.FC = () => {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 p-6 pb-24">
+        <div className="flex-1 p-6">
           {/* Suggested Queries */}
           <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
             <div className="flex items-center space-x-2 mb-4">
@@ -171,26 +171,24 @@ const CustomDashboardPage: React.FC = () => {
               })}
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Fixed Query Input at Bottom */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center space-x-3">
-            <Paperclip className="w-5 h-5 text-gray-400" />
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="What were my top 5 products last month from @SalesData ?"
-                className="w-full text-sm text-gray-700 placeholder-gray-400 border-none outline-none"
-                defaultValue="What were my top 5 products last month from @SalesData ?"
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
-                <Send className="w-4 h-4 text-white" />
-              </button>
+          {/* Query Input */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center space-x-3">
+              <Paperclip className="w-5 h-5 text-gray-400" />
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="What were my top 5 products last month from @SalesData ?"
+                  className="w-full text-sm text-gray-700 placeholder-gray-400 border-none outline-none"
+                  defaultValue="What were my top 5 products last month from @SalesData ?"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
+                  <Send className="w-4 h-4 text-white" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
