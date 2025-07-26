@@ -16,32 +16,32 @@ const UserSentimentsCard: React.FC = () => {
   // Sample data for different sentiments
   const sentimentData = {
     'Positive': {
-      color: '#3b82f6',
-      lightColor: '#93c5fd',
+      color: '#60a5fa',
+      lightColor: '#60a5fa',
       count: 125,
       percentage: '5.3%',
       trend: 'up',
       data: [45, 58, 62, 35, 45, 55, 65, 75, 55, 65, 72, 45, 55]
     },
     'Negative': {
-      color: '#8b5cf6',
-      lightColor: '#c4b5fd',
+      color: '#60a5fa',
+      lightColor: '#60a5fa',
       count: 100,
       percentage: '3.20%',
       trend: 'up',
       data: [38, 42, 35, 41, 28, 45, 42, 38, 32, 44, 41, 32, 35]
     },
     'Neutral': {
-      color: '#06b6d4',
-      lightColor: '#67e8f9',
+      color: '#60a5fa',
+      lightColor: '#60a5fa',
       count: 53,
       percentage: '2.3%',
       trend: 'down',
       data: [25, 32, 28, 35, 22, 38, 32, 28, 25, 35, 32, 25, 28]
     },
     'Mixed': {
-      color: '#10b981',
-      lightColor: '#6ee7b7',
+      color: '#60a5fa',
+      lightColor: '#60a5fa',
       count: 136,
       percentage: '3.12%',
       trend: 'up',
