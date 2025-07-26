@@ -146,12 +146,12 @@ function App() {
                   <BarChart3 className="w-5 h-5 text-purple-600" />
                 </div>
               </div>
-              <div className="text-2xl font-bold text-gray-900 mb-1">46,827</div>
-              <div className="text-gray-600 text-sm mb-2">Total Sales</div>
+              <div className="text-2xl font-bold text-gray-900 mb-1">12.5%</div>
+              <div className="text-gray-600 text-sm mb-2">Growth Period</div>
               <div className="flex items-center space-x-2 text-sm">
-                <TrendingDown className="w-4 h-4 text-red-500" />
-                <span className="text-red-500 font-normal">2.56</span>
-                <span className="text-gray-500">-0.91% this week</span>
+                <TrendingUp className="w-4 h-4 text-green-500" />
+                <span className="text-green-500 font-normal">1.8</span>
+                <span className="text-gray-500">+0.32% this week</span>
               </div>
             </div>
 
