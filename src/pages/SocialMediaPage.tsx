@@ -6,6 +6,10 @@ import SentimentAnalysisCard from '../components/SentimentAnalysisCard';
 import InfluencersCard from '../components/InfluencersCard';
 
 const SocialMediaPage: React.FC = () => {
+  const handleInfluencerSelect = (influencer: any) => {
+    console.log('Selected influencer:', influencer);
+  };
+
   return (
     <div className="p-8">
       <SocialMediaMetricsCard />
@@ -25,7 +29,7 @@ const SocialMediaPage: React.FC = () => {
       </div>
 
       <div className="mt-8">
-        <InfluencersCard />
+        <InfluencersCard onInfluencerSelect={handleInfluencerSelect} />
       </div>
     </div>
   );

@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
+import { useRef } from 'react';
 import { Users, Heart, MessageCircle, Share2, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import InfluencerAnalyticsCard from './InfluencerAnalyticsCard';
 
-const InfluencersCard: React.FC = () => {
+interface InfluencersCardProps {
+  onInfluencerSelect?: (influencer: any) => void;
+}
+
+const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect }) => {
   const [selectedInfluencer, setSelectedInfluencer] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
+  const analyticsRef = useRef<HTMLDivElement>(null);
   const influencersPerPage = 5;
 
   // Sample influencer data
@@ -213,6 +220,20 @@ const InfluencersCard: React.FC = () => {
 
   const handleInfluencerSelect = (influencerId: string) => {
     setSelectedInfluencer(influencerId);
+    const selectedInfluencerData = influencers.find(inf => inf.id === influencerId);
+    if (selectedInfluencerData && onInfluencerSelect) {
+      onInfluencerSelect(selectedInfluencerData);
+    }
+    
+    // Scroll to analytics card after a short delay to ensure it's rendered
+    setTimeout(() => {
+      if (analyticsRef.current) {
+        analyticsRef.current.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    }, 100);
   };
 
   const handlePageChange = (page: number) => {
@@ -389,11 +410,19 @@ const InfluencersCard: React.FC = () => {
         </button>
       </div>
 
-      {/* Selected Influencer Info */}
+      {/* Influencer Analytics Card */}
       {selectedInfluencer && (
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <div className="text-sm text-blue-800">
-            <strong>Selected:</strong> {currentInfluencers.find(i => i.id === selectedInfluencer)?.name}
+        <div ref={analyticsRef} className="mt-8">
+          <InfluencerAnalyticsCard 
+            influencer={influencers.find(i => i.id === selectedInfluencer)!}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default InfluencersCard;
           </div>
         </div>
       )}
