@@ -27,13 +27,13 @@ function App() {
               <div className="w-5 h-5 flex items-center justify-center">
                 <BarChart3 className="w-5 h-2" />
               </div>
-              <span>Financials</span>
+              <span className="text-sm">Financials</span>
             </div>
             
             <div className="flex items-center justify-between px-4 py-3 text-gray-300 hover:text-white cursor-pointer font-medium">
               <div className="flex items-center space-x-3">
                 <Zap className="w-5 h-5" />
-                <span>Saas</span>
+                <span className="text-sm">Saas</span>
               </div>
               <ChevronRight className="w-4 h-4" />
             </div>
@@ -41,7 +41,7 @@ function App() {
             <div className="flex items-center justify-between px-4 py-3 text-gray-300 hover:text-white cursor-pointer font-medium">
               <div className="flex items-center space-x-3">
                 <User className="w-5 h-5" />
-                <span>Customer</span>
+                <span className="text-sm">Customer</span>
               </div>
               <ChevronRight className="w-4 h-4" />
             </div>
@@ -49,7 +49,7 @@ function App() {
             <div className="flex items-center justify-between px-4 py-3 text-gray-300 hover:text-white cursor-pointer font-medium">
               <div className="flex items-center space-x-3">
                 <Share2 className="w-5 h-5" />
-                <span>Social Media</span>
+                <span className="text-sm">Social Media</span>
               </div>
               <ChevronRight className="w-4 h-4" />
             </div>
@@ -57,7 +57,7 @@ function App() {
             <div className="flex items-center justify-between px-4 py-3 text-gray-300 hover:text-white cursor-pointer font-medium">
               <div className="flex items-center space-x-3">
                 <Star className="w-5 h-5" />
-                <span>Customer Feedback</span>
+                <span className="text-sm">Customer Feedback</span>
               </div>
               <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center text-xs font-bold text-white">2</div>
             </div>
@@ -65,7 +65,7 @@ function App() {
             <div className="flex items-center justify-between px-4 py-3 text-gray-300 hover:text-white cursor-pointer font-medium">
               <div className="flex items-center space-x-3">
                 <Settings className="w-5 h-5" />
-                <span>Customer Dashboard</span>
+                <span className="text-sm">Customer Dashboard</span>
               </div>
               <ChevronRight className="w-4 h-4" />
             </div>
@@ -76,15 +76,15 @@ function App() {
         <div className="p-4 space-y-1">
           <div className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:text-white cursor-pointer font-medium">
             <HelpCircle className="w-5 h-5" />
-            <span>Help Centre</span>
+            <span className="text-sm">Help Centre</span>
           </div>
           <div className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:text-white cursor-pointer font-medium">
             <MessageCircle className="w-5 h-5" />
-            <span>Contact us</span>
+            <span className="text-sm">Contact us</span>
           </div>
           <div className="flex items-center space-x-3 px-4 py-3 text-orange-500 hover:text-orange-400 cursor-pointer font-medium">
             <LogOut className="w-5 h-5" />
-            <span>Log out</span>
+            <span className="text-sm">Log out</span>
           </div>
         </div>
       </div>
