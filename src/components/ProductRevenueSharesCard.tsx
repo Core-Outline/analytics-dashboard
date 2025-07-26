@@ -23,37 +23,12 @@ const ProductRevenueSharesCard: React.FC = () => {
     },
     xAxis: {
       type: 'value',
-      axisLine: {
-        show: false
-      },
-      axisTick: {
-        show: false
-      },
-      axisLabel: {
-        color: '#9ca3af',
-        fontSize: 12,
-        fontFamily: 'Inter, system-ui, sans-serif',
-        formatter: '{value}%'
-      },
-      splitLine: {
-        lineStyle: {
-          color: '#f1f5f9',
-          width: 1
-        }
-      }
+      show: false
     },
     yAxis: {
       type: 'category',
       data: ['Revenue Share'],
-      axisLine: {
-        show: false
-      },
-      axisTick: {
-        show: false
-      },
-      axisLabel: {
-        show: false
-      }
+      show: false
     },
     series: productData.map((product, index) => ({
       name: product.name,
@@ -64,7 +39,7 @@ const ProductRevenueSharesCard: React.FC = () => {
         color: product.color,
         borderRadius: index === 0 ? [8, 0, 0, 8] : index === productData.length - 1 ? [0, 8, 8, 0] : [0, 0, 0, 0]
       },
-      barWidth: '60%'
+      barWidth: '20%'
     })),
     tooltip: {
       trigger: 'axis',
