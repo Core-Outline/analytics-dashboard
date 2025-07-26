@@ -3,6 +3,7 @@ import { Users, DollarSign, TrendingUp, Activity, UserPlus, CreditCard, Calendar
 import TabbedMetricsCard from '../components/TabbedMetricsCard';
 import ActiveUsersCard from '../components/ActiveUsersCard';
 import UsersByDeviceCard from '../components/UsersByDeviceCard';
+import ActiveUsersHeatmap from '../components/ActiveUsersHeatmap';
 
 const SaasPage: React.FC = () => {
   return (
@@ -60,33 +61,10 @@ const SaasPage: React.FC = () => {
         </div>
 
         {/* Upcoming Renewals */}
+        {/* Active Users Heatmap */}
         <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h3 className="text-lg font-medium text-gray-900 mb-6">Upcoming Renewals</h3>
-          <div className="space-y-4">
-            {[
-              { name: 'TechCorp Inc.', plan: 'Enterprise', date: 'Tomorrow', amount: '$99' },
-              { name: 'StartupXYZ', plan: 'Pro Plan', date: 'In 2 days', amount: '$29' },
-              { name: 'Design Studio', plan: 'Pro Plan', date: 'In 3 days', amount: '$29' },
-              { name: 'Marketing Agency', plan: 'Enterprise', date: 'In 5 days', amount: '$99' },
-              { name: 'Freelancer Pro', plan: 'Basic Plan', date: 'In 1 week', amount: '$9' }
-            ].map((renewal, index) => (
-              <div key={index} className="flex items-center justify-between py-2">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Calendar className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">{renewal.name}</div>
-                    <div className="text-xs text-gray-500">{renewal.plan}</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-medium text-gray-900">{renewal.amount}</div>
-                  <div className="text-xs text-gray-500">{renewal.date}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-6">Active Users by Hour</h3>
+          <ActiveUsersHeatmap />
         </div>
       </div>
     </div>
