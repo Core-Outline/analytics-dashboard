@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
-import * as echarts from 'echarts';
 import worldJson from 'echarts/map/json/world.json';
 
 const UsersByCountryMap: React.FC = () => {
