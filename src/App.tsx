@@ -18,7 +18,7 @@ function App() {
           <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center font-bold text-lg">
             M
           </div>
-          <span className="text-xl font-medium">Mboard</span>
+          <span className="text-xl font-medium">Core&Outline</span>
         </div>
 
         {/* Navigation */}
