@@ -66,10 +66,26 @@ const UserSentimentsCard: React.FC = () => {
       type: 'bar',
       data: config.data.slice(0, 6), // Show only 6 data points for the dates
       itemStyle: {
-        color: config.color,
-        borderRadius: [4, 4, 0, 0]
+        color: {
+          type: 'linear',
+          x: 0,
+          y: 0,
+          x2: 0,
+          y2: 1,
+          colorStops: [
+            {
+              offset: 0,
+              color: '#60a5fa' // Light blue
+            },
+            {
+              offset: 1,
+              color: '#3b82f6' // Darker blue
+            }
+          ]
+        },
+        borderRadius: [8, 8, 8, 8]
       },
-      barWidth: '15%',
+      barWidth: '10%',
       barGap: '10%'
     }));
 
