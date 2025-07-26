@@ -1,43 +1,31 @@
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
+import { ChevronDown } from 'lucide-react';
 
 const AdCampaignsCard: React.FC = () => {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   
   // Sample data for clicks and cost
-  const clicksData = [1200, 1800, 1500, 2200, 2800, 3200, 2900];
-  const costData = [450, 680, 520, 780, 920, 1100, 980];
+  const clicksData = [3600, 3700, 3900, 3800, 3500, 3700, 3800];
+  const costData = [10200, 10500, 10900, 10800, 10600, 10700, 10870];
 
-  // Table data
+  // Table data matching the image
   const campaignData = [
-    { name: 'Summer Sale 2024', source: 'Google Ads', cost: '$1,250', clicks: '3,420' },
-    { name: 'Black Friday Promo', source: 'Facebook', cost: '$890', clicks: '2,180' },
-    { name: 'New Product Launch', source: 'Instagram', cost: '$1,450', clicks: '4,200' },
-    { name: 'Holiday Special', source: 'Google Ads', cost: '$720', clicks: '1,890' },
-    { name: 'Brand Awareness', source: 'LinkedIn', cost: '$980', clicks: '1,560' },
-    { name: 'Retargeting Campaign', source: 'Facebook', cost: '$650', clicks: '2,340' },
-    { name: 'Mobile App Install', source: 'TikTok', cost: '$1,120', clicks: '3,780' },
-    { name: 'Local Business Ads', source: 'Google Ads', cost: '$540', clicks: '1,230' }
+    { name: 'Black Friday Sale', source: 'Google', cost: '$1304.28', clicks: '543217' },
+    { name: 'Christmas Bundle', source: 'Facebook', cost: '$9876.56', clicks: '3904' },
+    { name: 'Halloween Party Started 🎃👻', source: 'Facebook', cost: '$3267.84', clicks: '7654' },
+    { name: 'Grab your reward', source: 'Instagram', cost: '$87545.28', clicks: '68654' },
+    { name: 'Black Friday Sale', source: 'Google', cost: '$1304.28', clicks: '3904' },
+    { name: 'Boxing Day offer', source: 'Instagram', cost: '$1200.5', clicks: '5004' }
   ];
 
-  const createChartOption = (title: string, data: number[], color: string, gradientColor: string) => ({
-    title: {
-      text: title,
-      textStyle: {
-        fontSize: 16,
-        fontWeight: 'normal',
-        color: '#374151',
-        fontFamily: 'Inter, system-ui, sans-serif'
-      },
-      left: 0,
-      top: 0
-    },
+  const createChartOption = (data: number[], color: string, gradientColor: string) => ({
     grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '15%',
-      top: '25%',
-      containLabel: true
+      left: '0%',
+      right: '0%',
+      bottom: '0%',
+      top: '0%',
+      containLabel: false
     },
     xAxis: {
       type: 'category',
@@ -72,7 +60,7 @@ const AdCampaignsCard: React.FC = () => {
               },
               {
                 offset: 1,
-                color: 'rgba(255, 255, 255, 0.1)'
+                color: 'rgba(255, 255, 255, 0)'
               }
             ]
           }
@@ -80,37 +68,45 @@ const AdCampaignsCard: React.FC = () => {
       }
     ],
     tooltip: {
-      trigger: 'axis',
-      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      borderColor: '#e5e7eb',
-      borderWidth: 1,
-      textStyle: {
-        color: '#374151',
-        fontSize: 12
-      }
+      show: false
     }
   });
 
-  const clicksOption = createChartOption('Clicks', clicksData, '#3b82f6', 'rgba(59, 130, 246, 0.3)');
-  const costOption = createChartOption('Cost', costData, '#10b981', 'rgba(16, 185, 129, 0.3)');
+  const clicksOption = createChartOption(clicksData, '#3b82f6', 'rgba(59, 130, 246, 0.2)');
+  const costOption = createChartOption(costData, '#f97316', 'rgba(249, 115, 22, 0.2)');
 
   return (
     <div className="space-y-6">
       {/* Charts Row */}
-      <div className="grid grid-cols-2 gap-6">
-        <div className="p-4">
-          <ReactECharts 
-            option={clicksOption} 
-            style={{ height: '200px', width: '100%' }}
-            opts={{ renderer: 'canvas' }}
-          />
+      <div className="grid grid-cols-2 gap-8">
+        {/* Cost Chart */}
+        <div>
+          <div className="mb-2">
+            <div className="text-sm text-gray-600 mb-1">Cost</div>
+            <div className="text-2xl font-bold text-gray-900">$10.87k</div>
+          </div>
+          <div className="h-16">
+            <ReactECharts 
+              option={costOption} 
+              style={{ height: '64px', width: '100%' }}
+              opts={{ renderer: 'canvas' }}
+            />
+          </div>
         </div>
-        <div className="p-4">
-          <ReactECharts 
-            option={costOption} 
-            style={{ height: '200px', width: '100%' }}
-            opts={{ renderer: 'canvas' }}
-          />
+
+        {/* Clicks Chart */}
+        <div>
+          <div className="mb-2">
+            <div className="text-sm text-gray-600 mb-1">Clicks</div>
+            <div className="text-2xl font-bold text-gray-900">3.8k</div>
+          </div>
+          <div className="h-16">
+            <ReactECharts 
+              option={clicksOption} 
+              style={{ height: '64px', width: '100%' }}
+              opts={{ renderer: 'canvas' }}
+            />
+          </div>
         </div>
       </div>
 
@@ -118,24 +114,35 @@ const AdCampaignsCard: React.FC = () => {
       <div className="overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr>
-              <th className="text-left text-sm font-medium text-gray-600 pb-3">Campaign Name</th>
+            <tr className="border-b border-gray-200">
+              <th className="text-left text-sm font-medium text-gray-600 pb-3">Top Campaigns</th>
               <th className="text-left text-sm font-medium text-gray-600 pb-3">Source</th>
-              <th className="text-left text-sm font-medium text-gray-600 pb-3">Cost</th>
-              <th className="text-left text-sm font-medium text-gray-600 pb-3">Clicks</th>
+              <th className="text-right text-sm font-medium text-gray-600 pb-3">Cost</th>
+              <th className="text-right text-sm font-medium text-gray-600 pb-3">Clicks</th>
             </tr>
           </thead>
           <tbody>
             {campaignData.map((campaign, index) => (
-              <tr key={index}>
-                <td className="text-sm text-gray-900 py-2 font-medium">{campaign.name}</td>
-                <td className="text-sm text-gray-600 py-2">{campaign.source}</td>
-                <td className="text-sm text-gray-900 py-2 font-medium">{campaign.cost}</td>
-                <td className="text-sm text-gray-900 py-2 font-medium">{campaign.clicks}</td>
+              <tr key={index} className="border-b border-gray-100 last:border-b-0">
+                <td className="text-sm text-gray-900 py-4">{campaign.name}</td>
+                <td className="text-sm text-gray-600 py-4">{campaign.source}</td>
+                <td className="text-sm text-gray-900 py-4 text-right font-medium">{campaign.cost}</td>
+                <td className="text-sm text-gray-900 py-4 text-right">{campaign.clicks}</td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Bottom Controls */}
+      <div className="flex items-center justify-between pt-4">
+        <div className="flex items-center space-x-2 text-sm text-gray-600 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer">
+          <span>Last 7 days</span>
+          <ChevronDown className="w-4 h-4" />
+        </div>
+        <div className="text-sm text-blue-600 cursor-pointer hover:text-blue-700">
+          Ad campaigns →
+        </div>
       </div>
     </div>
   );
