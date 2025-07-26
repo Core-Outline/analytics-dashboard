@@ -42,37 +42,11 @@ const AdCampaignsCard: React.FC = () => {
     xAxis: {
       type: 'category',
       data: days,
-      axisLine: {
-        show: false
-      },
-      axisTick: {
-        show: false
-      },
-      axisLabel: {
-        color: '#9ca3af',
-        fontSize: 12,
-        fontFamily: 'Inter, system-ui, sans-serif'
-      }
+      show: false
     },
     yAxis: {
       type: 'value',
-      axisLine: {
-        show: false
-      },
-      axisTick: {
-        show: false
-      },
-      axisLabel: {
-        color: '#9ca3af',
-        fontSize: 12,
-        fontFamily: 'Inter, system-ui, sans-serif'
-      },
-      splitLine: {
-        lineStyle: {
-          color: '#f1f5f9',
-          width: 1
-        }
-      }
+      show: false
     },
     series: [
       {
@@ -124,14 +98,14 @@ const AdCampaignsCard: React.FC = () => {
     <div className="space-y-6">
       {/* Charts Row */}
       <div className="grid grid-cols-2 gap-6">
-        <div className="bg-gray-50 p-4 rounded-lg">
+        <div className="p-4">
           <ReactECharts 
             option={clicksOption} 
             style={{ height: '200px', width: '100%' }}
             opts={{ renderer: 'canvas' }}
           />
         </div>
-        <div className="bg-gray-50 p-4 rounded-lg">
+        <div className="p-4">
           <ReactECharts 
             option={costOption} 
             style={{ height: '200px', width: '100%' }}
