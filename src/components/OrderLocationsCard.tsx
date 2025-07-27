@@ -1,20 +1,24 @@
 import React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import * as echarts from 'echarts';
 import ReactECharts from 'echarts-for-react';
 import { RefreshCw, MoreHorizontal, ChevronRight } from 'lucide-react';
 
 const OrderLocationsCard: React.FC = () => {
+  const [mapReady, setMapReady] = useState(false);
+
   useEffect(() => {
     // Register a simplified world map using ECharts built-in world map
     fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
       .then(response => response.json())
       .then(worldGeoJson => {
         echarts.registerMap('world', worldGeoJson);
+        setMapReady(true);
       })
       .catch(() => {
         // Fallback: use a simple world map configuration
         console.warn('Could not load world map data, using fallback');
+        setMapReady(false);
       });
   }, []);
 
@@ -135,11 +139,20 @@ const OrderLocationsCard: React.FC = () => {
 
       {/* World Map */}
       <div className="mb-8">
-        <ReactECharts 
-          option={mapOption}
-          style={{ height: '400px', width: '100%' }}
-          opts={{ renderer: 'canvas' }}
-        />
+        {mapReady ? (
+          <ReactECharts 
+            option={mapOption}
+            style={{ height: '400px', width: '100%' }}
+            opts={{ renderer: 'canvas' }}
+          />
+        ) : (
+          <div className="flex items-center justify-center h-96 bg-gray-50 rounded-lg">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+              <p className="text-gray-500 text-sm">Loading world map...</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Data Table */}
