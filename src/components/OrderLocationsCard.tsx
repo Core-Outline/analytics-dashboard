@@ -1,8 +1,15 @@
 import React from 'react';
+import { useEffect } from 'react';
+import * as echarts from 'echarts';
 import ReactECharts from 'echarts-for-react';
+import worldJson from 'echarts-maps/dist/world.json';
 import { RefreshCw, MoreHorizontal, ChevronRight } from 'lucide-react';
 
 const OrderLocationsCard: React.FC = () => {
+  useEffect(() => {
+    echarts.registerMap('world', worldJson);
+  }, []);
+
   // Sample data for order locations
   const locationData = [
     { city: 'New York', country: 'United States', sessions: 12450, users: 8920, percentage: 23.5 },
