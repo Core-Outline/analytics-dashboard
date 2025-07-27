@@ -5,6 +5,7 @@ const CustomDashboardPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedQuery, setSelectedQuery] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState('Queries');
 
   // Sample queries data
   const queries = [
@@ -38,6 +39,46 @@ const CustomDashboardPage: React.FC = () => {
     }
   ];
 
+  // Sample dashboards data
+  const dashboards = [
+    {
+      id: 'sales_overview_2024',
+      name: 'Sales Overview 2024',
+      type: 'dashboard',
+      icon: BarChart3,
+      color: 'text-green-600',
+      lastModified: '2 hours ago',
+      charts: 5
+    },
+    {
+      id: 'customer_analytics',
+      name: 'Customer Analytics',
+      type: 'dashboard',
+      icon: PieChart,
+      color: 'text-blue-600',
+      lastModified: '1 day ago',
+      charts: 8
+    },
+    {
+      id: 'financial_report_q4',
+      name: 'Financial Report Q4',
+      type: 'dashboard',
+      icon: BarChart3,
+      color: 'text-purple-600',
+      lastModified: '3 days ago',
+      charts: 6
+    },
+    {
+      id: 'marketing_performance',
+      name: 'Marketing Performance',
+      type: 'dashboard',
+      icon: MapPin,
+      color: 'text-orange-600',
+      lastModified: '1 week ago',
+      charts: 4
+    }
+  ];
+
   // Sample suggested queries
   const suggestedQueries = [
     {
@@ -61,6 +102,10 @@ const CustomDashboardPage: React.FC = () => {
     query.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const filteredDashboards = dashboards.filter(dashboard =>
+    dashboard.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 flex relative">
       {/* Left Sidebar */}
@@ -77,8 +122,25 @@ const CustomDashboardPage: React.FC = () => {
           {/* Tab */}
           <div className="border-b border-gray-200">
             <div className="flex">
-              <button className="px-4 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600">
+              <button 
+                onClick={() => setActiveTab('Queries')}
+                className={`px-4 py-2 text-sm font-medium ${
+                  activeTab === 'Queries'
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
                 Queries
+              </button>
+              <button 
+                onClick={() => setActiveTab('Dashboard')}
+                className={`px-4 py-2 text-sm font-medium ${
+                  activeTab === 'Dashboard'
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Dashboard
               </button>
             </div>
           </div>
@@ -90,7 +152,7 @@ const CustomDashboardPage: React.FC = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search queries..."
+              placeholder={activeTab === 'Queries' ? 'Search queries...' : 'Search dashboards...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -98,29 +160,55 @@ const CustomDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Queries List */}
+        {/* Content List */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-2">
-            {filteredQueries.map((query) => {
-              const Icon = query.icon;
-              return (
-                <div
-                  key={query.id}
-                  onClick={() => setSelectedQuery(query.id)}
-                  className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
-                    selectedQuery === query.id
-                      ? 'bg-blue-50 border border-blue-200'
-                      : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <Icon className={`w-4 h-4 ${query.color}`} />
-                    <span className="text-sm text-gray-900">{query.name}</span>
+            {activeTab === 'Queries' ? (
+              filteredQueries.map((query) => {
+                const Icon = query.icon;
+                return (
+                  <div
+                    key={query.id}
+                    onClick={() => setSelectedQuery(query.id)}
+                    className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
+                      selectedQuery === query.id
+                        ? 'bg-blue-50 border border-blue-200'
+                        : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <Icon className={`w-4 h-4 ${query.color}`} />
+                      <span className="text-sm text-gray-900">{query.name}</span>
+                    </div>
+                    <MoreHorizontal className="w-4 h-4 text-gray-400" />
                   </div>
-                  <MoreHorizontal className="w-4 h-4 text-gray-400" />
-                </div>
-              );
-            })}
+                );
+              })
+            ) : (
+              filteredDashboards.map((dashboard) => {
+                const Icon = dashboard.icon;
+                return (
+                  <div
+                    key={dashboard.id}
+                    onClick={() => setSelectedQuery(dashboard.id)}
+                    className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
+                      selectedQuery === dashboard.id
+                        ? 'bg-blue-50 border border-blue-200'
+                        : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <Icon className={`w-4 h-4 ${dashboard.color}`} />
+                      <div className="flex flex-col">
+                        <span className="text-sm text-gray-900">{dashboard.name}</span>
+                        <span className="text-xs text-gray-500">{dashboard.charts} charts • {dashboard.lastModified}</span>
+                      </div>
+                    </div>
+                    <MoreHorizontal className="w-4 h-4 text-gray-400" />
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
