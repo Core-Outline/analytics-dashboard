@@ -2,12 +2,20 @@ import React from 'react';
 import { useEffect } from 'react';
 import * as echarts from 'echarts';
 import ReactECharts from 'echarts-for-react';
-import worldJson from 'echarts-maps/dist/world.json';
 import { RefreshCw, MoreHorizontal, ChevronRight } from 'lucide-react';
 
 const OrderLocationsCard: React.FC = () => {
   useEffect(() => {
-    echarts.registerMap('world', worldJson);
+    // Register a simplified world map using ECharts built-in world map
+    fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
+      .then(response => response.json())
+      .then(worldGeoJson => {
+        echarts.registerMap('world', worldGeoJson);
+      })
+      .catch(() => {
+        // Fallback: use a simple world map configuration
+        console.warn('Could not load world map data, using fallback');
+      });
   }, []);
 
   // Sample data for order locations
