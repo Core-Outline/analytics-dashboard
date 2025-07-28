@@ -40,7 +40,7 @@ const RevenueGrowthCard: React.FC = () => {
       </div>
 
       {/* Circular Progress Bar */}
-      <div className="flex justify-center">
+      <div className="flex justify-center items-center px-4">
         <div className="relative w-24 h-24">
           <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
             {/* Background circle */}
