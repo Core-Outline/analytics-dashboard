@@ -53,7 +53,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
           )}
           
           {/* Dashboard Items */}
-          <div className={`space-y-1 ${!isCollapsed && !isDashboardExpanded ? 'hidden' : ''}`}>
+          <div className={`space-y-1 overflow-hidden transition-all duration-300 ease-in-out ${
+            !isCollapsed && !isDashboardExpanded 
+              ? 'max-h-0 opacity-0' 
+              : 'max-h-96 opacity-100'
+          }`}>
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeSection === item.id;
