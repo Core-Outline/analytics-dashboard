@@ -4,7 +4,9 @@ import {
   loadApiConfig, 
   loadUserData, 
   fetchRecurringRevenueData,
+  fetchRevenueGrowthData,
   RecurringRevenueData,
+  RevenueGrowthData,
   ApiConfig
 } from '../helpers/financials';
 import TotalSalesChart from '../components/OrdersAnalyticsChart';
@@ -17,6 +19,12 @@ import ProductRevenueSharesCard from '../components/ProductRevenueSharesCard';
 const FinancialsPage: React.FC = () => {
   const [salesTimeUnit, setSalesTimeUnit] = useState('Monthly');
   const [recurringRevenueData, setRecurringRevenueData] = useState<RecurringRevenueData>({
+    value: "_",
+    growth: 0,
+    percentage: "_",
+    isLoading: true
+  });
+  const [revenueGrowthData, setRevenueGrowthData] = useState<RevenueGrowthData>({
     value: "_",
     growth: 0,
     percentage: "_",
@@ -64,10 +72,25 @@ const FinancialsPage: React.FC = () => {
     }
   };
 
+  // Fetch revenue growth data
+  const fetchRevenueGrowth = async (): Promise<void> => {
+    if (!apiConfig.dataBaseUrl || !company) return;
+
+    setRevenueGrowthData(prev => ({ ...prev, isLoading: true }));
+
+    try {
+      const data = await fetchRevenueGrowthData(apiConfig, timeUnits, company);
+      setRevenueGrowthData(data);
+    } catch (error) {
+      console.error('Error in fetchRevenueGrowth:', error);
+    }
+  };
+
   // Fetch data when dependencies change
   useEffect(() => {
     if (apiConfig.dataBaseUrl && company) {
       fetchRecurringRevenue();
+      fetchRevenueGrowth();
     }
   }, [apiConfig.dataBaseUrl, timeUnits, company]);
 
@@ -120,12 +143,34 @@ const FinancialsPage: React.FC = () => {
               <TrendingUp className="w-5 h-5 text-pink-600" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-gray-900 mb-1">23,283.5</div>
+          <div className="text-2xl font-bold text-gray-900 mb-1">
+            {revenueGrowthData.isLoading ? (
+              <div className="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
+            ) : (
+              revenueGrowthData.value.toLocaleString()
+            )}
+          </div>
           <div className="text-gray-600 text-sm mb-2">Revenue Growth</div>
           <div className="flex items-center space-x-2 text-sm">
-            <TrendingUp className="w-4 h-4 text-green-500" />
-            <span className="text-green-500 font-normal">3.1</span>
-            <span className="text-gray-500">+0.49% this week</span>
+            {revenueGrowthData.growth >= 0 ? (
+              <TrendingUp className="w-4 h-4 text-green-500" />
+            ) : (
+              <TrendingDown className="w-4 h-4 text-red-500" />
+            )}
+            <span className={`font-normal ${revenueGrowthData.growth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              {revenueGrowthData.isLoading ? (
+                <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
+              ) : (
+                revenueGrowthData.growth.toFixed(1) + '%'
+              )}
+            </span>
+            <span className="text-gray-500">
+              {revenueGrowthData.isLoading ? (
+                <div className="animate-pulse bg-gray-200 h-4 w-16 rounded"></div>
+              ) : (
+                `${revenueGrowthData.percentage} this week`
+              )}
+            </span>
           </div>
         </div>
 
