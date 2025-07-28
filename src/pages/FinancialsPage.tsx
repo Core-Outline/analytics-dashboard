@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MoreHorizontal, TrendingUp, TrendingDown, DollarSign, BarChart3 } from 'lucide-react';
 import TotalSalesChart from '../components/OrdersAnalyticsChart';
 import RevenueGrowthCard from '../components/RevenueGrowthCard';
@@ -9,6 +9,90 @@ import ProductRevenueSharesCard from '../components/ProductRevenueSharesCard';
 
 const FinancialsPage: React.FC = () => {
   const [salesTimeUnit, setSalesTimeUnit] = useState('Monthly');
+  const [recurringRevenueData, setRecurringRevenueData] = useState({
+    value: 89935,
+    growth: 10.2,
+    percentage: '+1.01%',
+    isLoading: true
+  });
+  const [timeUnits, setTimeUnits] = useState('M');
+  const [company, setCompany] = useState('301');
+  const [apiConfig, setApiConfig] = useState({
+    brevoApiKey: '',
+    apiBaseUrl: '',
+    dataBaseUrl: ''
+  });
+
+  // Load configuration and localStorage data
+  useEffect(() => {
+    // Fetch configuration
+    fetch('/config')
+      .then(response => response.json())
+      .then(data => {
+        console.log("Default page details", data);
+        setApiConfig({
+          brevoApiKey: data.brevoApiKey,
+          apiBaseUrl: data.api_base_url,
+          dataBaseUrl: data.data_base_url
+        });
+      })
+      .catch(error => console.error('Error fetching config:', error));
+
+    // Load from localStorage
+    try {
+      const userToken = JSON.parse(localStorage.getItem('userToken') || '{}');
+      console.log("userToken ", userToken);
+      
+      if (userToken.ORGANIZATION_ID) {
+        setCompany(userToken.ORGANIZATION_ID.toString());
+        console.log("company ", userToken.ORGANIZATION_ID);
+      }
+      
+      console.log("user ", localStorage.getItem('userToken'));
+    } catch (error) {
+      console.error('Error parsing userToken from localStorage:', error);
+    }
+  }, []);
+
+  // Fetch recurring revenue data
+  const fetchRecurringRevenue = async () => {
+    if (!apiConfig.dataBaseUrl || !company) return;
+
+    setRecurringRevenueData(prev => ({ ...prev, isLoading: true }));
+
+    try {
+      const url = `${apiConfig.dataBaseUrl}/recurring-revenue?time_units=${timeUnits}&company=${company}`;
+      console.log('Fetching recurring revenue from:', url);
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Recurring revenue data:', data);
+      
+      // Update the state with API data
+      setRecurringRevenueData({
+        value: data.value || 89935,
+        growth: data.growth || 10.2,
+        percentage: data.percentage || '+1.01%',
+        isLoading: false
+      });
+    } catch (error) {
+      console.error('Error fetching recurring revenue:', error);
+      // Keep default values on error
+      setRecurringRevenueData(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  // Fetch data when dependencies change
+  useEffect(() => {
+    if (apiConfig.dataBaseUrl && company) {
+      fetchRecurringRevenue();
+    }
+  }, [apiConfig.dataBaseUrl, timeUnits, company]);
 
   return (
     <div className="p-8">
@@ -21,12 +105,30 @@ const FinancialsPage: React.FC = () => {
               <DollarSign className="w-5 h-5 text-blue-600" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-gray-900 mb-1">89,935</div>
+          <div className="text-2xl font-bold text-gray-900 mb-1">
+            {recurringRevenueData.isLoading ? (
+              <div className="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
+            ) : (
+              recurringRevenueData.value.toLocaleString()
+            )}
+          </div>
           <div className="text-gray-600 text-sm mb-2">Recurring Revenue</div>
           <div className="flex items-center space-x-2 text-sm">
             <TrendingUp className="w-4 h-4 text-green-500" />
-            <span className="text-green-500 font-normal">10.2</span>
-            <span className="text-gray-500">+1.01% this week</span>
+            <span className="text-green-500 font-normal">
+              {recurringRevenueData.isLoading ? (
+                <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
+              ) : (
+                recurringRevenueData.growth
+              )}
+            </span>
+            <span className="text-gray-500">
+              {recurringRevenueData.isLoading ? (
+                <div className="animate-pulse bg-gray-200 h-4 w-16 rounded"></div>
+              ) : (
+                `${recurringRevenueData.percentage} this week`
+              )}
+            </span>
           </div>
         </div>
 
