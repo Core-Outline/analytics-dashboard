@@ -1,8 +1,24 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
 
 const UsersByCountryMap: React.FC = () => {
+  const [mapReady, setMapReady] = useState(false);
+
+  useEffect(() => {
+    // Load world map GeoJSON data
+    fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
+      .then(response => response.json())
+      .then(worldGeoJson => {
+        echarts.registerMap('world', worldGeoJson);
+        setMapReady(true);
+      })
+      .catch(() => {
+        console.warn('Could not load world map data, using fallback');
+        setMapReady(false);
+      });
+  }, []);
+
   // Sample data for users by country (country code, user count)
   const countryData = [
     { name: 'United States', value: 15420, code: 'US' },
@@ -38,15 +54,38 @@ const UsersByCountryMap: React.FC = () => {
   const maxValue = Math.max(...values);
 
   const option = {
-    title: {
-      text: 'Users by Country',
-      left: 'center',
-      textStyle: {
-        color: '#374151',
-        fontSize: 16,
-        fontWeight: 'bold'
-      }
+    geo: {
+      map: 'world',
+      roam: false,
+      zoom: 1.2,
+      center: [0, 20],
+      itemStyle: {
+        areaColor: '#e6f3ff',
+        borderColor: '#ffffff',
+        borderWidth: 1
+      },
+      emphasis: {
+        itemStyle: {
+          areaColor: '#4a90e2'
+        }
+      },
+      regions: countryData.map(country => ({
+        name: country.name,
+        itemStyle: {
+          areaColor: getCountryColor(country.value, minValue, maxValue)
+        }
+      }))
     },
+    series: [
+      {
+        type: 'map',
+        geoIndex: 0,
+        data: countryData.map(country => ({
+          name: country.name,
+          value: country.value
+        }))
+      }
+    ],
     tooltip: {
       trigger: 'item',
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -57,39 +96,33 @@ const UsersByCountryMap: React.FC = () => {
         fontSize: 12
       },
       formatter: function(params: any) {
-        return `
-          <div style="font-weight: 600; margin-bottom: 4px;">${params.name}</div>
-          <div>${params.value.toLocaleString()} users</div>
-        `;
-      }
-    },
-    series: [
-      {
-        name: 'Countries',
-        type: 'pie',
-        radius: ['40%', '70%'],
-        center: ['50%', '50%'],
-        data: countryData,
-        itemStyle: {
-          borderRadius: 4,
-          borderColor: '#fff',
-          borderWidth: 2
-        },
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
-        },
-        label: {
-          show: false
-        },
-        labelLine: {
-          show: false
+        const countryInfo = countryData.find(item => item.name === params.name);
+        if (countryInfo) {
+          return `
+            <div style="font-weight: 600; margin-bottom: 4px;">${params.name}</div>
+            <div>${countryInfo.value.toLocaleString()} users</div>
+          `;
         }
-      }
-    ]
+        return params.name;
+      },
+    }
+  };
+
+  // Function to calculate color based on user count
+  const getCountryColor = (value: number, min: number, max: number) => {
+    const ratio = (value - min) / (max - min);
+    const blues = [
+      '#e6f3ff', // Lightest blue
+      '#bfdbfe',
+      '#93c5fd',
+      '#60a5fa',
+      '#3b82f6',
+      '#2563eb',
+      '#1d4ed8',
+      '#1e40af' // Darkest blue
+    ];
+    const index = Math.floor(ratio * (blues.length - 1));
+    return blues[index];
   };
 
   // Top countries table data
@@ -97,12 +130,22 @@ const UsersByCountryMap: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Users Chart */}
+      {/* World Map */}
       <div className="h-80">
-        <ReactECharts 
-          option={option} 
-          style={{ height: '320px', width: '100%' }}
-        />
+        {mapReady ? (
+          <ReactECharts 
+            option={option} 
+            style={{ height: '320px', width: '100%' }}
+            opts={{ renderer: 'canvas' }}
+          />
+        ) : (
+          <div className="flex items-center justify-center h-80 bg-gray-50 rounded-lg">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+              <p className="text-gray-500 text-sm">Loading world map...</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Top Countries Table */}
