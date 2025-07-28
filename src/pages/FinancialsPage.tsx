@@ -10,9 +10,9 @@ import ProductRevenueSharesCard from '../components/ProductRevenueSharesCard';
 const FinancialsPage: React.FC = () => {
   const [salesTimeUnit, setSalesTimeUnit] = useState('Monthly');
   const [recurringRevenueData, setRecurringRevenueData] = useState({
-    value: 89935,
-    growth: 10.2,
-    percentage: '+1.01%',
+    value: "_",
+    growth: "_",
+    percentage: "_",
     isLoading: true
   });
   const [timeUnits, setTimeUnits] = useState('M');
