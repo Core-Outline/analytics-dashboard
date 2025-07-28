@@ -253,7 +253,7 @@ const FinancialsPage: React.FC = () => {
       // Update the state with API data
       setRecurringRevenueData({
         value: data.value || fallbackData.amount[fallbackData.amount.length - 1],
-        growth: data.growth || fallbackData.growth[fallbackData.growth.length - 1] * 100,
+        growth: parseFloat((data.growth || fallbackData.growth[fallbackData.growth.length - 1] * 100).toFixed(1)),
         percentage: data.percentage || formatGrowth(fallbackData.growth[fallbackData.growth.length - 1]),
         isLoading: false
       });
@@ -266,7 +266,7 @@ const FinancialsPage: React.FC = () => {
       
       setRecurringRevenueData({
         value: latestAmount,
-        growth: latestGrowth * 100,
+        growth: parseFloat((latestGrowth * 100).toFixed(1)),
         percentage: formatGrowth(latestGrowth),
         isLoading: false
       });
@@ -309,7 +309,7 @@ const FinancialsPage: React.FC = () => {
               {recurringRevenueData.isLoading ? (
                 <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
               ) : (
-                recurringRevenueData.growth
+                recurringRevenueData.growth.toFixed(1) + '%'
               )}
             </span>
             <span className="text-gray-500">
