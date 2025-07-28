@@ -6,7 +6,7 @@ import {
   fetchRecurringRevenueData,
   RecurringRevenueData,
   ApiConfig
-} from '../helpers/apiHelpers';
+} from '../helpers/financials';
 import TotalSalesChart from '../components/OrdersAnalyticsChart';
 import RevenueGrowthCard from '../components/RevenueGrowthCard';
 import TopProductsChart from '../components/TopProductsChart';
