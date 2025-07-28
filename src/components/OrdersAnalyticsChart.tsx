@@ -132,7 +132,7 @@ const TotalSalesChart: React.FC<TotalSalesChartProps> = ({ timeUnit }) => {
     ],
     tooltip: {
       trigger: 'axis',
-      backgroundColor: 'rgba(128, 128, 128, 0.1)',
+      backgroundColor: 'rgba(128, 128, 128, 0.05)',
       borderWidth: 0,
       padding: 0,
       textStyle: {
@@ -144,7 +144,7 @@ const TotalSalesChart: React.FC<TotalSalesChartProps> = ({ timeUnit }) => {
       axisPointer: {
         type: 'line',
         lineStyle: {
-          color: 'rgba(128, 128, 128, 0.3)',
+          color: 'rgba(128, 128, 128, 0.15)',
           width: 60,
           type: 'solid'
         },
@@ -156,7 +156,7 @@ const TotalSalesChart: React.FC<TotalSalesChartProps> = ({ timeUnit }) => {
         return [point[0] - 30, 0];
       },
       extraCssText: `
-        background: rgba(128, 128, 128, 0.1) !important;
+        background: rgba(128, 128, 128, 0.05) !important;
         border: none !important;
         box-shadow: none !important;
         height: 100%;
@@ -194,6 +194,7 @@ const TotalSalesChart: React.FC<TotalSalesChartProps> = ({ timeUnit }) => {
               
               hoverInfo.innerHTML = `
                 <div class="text-xs text-gray-600 mb-1">${label}</div>
+                <div class="text-xs text-gray-500 mb-2">X: ${label} | Y: $${currentValue.toLocaleString()}</div>
                 <div class="space-y-1">
                   <div class="flex items-center space-x-2">
                     <div class="w-3 h-3 bg-amber-500 rounded-full"></div>
