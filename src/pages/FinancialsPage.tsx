@@ -26,7 +26,7 @@ const FinancialsPage: React.FC = () => {
   // Load configuration and localStorage data
   useEffect(() => {
     // Fetch configuration
-    fetch('/config')
+    fetch('/config.json')
       .then(response => response.json())
       .then(data => {
         console.log("Default page details", data);
