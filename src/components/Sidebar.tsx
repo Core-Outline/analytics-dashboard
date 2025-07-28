@@ -71,10 +71,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
                       ? 'text-orange-500 bg-slate-700' 
                       : 'text-gray-300 hover:text-white hover:bg-slate-700'
                   }`}
-                  title={isCollapsed ? item.label : undefined}
                 >
-                  <div className="flex items-center space-x-2">
-                    <Icon className="w-4 h-4 flex-shrink-0" />
+                  <div className="flex items-center">
                     {!isCollapsed && <span className="text-sm">{item.label}</span>}
                   </div>
                   {!isCollapsed && item.badge ? (
@@ -84,9 +82,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
                   ) : !isCollapsed ? (
                     <ChevronRight className="w-3 h-3" />
                   ) : null}
-                  {isCollapsed && item.badge && (
-                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full"></div>
-                  )}
                 </div>
               );
             })}
