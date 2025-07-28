@@ -2,7 +2,7 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import * as echarts from 'echarts';
 import ReactECharts from 'echarts-for-react';
-import { RefreshCw, MoreHorizontal, ChevronRight } from 'lucide-react';
+import { RotateCcw, MoreHorizontal, ChevronRight } from 'lucide-react';
 
 const OrderLocationsCard: React.FC = () => {
   const [mapReady, setMapReady] = useState(false);
@@ -129,7 +129,7 @@ const OrderLocationsCard: React.FC = () => {
         <h3 className="text-lg font-medium text-gray-900">Order Locations</h3>
         <div className="flex items-center space-x-2">
           <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-            <RefreshCw className="w-5 h-5" />
+            <RotateCcw className="w-5 h-5" />
           </button>
           <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
             <MoreHorizontal className="w-5 h-5" />

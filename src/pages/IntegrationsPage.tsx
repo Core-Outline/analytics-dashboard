@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Settings, Database, Share2, CreditCard, FileText, Smartphone, MessageSquare, BarChart3, Cloud } from 'lucide-react';
+import { Search, Settings, Database, Share2, CreditCard, FileText, Smartphone, MessageCircle, BarChart3, Cloud } from 'lucide-react';
 import IntegrationModal from '../components/IntegrationModal';
 
 interface Integration {

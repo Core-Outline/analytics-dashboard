@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
-import { TrendingUp, TrendingDown, MessageSquare, DollarSign, AlertTriangle, Users } from 'lucide-react';
+import { TrendingUp, TrendingDown, MessageCircle, DollarSign, AlertCircle, Users } from 'lucide-react';
 
 const FeedbackMetricsCard: React.FC = () => {
   // Sample data for the metrics
@@ -10,7 +10,7 @@ const FeedbackMetricsCard: React.FC = () => {
       title: 'Net Promoter Score',
       value: '25',
       percentage: '5.3%',
-      icon: MessageSquare,
+      icon: MessageCircle,
       iconBg: 'bg-blue-100',
       iconColor: 'text-blue-600',
       trend: 'up',
@@ -46,7 +46,7 @@ const FeedbackMetricsCard: React.FC = () => {
       title: 'Issues Raised',
       value: '03',
       percentage: '3.12%',
-      icon: AlertTriangle,
+      icon: AlertCircle,
       iconBg: 'bg-orange-100',
       iconColor: 'text-orange-600',
       trend: 'down',
@@ -114,7 +114,7 @@ const FeedbackMetricsCard: React.FC = () => {
       <div className="mb-6">
         <div className="flex items-center space-x-3 mb-2">
           <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-            <MessageSquare className="w-6 h-6 text-blue-600" />
+            <MessageCircle className="w-6 h-6 text-blue-600" />
           </div>
           <div>
             <h2 className="text-lg text-gray-600">Welcome to</h2>

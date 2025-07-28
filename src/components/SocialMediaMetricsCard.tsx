@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Camera, Zap, MessageCircle, ThumbsUp, RefreshCw, Megaphone, MoreHorizontal } from 'lucide-react';
+import { Users, Camera, Zap, MessageCircle, Heart, RotateCcw, Megaphone, MoreHorizontal } from 'lucide-react';
 
 const SocialMediaMetricsCard: React.FC = () => {
   // Sample data for top metrics
@@ -46,7 +46,7 @@ const SocialMediaMetricsCard: React.FC = () => {
     },
     {
       title: 'Likes',
-      icon: ThumbsUp,
+      icon: Heart,
       iconColor: 'text-cyan-500',
       borderColor: 'border-cyan-500',
       currentValue: 18420,
@@ -55,7 +55,7 @@ const SocialMediaMetricsCard: React.FC = () => {
     },
     {
       title: 'Conversions',
-      icon: RefreshCw,
+      icon: RotateCcw,
       iconColor: 'text-green-500',
       borderColor: 'border-green-500',
       currentValue: 1256,

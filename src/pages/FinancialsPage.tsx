@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MoreVertical, TrendingUp, TrendingDown, DollarSign, BarChart3 } from 'lucide-react';
+import { MoreHorizontal, TrendingUp, TrendingDown, DollarSign, BarChart3 } from 'lucide-react';
 import TotalSalesChart from '../components/OrdersAnalyticsChart';
 import RevenueGrowthCard from '../components/RevenueGrowthCard';
 import TopProductsChart from '../components/TopProductsChart';
@@ -124,7 +124,7 @@ const FinancialsPage: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-medium text-gray-900">Revenue Growth</h3>
-            <MoreVertical className="w-5 h-5 text-gray-400 cursor-pointer" />
+            <MoreHorizontal className="w-5 h-5 text-gray-400 cursor-pointer" />
           </div>
           <RevenueGrowthCard />
         </div>
