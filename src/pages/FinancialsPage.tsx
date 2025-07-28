@@ -300,7 +300,11 @@ const FinancialsPage: React.FC = () => {
           </div>
           <div className="text-gray-600 text-sm mb-2">Recurring Revenue</div>
           <div className="flex items-center space-x-2 text-sm">
-            <TrendingUp className="w-4 h-4 text-green-500" />
+            {recurringRevenueData.growth >= 0 ? (
+              <TrendingUp className="w-4 h-4 text-green-500" />
+            ) : (
+              <TrendingDown className="w-4 h-4 text-red-500" />
+            )}
             <span className="text-green-500 font-normal">
               {recurringRevenueData.isLoading ? (
                 <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
