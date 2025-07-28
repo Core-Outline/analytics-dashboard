@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, ChevronLeft, ChevronDown, ChevronUp, BarChart, Zap, Users, Share, Star, Settings, HelpCircle, MessageCircle, LogOut, Plug } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ChevronDown, ChevronUp, BarChart3, Zap, Users, Share2, Heart, Settings, HelpCircle, MessageCircle, LogOut, Plug2 } from 'lucide-react';
 
 interface SidebarProps {
   activeSection: string;
@@ -12,13 +12,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
   const [isDashboardExpanded, setIsDashboardExpanded] = React.useState(true);
 
   const navigationItems = [
-    { id: 'financials', label: 'Financials', icon: BarChart },
+    { id: 'financials', label: 'Financials', icon: BarChart3 },
     { id: 'saas', label: 'Saas', icon: Zap },
     { id: 'customer', label: 'Customer', icon: Users },
-    { id: 'social-media', label: 'Social Media', icon: Share },
-    { id: 'customer-feedback', label: 'Customer Feedback', icon: Star, badge: 2 },
+    { id: 'social-media', label: 'Social Media', icon: Share2 },
+    { id: 'customer-feedback', label: 'Customer Feedback', icon: Heart, badge: 2 },
     { id: 'custom-dashboard', label: 'Custom Dashboard', icon: Settings },
-    { id: 'integrations', label: 'Integrations', icon: Plug }
+    { id: 'integrations', label: 'Integrations', icon: Plug2 }
   ];
 
   return (
@@ -41,7 +41,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
               className="flex items-center justify-between px-3 py-2 cursor-pointer text-gray-400 hover:text-white transition-colors"
             >
               <div className="flex items-center space-x-2">
-                <BarChart className="w-4 h-4" />
+                <BarChart3 className="w-4 h-4" />
                 <span className="text-xs font-medium uppercase tracking-wider">Dashboard</span>
               </div>
               {isDashboardExpanded ? (
