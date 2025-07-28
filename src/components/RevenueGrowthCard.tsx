@@ -1,19 +1,34 @@
 import React from 'react';
+import { formatAmount, formatGrowth } from '../helpers/financials';
 
-const RevenueGrowthCard: React.FC = () => {
-  const revenueData = [
-    { date: 'Jan 2024', revenue: '$45,230', growth: '+12.5%' },
-    { date: 'Feb 2024', revenue: '$52,180', growth: '+15.4%' },
-    { date: 'Mar 2024', revenue: '$48,920', growth: '+8.2%' }
-  ];
+interface RevenueGrowthCardProps {
+  value: number | string;
+  growth: number;
+  percentage: string;
+  isLoading: boolean;
+  dateList: string[];
+  amountList: number[];
+  growthList: number[];
+}
 
-  const latestGrowth = 8.2; // Latest growth percentage for the progress bar
+const RevenueGrowthCard: React.FC<RevenueGrowthCardProps> = ({ value, growth, percentage, isLoading, dateList, amountList, growthList }) => {
+  // Prepare table data (show last 3 periods)
+  console.log(dateList, amountList, growthList)
+  const tableRows = dateList.slice(-3).map((date, idx) => {
+    const i = dateList.length - 3 + idx;
+    return {
+      date: new Date(date).toLocaleString('default', { month: 'short', year: 'numeric' }),
+      revenue: formatAmount(amountList[i] ?? 0),
+      growth: formatGrowth((growthList[i] ?? 0) / 100)
+    };
+  });
 
-  // Calculate the stroke-dasharray for the progress circle
+  // Use the latest growth value for the progress bar
+  const latestGrowth = growthList.length > 0 ? growthList[growthList.length - 1] : 0;
   const radius = 45;
   const circumference = 2 * Math.PI * radius;
   const strokeDasharray = circumference;
-  const strokeDashoffset = circumference - (latestGrowth / 100) * circumference;
+  const strokeDashoffset = circumference - (Math.abs(latestGrowth) / 100) * circumference;
 
   return (
     <div className="flex flex-col h-full">
@@ -28,11 +43,11 @@ const RevenueGrowthCard: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {revenueData.map((row, index) => (
+            {tableRows.map((row, index) => (
               <tr key={index}>
                 <td className="text-sm text-gray-900 py-2">{row.date}</td>
                 <td className="text-sm text-gray-900 py-2 font-medium">{row.revenue}</td>
-                <td className="text-sm text-green-600 py-2 font-medium">{row.growth}</td>
+                <td className={`text-sm py-2 font-medium ${row.growth.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>{row.growth}</td>
               </tr>
             ))}
           </tbody>
@@ -57,7 +72,7 @@ const RevenueGrowthCard: React.FC = () => {
               cx="50"
               cy="50"
               r={radius}
-              stroke="#10b981"
+              stroke={latestGrowth >= 0 ? '#10b981' : '#ef4444'}
               strokeWidth="8"
               fill="none"
               strokeDasharray={strokeDasharray}
@@ -68,7 +83,7 @@ const RevenueGrowthCard: React.FC = () => {
           </svg>
           {/* Center text */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-lg font-bold text-gray-900">{latestGrowth}%</span>
+            <span className="text-lg font-bold text-gray-900">{formatGrowth(latestGrowth / 100)}</span>
           </div>
         </div>
       </div>

@@ -1,7 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Users, MapPin, CreditCard, MoreHorizontal } from 'lucide-react';
 
+function abbreviateNumber(value: number): string {
+  if (value >= 1e9) return (value / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+  if (value >= 1e6) return (value / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (value >= 1e3) return (value / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+  return value.toString();
+}
+
 const CustomerMetricsCard: React.FC = () => {
+  const [userCount, setUserCount] = useState<number | null>(null);
+  const [userLoading, setUserLoading] = useState(true);
+  const [userError, setUserError] = useState(false);
+
+  useEffect(() => {
+    setUserLoading(true);
+    fetch('http://localhost:5000/unique-users?company=101')
+      .then(res => res.json())
+      .then(data => {
+        setUserCount(data.users);
+        setUserLoading(false);
+      })
+      .catch(() => {
+        setUserError(true);
+        setUserLoading(false);
+      });
+  }, []);
+
   const metrics = [
     {
       title: 'Users',
@@ -9,7 +34,9 @@ const CustomerMetricsCard: React.FC = () => {
       iconBg: 'bg-blue-100',
       iconColor: 'text-blue-600',
       label: 'users',
-      target: 5000
+      target: userCount,
+      loading: userLoading,
+      error: userError
     },
     {
       title: 'Location data',
@@ -34,7 +61,6 @@ const CustomerMetricsCard: React.FC = () => {
       <div className="grid grid-cols-3 divide-x divide-gray-100">
         {metrics.map((metric, index) => {
           const Icon = metric.icon;
-          
           return (
             <div key={index} className="p-4">
               {/* Header */}
@@ -51,9 +77,21 @@ const CustomerMetricsCard: React.FC = () => {
               {/* Content */}
               <div className="space-y-3">
                 <div className="text-sm text-gray-600">{metric.label}</div>
-                <div className="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
-                  Target: {metric.target.toLocaleString()}
-                </div>
+                {index === 0 ? (
+                  metric.loading ? (
+                    <div className="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium animate-pulse">Loading...</div>
+                  ) : metric.error ? (
+                    <div className="inline-block bg-red-50 text-red-700 px-3 py-1 rounded-full text-xs font-medium">Error</div>
+                  ) : (
+                    <div className="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
+                      {metric.target !== null && metric.target !== undefined ? `Target: ${abbreviateNumber(metric.target)}` : '—'}
+                    </div>
+                  )
+                ) : (
+                  <div className="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
+                    Target: {metric.target.toLocaleString()}
+                  </div>
+                )}
               </div>
             </div>
           );

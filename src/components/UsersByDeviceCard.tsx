@@ -1,98 +1,119 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 
-const UsersByDeviceCard: React.FC = () => {
-  const deviceData = [
-    { name: 'Desktop', value: 1245, color: '#3b82f6' },
-    { name: 'Mobile', value: 987, color: '#10b981' },
-    { name: 'Tablet', value: 456, color: '#f59e0b' },
-    { name: 'Other', value: 159, color: '#8b5cf6' }
-  ];
+const DEVICE_SESSIONS_API_URL = 'http://localhost:5000/device-sessions?company=101';
 
-  const chartOption = {
+const UsersByDeviceCard: React.FC = () => {
+  const [deviceData, setDeviceData] = useState<{ browser: string[]; count: number[]; percentage: number[] } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [firstLoad, setFirstLoad] = useState(true);
+
+  const fetchDeviceData = () => {
+    fetch(DEVICE_SESSIONS_API_URL)
+      .then(res => res.json())
+      .then(data => {
+        setDeviceData(data);
+      })
+      .catch(() => setDeviceData(null))
+      .finally(() => {
+        setLoading(false);
+        setFirstLoad(false);
+      });
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    fetchDeviceData();
+    const interval = setInterval(() => {
+      fetchDeviceData();
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const chartOption = deviceData ? {
+    tooltip: {
+      trigger: 'item',
+      formatter: '{b}: {c} ({d}%)',
+      backgroundColor: 'rgba(255,255,255,0.95)',
+      borderColor: '#e5e7eb',
+      borderWidth: 1,
+      textStyle: { color: '#374151', fontSize: 12 },
+    },
+    legend: {
+      orient: 'vertical',
+      left: 0,
+      top: 'middle',
+      textStyle: { color: '#374151', fontSize: 12 },
+      data: deviceData.browser
+    },
     series: [
       {
+        name: 'Sessions',
         type: 'pie',
-        radius: ['30%', '70%'],
-        center: ['50%', '45%'],
-        roseType: 'area',
-        data: deviceData.map(item => ({
-          value: item.value,
-          name: item.name,
-          itemStyle: { 
-            color: item.color,
-            borderRadius: 8,
-            borderColor: '#fff',
-            borderWidth: 2
-          }
-        })),
+        radius: ['30%', '80%'],
+        center: ['60%', '50%'],
+        roseType: 'area', // Nightingale chart
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 8,
+          borderColor: '#fff',
+          borderWidth: 2
+        },
         label: {
           show: false
         },
-        labelLine: {
-          show: false
-        },
         emphasis: {
-          scale: true,
-          scaleSize: 5
-        }
+          label: {
+            show: true,
+            fontWeight: 'bold',
+            formatter: '{b}: {d}%'
+          }
+        },
+        data: deviceData.browser.map((b, i) => ({
+          value: deviceData.count[i],
+          name: b
+        })).sort((a, b) => b.value - a.value) // Order items top-to-bottom
       }
-    ],
-    tooltip: {
-      trigger: 'item',
-      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      borderColor: '#e5e7eb',
-      borderWidth: 1,
-      textStyle: {
-        color: '#374151',
-        fontSize: 12
-      },
-      formatter: '{b}: {c} sessions ({d}%)'
-    },
-    legend: {
-      show: false
-    }
-  };
+    ]
+  } : {};
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
-      <h3 className="text-lg font-medium text-gray-900 mb-6">Users by Device</h3>
-      
-      {/* Nightingale Pie Chart */}
-      <div className="mb-6">
-        <ReactECharts 
-          option={chartOption} 
-          style={{ height: '200px', width: '100%' }}
-          opts={{ renderer: 'canvas' }}
-        />
-      </div>
-
-      {/* Device Sessions Table */}
-      <div className="overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-left text-sm font-medium text-gray-600 pb-3">Device</th>
-              <th className="text-right text-sm font-medium text-gray-600 pb-3">Sessions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {deviceData.map((device, index) => (
-              <tr key={index} className="border-b border-gray-100 last:border-b-0">
-                <td className="text-sm text-gray-900 py-3 flex items-center">
-                  <div 
-                    className="w-3 h-3 rounded-full mr-3"
-                    style={{ backgroundColor: device.color }}
-                  ></div>
-                  {device.name}
-                </td>
-                <td className="text-sm text-gray-900 py-3 text-right font-medium">
-                  {device.value.toLocaleString()}
-                </td>
+      <h3 className="text-lg font-medium text-gray-900 mb-6">Users by Device/Browser</h3>
+      <div className="flex flex-col items-center">
+        <div className="w-full mb-6">
+          {firstLoad && loading ? (
+            <div className="h-48 w-full bg-gray-100 animate-pulse rounded" />
+          ) : (
+            <ReactECharts
+              option={chartOption}
+              style={{ height: '240px', width: '100%' }}
+              opts={{ renderer: 'canvas' }}
+            />
+          )}
+        </div>
+        <div className="w-full">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-200">
+                <th className="text-left text-sm font-medium text-gray-500 pb-2">Browser</th>
+                <th className="text-right text-sm font-medium text-gray-500 pb-2">Sessions</th>
+                <th className="text-right text-sm font-medium text-gray-500 pb-2">% Share</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {firstLoad && loading ? (
+                <tr><td colSpan={3}><div className="h-6 w-full bg-gray-100 animate-pulse rounded" /></td></tr>
+              ) : deviceData && deviceData.browser.map((b, i) => (
+                <tr key={b} className="border-b border-gray-100 last:border-b-0">
+                  <td className="text-sm text-gray-900 py-2 font-mono">{b}</td>
+                  <td className="text-sm text-gray-900 py-2 text-right font-medium">{deviceData.count[i].toLocaleString()}</td>
+                  <td className="text-sm text-gray-900 py-2 text-right font-medium">{deviceData.percentage[i].toFixed(1)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

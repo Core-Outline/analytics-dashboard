@@ -1,35 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 
+const ACTIVE_USERS_API_URL = 'http://localhost:5000/active-users?company=101';
+const PAGE_VISITS_API_URL = 'http://localhost:5000/page-visits?company=101';
+
 const ActiveUsersCard: React.FC = () => {
-  const [activeUsers, setActiveUsers] = useState(2847);
-  const [chartData, setChartData] = useState([
-    120, 135, 118, 142, 165, 158, 172, 189, 175, 192, 210, 205,
-    198, 215, 232, 225, 240, 255, 248, 265, 280, 275, 290, 285
-  ]);
-
-  // Simulate real-time updates every minute
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Update active users count (±50 users randomly)
-      setActiveUsers(prev => {
-        const change = Math.floor(Math.random() * 100) - 50;
-        return Math.max(2500, Math.min(3200, prev + change));
-      });
-
-      // Update chart data - shift array and add new value
-      setChartData(prev => {
-        const newData = [...prev.slice(1)];
-        const lastValue = prev[prev.length - 1];
-        const change = Math.floor(Math.random() * 60) - 30;
-        const newValue = Math.max(80, Math.min(320, lastValue + change));
-        newData.push(newValue);
-        return newData;
-      });
-    }, 3000); // Update every 3 seconds for demo purposes
-
-    return () => clearInterval(interval);
-  }, []);
+  const [activeUsers, setActiveUsers] = useState(0);
+  const [chartData, setChartData] = useState<number[]>([]);
+  const [mostVisitedPages, setMostVisitedPages] = useState<{ page: string; users: number }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [firstLoad, setFirstLoad] = useState(true);
+  const [pageVisits, setPageVisits] = useState<{ page_name: string; count: number; duration: string }[]>([]);
 
   // Generate time labels for the last 24 hours
   const timeLabels = Array.from({ length: 24 }, (_, i) => {
@@ -37,6 +18,7 @@ const ActiveUsersCard: React.FC = () => {
     return `${hour.toString().padStart(2, '0')}:00`;
   });
 
+  // Chart option (must be inside component)
   const chartOption = {
     grid: {
       left: '3%',
@@ -68,11 +50,11 @@ const ActiveUsersCard: React.FC = () => {
             colorStops: [
               {
                 offset: 0,
-               color: '#ffffff'
+                color: '#ffffff'
               },
               {
                 offset: 1,
-               color: 'rgba(255, 255, 255, 0.6)'
+                color: 'rgba(255, 255, 255, 0.6)'
               }
             ]
           },
@@ -82,19 +64,75 @@ const ActiveUsersCard: React.FC = () => {
       }
     ],
     tooltip: {
-      show: false
+      show: true,
+      trigger: 'axis',
+      backgroundColor: 'rgba(255,255,255,0.95)',
+      borderColor: '#e5e7eb',
+      borderWidth: 1,
+      textStyle: { color: '#374151', fontSize: 12 },
+      formatter: function (params: any) {
+        const p = params[0];
+        return `<div style=\"font-weight:600; margin-bottom:4px;\">${p.axisValue}</div><div>${p.marker} Active Users: <b>${p.data}</b></div>`;
+      }
     },
     animation: true,
     animationDuration: 1000,
     animationEasing: 'cubicOut'
   };
 
-  // Most visited pages data
-  const mostVisitedPages = [
-    { page: '/dashboard', users: 1245 },
-    { page: '/analytics', users: 987 },
-    { page: '/settings', users: 756 }
-  ];
+  // Fetch function
+  const fetchActiveUsers = () => {
+    fetch(ACTIVE_USERS_API_URL)
+      .then(res => res.json())
+      .then((data) => {
+        console.log("Active users: ", data);
+        // Unique active users
+        const uniqueUsers = new Set(data.map((row: any) => row.user_id));
+        setActiveUsers(uniqueUsers.size);
+
+        // Chart: count of active users per hour (last 24 hours)
+        const now = new Date();
+        const hours = Array.from({ length: 24 }, (_, i) => (now.getHours() - 23 + i + 24) % 24);
+        const hourCounts: Record<number, Set<number>> = {};
+        hours.forEach(h => { hourCounts[h] = new Set(); });
+        data.forEach((row: any) => {
+          const d = new Date(row.start_date.replace(/\s+/, 'T'));
+          const h = d.getHours();
+          if (hourCounts[h]) hourCounts[h].add(row.user_id);
+        });
+        setChartData(hours.map(h => hourCounts[h].size));
+      })
+      .catch(() => {
+        setActiveUsers(0);
+        setChartData(Array(24).fill(0));
+        setMostVisitedPages([]);
+      })
+      .finally(() => {
+        setLoading(false);
+        setFirstLoad(false);
+      });
+  };
+
+  // Fetch page visits for most visited pages table
+  const fetchPageVisits = () => {
+    fetch(PAGE_VISITS_API_URL)
+      .then(res => res.json())
+      .then((data) => {
+        setPageVisits(data.sort((a: any, b: any) => b.count - a.count).slice(0, 5));
+      })
+      .catch(() => setPageVisits([]));
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    fetchActiveUsers();
+    fetchPageVisits();
+    const interval = setInterval(() => {
+      fetchActiveUsers();
+      fetchPageVisits();
+    }, 60000); // 1 minute
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="bg-blue-500/90 backdrop-blur-sm border border-blue-400/50 p-6 rounded-lg shadow-sm">
@@ -102,17 +140,21 @@ const ActiveUsersCard: React.FC = () => {
       <div className="mb-6">
         <div className="text-sm text-white/80 mb-2">Currently Active Users</div>
         <div className="text-4xl font-bold text-white transition-all duration-1000">
-          {activeUsers.toLocaleString()}
+          {firstLoad && loading ? <span className="animate-pulse">...</span> : activeUsers.toLocaleString()}
         </div>
       </div>
 
       {/* Bar Chart */}
       <div className="mb-8">
-        <ReactECharts 
-          option={chartOption} 
-          style={{ height: '200px', width: '100%' }}
-          opts={{ renderer: 'canvas' }}
-        />
+        {firstLoad && loading ? (
+          <div className="h-[200px] w-full bg-white/10 animate-pulse rounded" />
+        ) : (
+          <ReactECharts
+            option={chartOption}
+            style={{ height: '200px', width: '100%' }}
+            opts={{ renderer: 'canvas' }}
+          />
+        )}
       </div>
 
       {/* Most Visited Pages Table */}
@@ -123,15 +165,17 @@ const ActiveUsersCard: React.FC = () => {
             <thead>
               <tr className="border-b border-white/20">
                 <th className="text-left text-sm font-medium text-white/80 pb-3">Page</th>
-                <th className="text-right text-sm font-medium text-white/80 pb-3">Users</th>
+                <th className="text-right text-sm font-medium text-white/80 pb-3">Visits</th>
               </tr>
             </thead>
             <tbody>
-              {mostVisitedPages.map((page, index) => (
+              {firstLoad && loading ? (
+                <tr><td colSpan={2}><div className="h-6 w-full bg-white/10 animate-pulse rounded" /></td></tr>
+              ) : pageVisits.map((page, index) => (
                 <tr key={index} className="border-b border-white/10 last:border-b-0">
-                  <td className="text-sm text-white py-3 font-mono">{page.page}</td>
+                  <td className="text-sm text-white py-3 font-mono">{page.page_name}</td>
                   <td className="text-sm text-white py-3 text-right font-medium">
-                    {page.users.toLocaleString()}
+                    {page.count.toLocaleString()}
                   </td>
                 </tr>
               ))}

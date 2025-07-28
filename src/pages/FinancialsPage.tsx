@@ -5,9 +5,17 @@ import {
   loadUserData, 
   fetchRecurringRevenueData,
   fetchRevenueGrowthData,
+  fetchRevenueGrowthRaw,
+  fetchGrowthPeriodData,
+  fetchAnnualRunRateData,
+  fetchProductRevenueSharesData,
+  fetchTopProductsSold,
   RecurringRevenueData,
   RevenueGrowthData,
-  ApiConfig
+  GrowthPeriodData,
+  AnnualRunRateData,
+  ProductRevenueSharesData,
+  TopProductSold
 } from '../helpers/financials';
 import TotalSalesChart from '../components/OrdersAnalyticsChart';
 import RevenueGrowthCard from '../components/RevenueGrowthCard';
@@ -25,18 +33,32 @@ const FinancialsPage: React.FC = () => {
     isLoading: true
   });
   const [revenueGrowthData, setRevenueGrowthData] = useState<RevenueGrowthData>({
+    value: '_',
+    growth: 0,
+    percentage: '_',
+    isLoading: true
+  });
+  const [revenueGrowthRaw, setRevenueGrowthRaw] = useState<{date: string[]; amount: number[]; growth: number[]}>({ date: [], amount: [], growth: [] });
+  const [growthPeriodData, setGrowthPeriodData] = useState<GrowthPeriodData>({
+    value: "_",
+    isLoading: true
+  });
+  const [annualRunRateData, setAnnualRunRateData] = useState<AnnualRunRateData>({
     value: "_",
     growth: 0,
-    percentage: "_",
     isLoading: true
   });
   const [timeUnits, setTimeUnits] = useState('M');
   const [company, setCompany] = useState('301');
-  const [apiConfig, setApiConfig] = useState<ApiConfig>({
+  const [apiConfig, setApiConfig] = useState({
     brevoApiKey: '',
     apiBaseUrl: '',
     dataBaseUrl: ''
   });
+  const [productRevenueShares, setProductRevenueShares] = useState<ProductRevenueSharesData | null>(null);
+  const [productRevenueSharesLoading, setProductRevenueSharesLoading] = useState(true);
+  const [grossRevenueData, setGrossRevenueData] = useState<TopProductSold[]>([]);
+  const [grossRevenueLoading, setGrossRevenueLoading] = useState(true);
 
   // Load configuration and localStorage data
   useEffect(() => {
@@ -75,14 +97,74 @@ const FinancialsPage: React.FC = () => {
   // Fetch revenue growth data
   const fetchRevenueGrowth = async (): Promise<void> => {
     if (!apiConfig.dataBaseUrl || !company) return;
-
     setRevenueGrowthData(prev => ({ ...prev, isLoading: true }));
-
     try {
-      const data = await fetchRevenueGrowthData(apiConfig, timeUnits, company);
-      setRevenueGrowthData(data);
+      const [summary, raw] = await Promise.all([
+        fetchRevenueGrowthData(apiConfig, timeUnits, company),
+        fetchRevenueGrowthRaw(apiConfig, timeUnits, company)
+      ]);
+      setRevenueGrowthData(summary);
+      setRevenueGrowthRaw(raw);
     } catch (error) {
+      setRevenueGrowthData({ value: '_', growth: 0, percentage: '_', isLoading: false });
+      setRevenueGrowthRaw({ date: [], amount: [], growth: [] });
       console.error('Error in fetchRevenueGrowth:', error);
+    }
+  };
+
+  // Fetch growth period data
+  const fetchGrowthPeriod = async (): Promise<void> => {
+    if (!company) return;
+    setGrowthPeriodData(prev => ({ ...prev, isLoading: true }));
+    try {
+      const data = await fetchGrowthPeriodData(timeUnits, company);
+      setGrowthPeriodData(data);
+    } catch (error) {
+      setGrowthPeriodData({ value: 2, isLoading: false });
+      console.error('Error in fetchGrowthPeriod:', error);
+    }
+  };
+
+  // Fetch annual run rate data
+  const fetchAnnualRunRate = async (): Promise<void> => {
+    if (!company) return;
+    setAnnualRunRateData(prev => ({ ...prev, isLoading: true }));
+    try {
+      const data = await fetchAnnualRunRateData(company);
+      setAnnualRunRateData(data);
+    } catch (error) {
+      setAnnualRunRateData({ value: 29728554, growth: -0.7554751613973278, isLoading: false });
+      console.error('Error in fetchAnnualRunRate:', error);
+    }
+  };
+
+  // Fetch product revenue shares data
+  const fetchProductRevenueShares = async (): Promise<void> => {
+    if (!apiConfig.dataBaseUrl || !company) return;
+    setProductRevenueSharesLoading(true);
+    try {
+      const data = await fetchProductRevenueSharesData(apiConfig, company);
+      setProductRevenueShares(data);
+    } catch (error) {
+      setProductRevenueShares(null);
+      console.error('Error in fetchProductRevenueShares:', error);
+    } finally {
+      setProductRevenueSharesLoading(false);
+    }
+  };
+
+  // Fetch gross revenue data
+  const fetchGrossRevenueData = async (): Promise<void> => {
+    if (!apiConfig.dataBaseUrl || !company) return;
+    setGrossRevenueLoading(true);
+    try {
+      const data = await fetchTopProductsSold(apiConfig, timeUnits, company);
+      setGrossRevenueData(data);
+    } catch (error) {
+      setGrossRevenueData([]);
+      console.error('Error in fetchGrossRevenueData:', error);
+    } finally {
+      setGrossRevenueLoading(false);
     }
   };
 
@@ -91,6 +173,10 @@ const FinancialsPage: React.FC = () => {
     if (apiConfig.dataBaseUrl && company) {
       fetchRecurringRevenue();
       fetchRevenueGrowth();
+      fetchGrowthPeriod();
+      fetchAnnualRunRate();
+      fetchProductRevenueShares();
+      fetchGrossRevenueData();
     }
   }, [apiConfig.dataBaseUrl, timeUnits, company]);
 
@@ -174,19 +260,26 @@ const FinancialsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Total Sales */}
+        {/* Growth Period */}
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
               <BarChart3 className="w-5 h-5 text-purple-600" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-gray-900 mb-1">12.5%</div>
+          <div className="text-2xl font-bold text-gray-900 mb-1">
+            {growthPeriodData.isLoading ? (
+              <div className="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
+            ) : (
+              growthPeriodData.value
+            )}
+          </div>
           <div className="text-gray-600 text-sm mb-2">Growth Period</div>
           <div className="flex items-center space-x-2 text-sm">
             <TrendingUp className="w-4 h-4 text-green-500" />
-            <span className="text-green-500 font-normal">1.8</span>
-            <span className="text-gray-500">+0.32% this week</span>
+            {/* Placeholder for growth/percentage if needed */}
+            <span className="text-green-500 font-normal"></span>
+            <span className="text-gray-500"></span>
           </div>
         </div>
 
@@ -197,12 +290,28 @@ const FinancialsPage: React.FC = () => {
               <DollarSign className="w-5 h-5 text-orange-600" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-gray-900 mb-1">124,854</div>
+          <div className="text-2xl font-bold text-gray-900 mb-1">
+            {annualRunRateData.isLoading ? (
+              <div className="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
+            ) : (
+              annualRunRateData.value.toLocaleString()
+            )}
+          </div>
           <div className="text-gray-600 text-sm mb-2">Annual Run Rate</div>
           <div className="flex items-center space-x-2 text-sm">
-            <TrendingUp className="w-4 h-4 text-green-500" />
-            <span className="text-green-500 font-normal">7.2</span>
-            <span className="text-gray-500">+1.51% this week</span>
+            {annualRunRateData.growth >= 0 ? (
+              <TrendingUp className="w-4 h-4 text-green-500" />
+            ) : (
+              <TrendingDown className="w-4 h-4 text-red-500" />
+            )}
+            <span className={`font-normal ${annualRunRateData.growth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              {annualRunRateData.isLoading ? (
+                <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
+              ) : (
+                (annualRunRateData.growth * 100).toFixed(2) + '%'
+              )}
+            </span>
+            <span className="text-gray-500"></span>
           </div>
         </div>
       </div>
@@ -245,6 +354,8 @@ const FinancialsPage: React.FC = () => {
               </select>
             </div>
           </div>
+          {/* Show skeleton while loading, else show chart */}
+          {/* You may want to add a loading state for TotalSalesChart if not already present */}
           <TotalSalesChart timeUnit={salesTimeUnit} />
         </div>
 
@@ -254,13 +365,29 @@ const FinancialsPage: React.FC = () => {
             <h3 className="text-lg font-medium text-gray-900">Revenue Growth</h3>
             <MoreHorizontal className="w-5 h-5 text-gray-400 cursor-pointer" />
           </div>
-          <RevenueGrowthCard />
+          {revenueGrowthData.isLoading ? (
+            <div className="animate-pulse flex flex-col gap-4">
+              <div className="h-8 w-full bg-gray-200 rounded" />
+              <div className="h-8 w-full bg-gray-200 rounded" />
+              <div className="h-24 w-24 bg-gray-200 rounded-full mx-auto" />
+            </div>
+          ) : (
+            <RevenueGrowthCard
+              value={revenueGrowthData.value}
+              growth={revenueGrowthData.growth}
+              percentage={revenueGrowthData.percentage}
+              isLoading={revenueGrowthData.isLoading}
+              dateList={revenueGrowthRaw.date}
+              amountList={revenueGrowthRaw.amount}
+              growthList={revenueGrowthRaw.growth}
+            />
+          )}
         </div>
       </div>
 
       {/* Product Revenue Shares */}
       <div className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <ProductRevenueSharesCard />
+        <ProductRevenueSharesCard data={productRevenueShares} loading={productRevenueSharesLoading} />
       </div>
 
       {/* Gross Revenue */}
@@ -268,7 +395,7 @@ const FinancialsPage: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-medium text-gray-900">Gross Revenue</h3>
         </div>
-        <GrossRevenueCard />
+        <GrossRevenueCard data={grossRevenueData} loading={grossRevenueLoading} />
       </div>
 
       {/* Top Products Sold */}
@@ -276,7 +403,7 @@ const FinancialsPage: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-medium text-gray-900">Top Products Sold</h3>
         </div>
-        <TopProductsChart />
+        <TopProductsChart data={grossRevenueData} loading={grossRevenueLoading} />
       </div>
 
       {/* Ad Campaigns Performance */}

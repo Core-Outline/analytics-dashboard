@@ -1,17 +1,25 @@
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
+import { ProductRevenueSharesData } from '../helpers/financials';
 
-const ProductRevenueSharesCard: React.FC = () => {
-  const productData = [
-    { name: 'Wireless Headphones', value: 28, color: '#3b82f6' },
-    { name: 'Smart Watch', value: 22, color: '#10b981' },
-    { name: 'Laptop Stand', value: 18, color: '#f59e0b' },
-    { name: 'Bluetooth Speaker', value: 12, color: '#ef4444' },
-    { name: 'Phone Case', value: 8, color: '#8b5cf6' },
-    { name: 'Tablet Holder', value: 6, color: '#ec4899' },
-    { name: 'USB Cable', value: 4, color: '#06b6d4' },
-    { name: 'Screen Protector', value: 2, color: '#84cc16' }
-  ];
+interface ProductRevenueSharesCardProps {
+  data: ProductRevenueSharesData | null;
+  loading: boolean;
+}
+
+const COLORS = [
+  '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f472b6', '#facc15'
+];
+
+const ProductRevenueSharesCard: React.FC<ProductRevenueSharesCardProps> = ({ data, loading }) => {
+  let productData: { name: string; value: number; color: string }[] = [];
+  if (data && data.product_id && data.pct_amount) {
+    productData = data.product_id.map((id, i) => ({
+      name: `${id}`,
+      value: Number(data.pct_amount[i]),
+      color: COLORS[i % COLORS.length]
+    }));
+  }
 
   const chartOption = {
     grid: {
@@ -81,11 +89,17 @@ const ProductRevenueSharesCard: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-medium text-gray-900">Product Revenue Shares</h3>
       </div>
-      <ReactECharts 
-        option={chartOption} 
-        style={{ height: '200px', width: '100%' }}
-        opts={{ renderer: 'canvas' }}
-      />
+      {loading ? (
+        <div className="h-[200px] w-full flex items-center justify-center">
+          <div className="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
+        </div>
+      ) : (
+        <ReactECharts 
+          option={chartOption} 
+          style={{ height: '200px', width: '100%' }}
+          opts={{ renderer: 'canvas' }}
+        />
+      )}
     </div>
   );
 };

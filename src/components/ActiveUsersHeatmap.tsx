@@ -1,177 +1,139 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 
+const USERS_API_URL = 'http://localhost:5000/active-users?company=101';
+
+const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const hours = Array.from({ length: 24 }, (_, h) => `${h.toString().padStart(2, '0')}:00`);
+
 const ActiveUsersHeatmap: React.FC = () => {
-  // Days of the week
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  
-  // Hours of the day (0-23)
-  const hours = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
-  
-  // Generate sample data for active users (day, hour, user_count)
-  const generateHeatmapData = () => {
-    const data = [];
-    for (let day = 0; day < 7; day++) {
-      for (let hour = 0; hour < 24; hour++) {
-        // Simulate realistic user activity patterns
-        let userCount;
-        
-        // Weekend vs weekday patterns
-        const isWeekend = day === 5 || day === 6; // Saturday, Sunday
-        
-        // Peak hours: 9-11 AM and 2-4 PM on weekdays, 10 AM-2 PM on weekends
-        if (isWeekend) {
-          if (hour >= 10 && hour <= 14) {
-            userCount = Math.floor(Math.random() * 200) + 150; // 150-350 users
-          } else if (hour >= 8 && hour <= 18) {
-            userCount = Math.floor(Math.random() * 150) + 80; // 80-230 users
-          } else if (hour >= 20 && hour <= 23) {
-            userCount = Math.floor(Math.random() * 120) + 60; // 60-180 users
-          } else {
-            userCount = Math.floor(Math.random() * 50) + 10; // 10-60 users
+  const [heatmapData, setHeatmapData] = useState<number[][]>(Array(7).fill(null).map(() => Array(24).fill(0)));
+  const [loading, setLoading] = useState(true);
+  const [firstLoad, setFirstLoad] = useState(true);
+
+  useEffect(() => {
+    const fetchHeatmap = () => {
+      fetch(USERS_API_URL)
+        .then(res => res.json())
+        .then(data => {
+          // Bin unique users by [weekday][hour]
+          const map: Record<number, Record<number, Set<number>>> = {};
+          for (let d = 0; d < 7; d++) {
+            map[d] = {};
+            for (let h = 0; h < 24; h++) map[d][h] = new Set();
           }
-        } else {
-          if ((hour >= 9 && hour <= 11) || (hour >= 14 && hour <= 16)) {
-            userCount = Math.floor(Math.random() * 250) + 200; // 200-450 users
-          } else if (hour >= 8 && hour <= 18) {
-            userCount = Math.floor(Math.random() * 180) + 100; // 100-280 users
-          } else if (hour >= 19 && hour <= 22) {
-            userCount = Math.floor(Math.random() * 150) + 80; // 80-230 users
-          } else {
-            userCount = Math.floor(Math.random() * 60) + 20; // 20-80 users
+          data.forEach((row: any) => {
+            const dt = new Date(row.start_date.replace(/\s+/, 'T'));
+            const weekday = dt.getDay();
+            const hour = dt.getHours();
+            map[weekday][hour].add(row.user_id);
+          });
+          const arr = Array(7).fill(null).map((_, d) => Array(24).fill(0));
+          for (let d = 0; d < 7; d++) {
+            for (let h = 0; h < 24; h++) {
+              arr[d][h] = map[d][h].size;
+            }
           }
-        }
-        
-        data.push([day, hour, userCount]);
-      }
+          setHeatmapData(arr);
+        })
+        .catch(() => setHeatmapData(Array(7).fill(null).map(() => Array(24).fill(0))))
+        .finally(() => {
+          setLoading(false);
+          setFirstLoad(false);
+        });
+    };
+    setLoading(true);
+    fetchHeatmap();
+    const interval = setInterval(fetchHeatmap, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // ECharts expects [day, hour, value] for each cell (x=day, y=hour)
+  const echartsData = [];
+  for (let h = 0; h < 24; h++) {
+    for (let d = 0; d < 7; d++) {
+      echartsData.push([d, h, heatmapData[d][h]]);
     }
-    return data;
-  };
+  }
 
-  const heatmapData = generateHeatmapData();
-  
-  // Find min and max values for color scaling
-  const values = heatmapData.map(item => item[2]);
-  const minValue = Math.min(...values);
-  const maxValue = Math.max(...values);
-
-  const option = {
+  const chartOption = {
+    tooltip: {
+      position: 'top',
+      backgroundColor: 'rgba(255,255,255,0.95)',
+      borderColor: '#e5e7eb',
+      borderWidth: 1,
+      textStyle: { color: '#374151', fontSize: 12 },
+      formatter: function(params: any) {
+        const day = days[params.data[0]];
+        const hour = hours[params.data[1]];
+        return `<div style=\"font-weight:600; margin-bottom:4px;\">${day}, ${hour}</div><div>Active Users: <b>${params.data[2]}</b></div>`;
+      }
+    },
     grid: {
-      left: '10%',
-      right: '5%',
-      bottom: '15%',
-      top: '5%',
+      left: 60,
+      right: 20,
+      bottom: 30,
+      top: 30,
       containLabel: true
     },
     xAxis: {
       type: 'category',
       data: days,
-      splitArea: {
-        show: true,
-        areaStyle: {
-          color: ['rgba(250,250,250,0.1)', 'rgba(200,200,200,0.1)']
-        }
-      },
-      axisLabel: {
-        color: '#6b7280',
-        fontSize: 12,
-        fontFamily: 'Inter, system-ui, sans-serif'
-      },
-      axisLine: {
-        show: false
-      },
-      axisTick: {
-        show: false
-      }
+      splitArea: { show: true },
+      axisLabel: { color: '#6b7280', fontSize: 12 },
+      axisLine: { lineStyle: { color: '#e5e7eb' } }
     },
     yAxis: {
       type: 'category',
       data: hours,
-      splitArea: {
-        show: true,
-        areaStyle: {
-          color: ['rgba(250,250,250,0.1)', 'rgba(200,200,200,0.1)']
-        }
-      },
-      axisLabel: {
-        color: '#6b7280',
-        fontSize: 10,
-        fontFamily: 'Inter, system-ui, sans-serif'
-      },
-      axisLine: {
-        show: false
-      },
-      axisTick: {
-        show: false
-      }
+      splitArea: { show: true },
+      axisLabel: { color: '#6b7280', fontSize: 11 },
+      axisLine: { lineStyle: { color: '#e5e7eb' } }
     },
     visualMap: {
-      min: minValue,
-      max: maxValue,
+      min: 0,
+      max: Math.max(1, ...echartsData.map(d => d[2])),
       calculable: true,
       orient: 'horizontal',
       left: 'center',
-      bottom: '5%',
+      bottom: 0,
       inRange: {
-        color: ['#f3f4f6', '#ddd6fe', '#a78bfa', '#8b5cf6', '#7c3aed', '#6d28d9']
+        color: ['#e0e7ff', '#60a5fa', '#2563eb', '#1e40af']
       },
-      textStyle: {
-        color: '#6b7280',
-        fontSize: 10
-      },
-      formatter: function(value: number) {
-        return Math.round(value).toString();
-      }
+      textStyle: { color: '#6b7280' }
     },
     series: [
       {
         name: 'Active Users',
         type: 'heatmap',
-        data: heatmapData,
+        data: echartsData,
         label: {
           show: false
         },
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
+            shadowColor: 'rgba(0,0,0,0.3)'
           }
-        },
-        itemStyle: {
-          borderRadius: 2,
-          borderWidth: 1,
-          borderColor: '#fff'
         }
       }
     ],
-    tooltip: {
-      trigger: 'item',
-      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      borderColor: '#e5e7eb',
-      borderWidth: 1,
-      textStyle: {
-        color: '#374151',
-        fontSize: 12
-      },
-      formatter: function(params: any) {
-        const day = days[params.data[0]];
-        const hour = hours[params.data[1]];
-        const users = params.data[2];
-        return `
-          <div style="font-weight: 600; margin-bottom: 4px;">${day} ${hour}</div>
-          <div>${users} active users</div>
-        `;
-      }
-    }
+    animation: true,
+    animationDuration: 1000,
+    animationEasing: 'cubicOut'
   };
 
   return (
     <div>
-      <ReactECharts 
-        option={option} 
-        style={{ height: '400px', width: '100%' }}
-        opts={{ renderer: 'canvas' }}
-      />
+      {firstLoad && loading ? (
+        <div className="h-96 w-full bg-gray-100 animate-pulse rounded" />
+      ) : (
+        <ReactECharts
+          option={chartOption}
+          style={{ height: '480px', width: '100%' }}
+          opts={{ renderer: 'canvas' }}
+        />
+      )}
     </div>
   );
 };
