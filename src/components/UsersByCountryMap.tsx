@@ -53,6 +53,23 @@ const UsersByCountryMap: React.FC = () => {
   const minValue = Math.min(...values);
   const maxValue = Math.max(...values);
 
+  // Function to calculate color based on user count
+  const getCountryColor = (value: number, min: number, max: number) => {
+    const ratio = (value - min) / (max - min);
+    const blues = [
+      '#e6f3ff', // Lightest blue
+      '#bfdbfe',
+      '#93c5fd',
+      '#60a5fa',
+      '#3b82f6',
+      '#2563eb',
+      '#1d4ed8',
+      '#1e40af' // Darkest blue
+    ];
+    const index = Math.floor(ratio * (blues.length - 1));
+    return blues[index];
+  };
+
   const option = {
     geo: {
       map: 'world',
@@ -106,23 +123,6 @@ const UsersByCountryMap: React.FC = () => {
         return params.name;
       },
     }
-  };
-
-  // Function to calculate color based on user count
-  const getCountryColor = (value: number, min: number, max: number) => {
-    const ratio = (value - min) / (max - min);
-    const blues = [
-      '#e6f3ff', // Lightest blue
-      '#bfdbfe',
-      '#93c5fd',
-      '#60a5fa',
-      '#3b82f6',
-      '#2563eb',
-      '#1d4ed8',
-      '#1e40af' // Darkest blue
-    ];
-    const index = Math.floor(ratio * (blues.length - 1));
-    return blues[index];
   };
 
   // Top countries table data
