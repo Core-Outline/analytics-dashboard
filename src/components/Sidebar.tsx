@@ -62,7 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
                 <div
                   key={item.id}
                   onClick={() => onSectionChange(item.id)}
-                  className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2 cursor-pointer font-medium rounded-lg transition-colors ${
+                  className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} ${isCollapsed ? 'px-3' : 'px-3 ml-4'} py-1.5 cursor-pointer font-medium rounded-lg transition-colors ${
                     isActive 
                       ? 'text-orange-500 bg-slate-700' 
                       : 'text-gray-300 hover:text-white hover:bg-slate-700'
