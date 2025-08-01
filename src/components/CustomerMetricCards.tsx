@@ -1,55 +1,29 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
 const CustomerMetricCards: React.FC = () => {
-  const metrics = [
-    {
-      title: 'Customer Growth Rate',
-      value: '12.5%',
-      target: '15%',
-      growth: '+2.3%',
-      isPositive: true,
-      data: [8.2, 9.1, 10.5, 11.2, 10.8, 11.9, 12.5, 13.1, 12.8, 12.5],
-      color: '#3b82f6'
-    },
-    {
-      title: 'Churn Rate',
-      value: '3.2%',
-      target: '2.5%',
-      growth: '-0.8%',
-      isPositive: true,
-      data: [4.5, 4.2, 3.8, 3.5, 3.9, 3.6, 3.4, 3.2, 3.1, 3.2],
-      color: '#ef4444'
-    },
-    {
-      title: 'Average Time to Payback CAC',
-      value: '8.3 months',
-      target: '6 months',
-      growth: '-1.2 months',
-      isPositive: true,
-      data: [12.5, 11.8, 10.9, 10.2, 9.8, 9.1, 8.7, 8.5, 8.1, 8.3],
-      color: '#10b981'
-    },
-    {
-      title: 'LTV:CAC Ratio',
-      value: '4.2:1',
-      target: '5:1',
-      growth: '+0.3',
-      isPositive: true,
-      data: [3.2, 3.4, 3.6, 3.8, 3.9, 4.0, 4.1, 4.2, 4.1, 4.2],
-      color: '#f59e0b'
-    },
-    {
-      title: 'Active Customers',
-      value: '12,847',
-      target: '15,000',
-      growth: '+847',
-      isPositive: true,
-      data: [10200, 10800, 11200, 11600, 11900, 12100, 12300, 12500, 12700, 12847],
-      color: '#8b5cf6'
-    }
-  ];
+  const [growthData, setGrowthData] = useState<number[]>([]);
+  const [growthValue, setGrowthValue] = useState<string>('');
+  const [growthLoading, setGrowthLoading] = useState(true);
+  const [growthError, setGrowthError] = useState(false);
+
+  useEffect(() => {
+    setGrowthLoading(true);
+    fetch('http://127.0.0.1:5000/users?time_units=YS&company=101&data_source_id=101')
+      .then(res => res.json())
+      .then(data => {
+        // Use the 'growth' array for chart, last value for current growth
+        setGrowthData(data.growth.map((g: number) => Math.round(g * 10000) / 100)); // percent, 2 decimals
+        const lastGrowth = data.growth[data.growth.length - 1];
+        setGrowthValue(`${(lastGrowth * 100).toFixed(2)}%`);
+        setGrowthLoading(false);
+      })
+      .catch(() => {
+        setGrowthError(true);
+        setGrowthLoading(false);
+      });
+  }, []);
 
   const createChartOption = (data: number[], color: string) => ({
     grid: {
@@ -103,6 +77,54 @@ const CustomerMetricCards: React.FC = () => {
       show: false
     }
   });
+
+  const metrics = [
+    {
+      title: 'Customer Growth Rate',
+      value: growthLoading ? 'Loading...' : growthError ? 'Error' : growthValue,
+      target: '15%',
+      growth: growthLoading ? '' : growthError ? '' : growthValue,
+      isPositive: !growthError && growthData.length > 0 ? growthData[growthData.length - 1] >= 0 : true,
+      data: growthData.length > 0 ? growthData : [0,0,0,0,0],
+      color: '#3b82f6'
+    },
+    {
+      title: 'Churn Rate',
+      value: '3.2%',
+      target: '2.5%',
+      growth: '-0.8%',
+      isPositive: true,
+      data: [4.5, 4.2, 3.8, 3.5, 3.9, 3.6, 3.4, 3.2, 3.1, 3.2],
+      color: '#ef4444'
+    },
+    {
+      title: 'Average Time to Payback CAC',
+      value: '8.3 months',
+      target: '6 months',
+      growth: '-1.2 months',
+      isPositive: true,
+      data: [12.5, 11.8, 10.9, 10.2, 9.8, 9.1, 8.7, 8.5, 8.1, 8.3],
+      color: '#10b981'
+    },
+    {
+      title: 'LTV:CAC Ratio',
+      value: '4.2:1',
+      target: '5:1',
+      growth: '+0.3',
+      isPositive: true,
+      data: [3.2, 3.4, 3.6, 3.8, 3.9, 4.0, 4.1, 4.2, 4.1, 4.2],
+      color: '#f59e0b'
+    },
+    {
+      title: 'Active Customers',
+      value: '12,847',
+      target: '15,000',
+      growth: '+847',
+      isPositive: true,
+      data: [10200, 10800, 11200, 11600, 11900, 12100, 12300, 12500, 12700, 12847],
+      color: '#8b5cf6'
+    }
+  ];
 
   return (
     <div className="grid grid-cols-2 gap-6">

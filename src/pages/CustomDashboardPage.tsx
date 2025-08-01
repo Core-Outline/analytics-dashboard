@@ -1,43 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, FileText, MoreHorizontal, Sparkles, BarChart3, PieChart, MapPin, Send, Paperclip, ChevronLeft, ChevronRight } from 'lucide-react';
+import ReactECharts from 'echarts-for-react';
 
 const CustomDashboardPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedQuery, setSelectedQuery] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('Queries');
+  const [queries, setQueries] = useState<any[]>([]);
+  const [queriesLoading, setQueriesLoading] = useState(false);
+  const [queriesError, setQueriesError] = useState<string | null>(null);
 
-  // Sample queries data
-  const queries = [
-    {
-      id: 'transaction_data_csv_1',
-      name: 'transaction_data.csv',
-      type: 'file',
-      icon: FileText,
-      color: 'text-blue-600'
-    },
-    {
-      id: 'transaction_data_csv_2',
-      name: 'transaction_data.csv',
-      type: 'file',
-      icon: FileText,
-      color: 'text-blue-600'
-    },
-    {
-      id: 'sample_sales_file_1',
-      name: 'Sample Sales File',
-      type: 'file',
-      icon: FileText,
-      color: 'text-blue-600'
-    },
-    {
-      id: 'sample_sales_file_2',
-      name: 'Sample Sales File',
-      type: 'file',
-      icon: FileText,
-      color: 'text-blue-600'
+  // Fetch queries from API
+  useEffect(() => {
+    async function fetchQueries() {
+      setQueriesLoading(true);
+      try {
+        const res = await fetch('http://localhost:5000/queries?company=101&query_type');
+        if (!res.ok) throw new Error('Failed to fetch queries');
+        const data = await res.json();
+        setQueries(data);
+        setQueriesError(null);
+      } catch (err) {
+        setQueriesError('Failed to load queries');
+      }
+      setQueriesLoading(false);
     }
-  ];
+    fetchQueries();
+  }, []);
 
   // Sample dashboards data
   const dashboards = [
@@ -99,12 +89,35 @@ const CustomDashboardPage: React.FC = () => {
   ];
 
   const filteredQueries = queries.filter(query =>
-    query.name.toLowerCase().includes(searchQuery.toLowerCase())
+    query.name && query.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const filteredDashboards = dashboards.filter(dashboard =>
     dashboard.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Sample API call for chart code
+  const [chartCode, setChartCode] = useState<string | null>(null);
+  const [chartLoading, setChartLoading] = useState(false);
+  const [chartError, setChartError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchChartCode() {
+      setChartLoading(true);
+      try {
+        // The API returns a string of code for the chart
+        // const res = await fetch('http://localhost:5000/sample-chart-code');
+        // Sample output for demonstration (replace with actual API call in production)
+        const data = { code: "return <ReactECharts option={{ xAxis: { type: 'category', data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] }, yAxis: { type: 'value' }, series: [{ data: [120, 200, 150, 80, 70], type: 'bar' }] }} />;" };
+        setChartCode(data.code);
+        setChartError(null);
+      } catch (err) {
+        setChartError('Failed to load chart code');
+      }
+      setChartLoading(false);
+    }
+    fetchChartCode();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 flex relative">
@@ -114,7 +127,7 @@ const CustomDashboardPage: React.FC = () => {
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center space-x-2 mb-4">
             <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
-              <span className="text-white text-sm font-bold">📊</span>
+              <span className="text-white text-sm font-bold"></span>
             </div>
             <span className="font-medium text-gray-900">Custom Dashboard</span>
           </div>
@@ -164,26 +177,57 @@ const CustomDashboardPage: React.FC = () => {
         <div className="flex-1 overflow-y-auto">
           <div className="p-2">
             {activeTab === 'Queries' ? (
-              filteredQueries.map((query) => {
-                const Icon = query.icon;
-                return (
-                  <div
-                    key={query.id}
-                    onClick={() => setSelectedQuery(query.id)}
-                    className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
-                      selectedQuery === query.id
-                        ? 'bg-blue-50 border border-blue-200'
-                        : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <Icon className={`w-4 h-4 ${query.color}`} />
-                      <span className="text-sm text-gray-900">{query.name}</span>
+              queriesLoading ? (
+                <div className="p-4 text-gray-500">Loading queries...</div>
+              ) : queriesError ? (
+                <div className="p-4 text-red-500">{queriesError}</div>
+              ) : filteredQueries.length === 0 ? (
+                <div className="p-4 text-gray-500">No queries found.</div>
+              ) : (
+                filteredQueries.map((query) => {
+                  // Choose icon based on data_source_type
+                  let Icon = FileText;
+                  let color = 'text-blue-600';
+                  if (query.data_source_type === 'mongodb') {
+                    color = 'text-green-600';
+                  } else if (query.data_source_type === 'twitter') {
+                    color = 'text-blue-400';
+                  } else if (query.data_source_type === 'social_media') {
+                    color = 'text-pink-600';
+                  } else if (query.data_source_type === 'postgresql') {
+                    color = 'text-purple-600';
+                  } else if (query.data_source_type === 'saas') {
+                    color = 'text-orange-600';
+                  }
+                  return (
+                    <div
+                      key={query.query_id}
+                      onClick={() => setSelectedQuery(query.query_id || query.data_source_id)}
+                      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
+                        selectedQuery === (query.query_id || query.data_source_id)
+                          ? 'bg-blue-50 border border-blue-200'
+                          : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Icon className={`w-4 h-4 ${color}`} />
+                        <span className="text-sm text-gray-900">{query.name}</span>
+                        {query.data_source_type && (
+                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 ml-1">
+                            {query.data_source_type}
+                          </span>
+                        )}
+                        {query.query_type && (
+                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-600 ml-1">
+                            {query.query_type}
+                          </span>
+                        )}
+                      </div>
+                      <MoreHorizontal className="w-4 h-4 text-gray-400" />
                     </div>
-                    <MoreHorizontal className="w-4 h-4 text-gray-400" />
-                  </div>
-                );
-              })
+                  );
+                })
+              )
             ) : (
               filteredDashboards.map((dashboard) => {
                 const Icon = dashboard.icon;
@@ -235,6 +279,34 @@ const CustomDashboardPage: React.FC = () => {
 
         {/* Content Area */}
         <div className="flex-1 p-6">
+          {/* Sample Chart using code from API */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Sample Chart (from API code)</h3>
+            {chartLoading ? (
+              <div className="text-gray-500">Loading chart...</div>
+            ) : chartError ? (
+              <div className="text-red-500">{chartError}</div>
+            ) : chartCode ? (
+              (() => {
+                // Remove 'return' if present and wrap in parentheses for JSX
+                let code = chartCode.trim();
+                if (code.startsWith('return')) {
+                  code = code.replace(/^return\s+/, '');
+                }
+                if (!code.startsWith('(')) {
+                  code = '(' + code;
+                }
+                if (!code.endsWith(')')) {
+                  code = code + ')';
+                }
+                // eslint-disable-next-line no-eval
+                return eval(code);
+              })()
+            ) : (
+              <div className="text-gray-500">No chart code available.</div>
+            )}
+          </div>
+
           {/* Suggested Queries */}
           <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
             <div className="flex items-center space-x-2 mb-4">

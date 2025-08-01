@@ -1,216 +1,35 @@
-import React, { useState } from 'react';
-import { useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Users, Heart, MessageCircle, Share2, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import InfluencerAnalyticsCard from './InfluencerAnalyticsCard';
+import { fetchAccountInfluencers } from '../api/socialMedia';
 
 interface InfluencersCardProps {
   onInfluencerSelect?: (influencer: any) => void;
 }
 
 const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect }) => {
+  const [influencers, setInfluencers] = useState<any[]>([]);
   const [selectedInfluencer, setSelectedInfluencer] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const analyticsRef = useRef<HTMLDivElement>(null);
   const influencersPerPage = 5;
 
-  // Sample influencer data
-  const influencers = [
-    {
-      id: 'sarah_lifestyle',
-      name: 'Sarah Johnson',
-      handle: '@sarah_lifestyle',
-      platform: 'Instagram',
-      followers: '2.4M',
-      engagement: '4.8%',
-      posts: 156,
-      avgLikes: '115K',
-      avgComments: '2.3K',
-      category: 'Lifestyle',
-      avatar: 'SJ'
-    },
-    {
-      id: 'tech_mike',
-      name: 'Michael Chen',
-      handle: '@tech_mike',
-      platform: 'YouTube',
-      followers: '1.8M',
-      engagement: '6.2%',
-      posts: 89,
-      avgLikes: '89K',
-      avgComments: '4.1K',
-      category: 'Technology',
-      avatar: 'MC'
-    },
-    {
-      id: 'fitness_emily',
-      name: 'Emily Davis',
-      handle: '@fitness_emily',
-      platform: 'TikTok',
-      followers: '3.1M',
-      engagement: '7.5%',
-      posts: 234,
-      avgLikes: '187K',
-      avgComments: '5.8K',
-      category: 'Fitness',
-      avatar: 'ED'
-    },
-    {
-      id: 'food_david',
-      name: 'David Wilson',
-      handle: '@food_david',
-      platform: 'Instagram',
-      followers: '1.2M',
-      engagement: '5.4%',
-      posts: 298,
-      avgLikes: '65K',
-      avgComments: '1.9K',
-      category: 'Food',
-      avatar: 'DW'
-    },
-    {
-      id: 'travel_lisa',
-      name: 'Lisa Anderson',
-      handle: '@travel_lisa',
-      platform: 'Instagram',
-      followers: '2.8M',
-      engagement: '4.1%',
-      posts: 187,
-      avgLikes: '142K',
-      avgComments: '3.2K',
-      category: 'Travel',
-      avatar: 'LA'
-    },
-    {
-      id: 'gaming_alex',
-      name: 'Alex Rodriguez',
-      handle: '@gaming_alex',
-      platform: 'Twitch',
-      followers: '1.5M',
-      engagement: '8.2%',
-      posts: 145,
-      avgLikes: '78K',
-      avgComments: '3.7K',
-      category: 'Gaming',
-      avatar: 'AR'
-    },
-    {
-      id: 'beauty_sophia',
-      name: 'Sophia Martinez',
-      handle: '@beauty_sophia',
-      platform: 'Instagram',
-      followers: '2.1M',
-      engagement: '5.9%',
-      posts: 312,
-      avgLikes: '124K',
-      avgComments: '2.8K',
-      category: 'Beauty',
-      avatar: 'SM'
-    },
-    {
-      id: 'business_james',
-      name: 'James Thompson',
-      handle: '@business_james',
-      platform: 'LinkedIn',
-      followers: '890K',
-      engagement: '4.3%',
-      posts: 78,
-      avgLikes: '38K',
-      avgComments: '1.2K',
-      category: 'Business',
-      avatar: 'JT'
-    },
-    {
-      id: 'music_taylor',
-      name: 'Taylor Swift Fan',
-      handle: '@music_taylor',
-      platform: 'TikTok',
-      followers: '4.2M',
-      engagement: '9.1%',
-      posts: 567,
-      avgLikes: '312K',
-      avgComments: '8.9K',
-      category: 'Music',
-      avatar: 'TS'
-    },
-    {
-      id: 'fashion_olivia',
-      name: 'Olivia Brown',
-      handle: '@fashion_olivia',
-      platform: 'Instagram',
-      followers: '1.9M',
-      engagement: '6.7%',
-      posts: 289,
-      avgLikes: '127K',
-      avgComments: '3.4K',
-      category: 'Fashion',
-      avatar: 'OB'
-    },
-    {
-      id: 'sports_marcus',
-      name: 'Marcus Johnson',
-      handle: '@sports_marcus',
-      platform: 'YouTube',
-      followers: '2.3M',
-      engagement: '5.8%',
-      posts: 134,
-      avgLikes: '156K',
-      avgComments: '4.2K',
-      category: 'Sports',
-      avatar: 'MJ'
-    },
-    {
-      id: 'art_emma',
-      name: 'Emma Wilson',
-      handle: '@art_emma',
-      platform: 'Instagram',
-      followers: '756K',
-      engagement: '7.4%',
-      posts: 198,
-      avgLikes: '56K',
-      avgComments: '1.8K',
-      category: 'Art',
-      avatar: 'EW'
-    },
-    {
-      id: 'comedy_ryan',
-      name: 'Ryan Davis',
-      handle: '@comedy_ryan',
-      platform: 'TikTok',
-      followers: '3.8M',
-      engagement: '11.2%',
-      posts: 423,
-      avgLikes: '425K',
-      avgComments: '12.1K',
-      category: 'Comedy',
-      avatar: 'RD'
-    },
-    {
-      id: 'pets_anna',
-      name: 'Anna Garcia',
-      handle: '@pets_anna',
-      platform: 'Instagram',
-      followers: '1.4M',
-      engagement: '8.9%',
-      posts: 345,
-      avgLikes: '124K',
-      avgComments: '5.6K',
-      category: 'Pets',
-      avatar: 'AG'
-    },
-    {
-      id: 'diy_kevin',
-      name: 'Kevin Lee',
-      handle: '@diy_kevin',
-      platform: 'YouTube',
-      followers: '1.1M',
-      engagement: '6.5%',
-      posts: 87,
-      avgLikes: '71K',
-      avgComments: '2.9K',
-      category: 'DIY',
-      avatar: 'KL'
+  useEffect(() => {
+    async function fetchInfluencers() {
+      setLoading(true);
+      try {
+        const res = await fetchAccountInfluencers({});
+        setInfluencers(res.data);
+        setError(null);
+      } catch (err: any) {
+        setError('Failed to load influencers');
+      }
+      setLoading(false);
     }
-  ];
+    fetchInfluencers();
+  }, []);
 
   // Calculate pagination
   const totalPages = Math.ceil(influencers.length / influencersPerPage);
@@ -257,6 +76,14 @@ const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect })
         return 'bg-blue-100 text-blue-800';
     }
   };
+
+  if (loading) {
+    return <div className="text-center py-4">Loading influencers...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-4 text-red-500">{error}</div>;
+  }
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">

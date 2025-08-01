@@ -1,17 +1,33 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
+import { fetchConversionsSplits } from '../api/socialMedia';
 
 const ConversionsDistributionCard: React.FC = () => {
-  // Sample data for conversions by social media platform
-  const platformData = [
-    { name: 'Facebook', value: 35, color: '#1877f2', conversions: 440 },
-    { name: 'Instagram', value: 28, color: '#e4405f', conversions: 352 },
-    { name: 'Twitter', value: 18, color: '#1da1f2', conversions: 226 },
-    { name: 'LinkedIn', value: 12, color: '#0077b5', conversions: 151 },
-    { name: 'TikTok', value: 7, color: '#000000', conversions: 88 }
-  ];
+  const [platformData, setPlatformData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const totalConversions = platformData.reduce((sum, platform) => sum + platform.conversions, 0);
+  useEffect(() => {
+    async function fetchSplits() {
+      setLoading(true);
+      try {
+        const res = await fetchConversionsSplits({
+          company_id: 101,
+          time_units: 'H'
+        });
+        // Ensure platformData is always an array
+        setPlatformData(Array.isArray(res.data) ? res.data : []);
+        setError(null);
+      } catch (err: any) {
+        setError('Failed to load conversions distribution');
+      }
+      setLoading(false);
+    }
+    fetchSplits();
+  }, []);
+
+  const safePlatformData = Array.isArray(platformData) ? platformData : [];
+  const totalConversions = safePlatformData.reduce((sum, platform) => sum + (platform.conversions || 0), 0);
 
   const chartOption = {
     grid: {
@@ -30,14 +46,14 @@ const ConversionsDistributionCard: React.FC = () => {
       data: ['Conversions'],
       show: false
     },
-    series: platformData.map((platform, index) => ({
+    series: safePlatformData.map((platform, index) => ({
       name: platform.name,
       type: 'bar',
       stack: 'total',
       data: [platform.value],
       itemStyle: {
         color: platform.color,
-        borderRadius: index === 0 ? [8, 0, 0, 8] : index === platformData.length - 1 ? [0, 8, 8, 0] : [0, 0, 0, 0]
+        borderRadius: index === 0 ? [8, 0, 0, 8] : index === safePlatformData.length - 1 ? [0, 8, 8, 0] : [0, 0, 0, 0]
       },
       barWidth: '40px'
     })),
@@ -90,7 +106,7 @@ const ConversionsDistributionCard: React.FC = () => {
 
       {/* Platform Breakdown */}
       <div className="space-y-3">
-        {platformData.map((platform, index) => (
+        {safePlatformData.map((platform, index) => (
           <div key={index} className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div 

@@ -1,77 +1,143 @@
-import React from 'react';
-import { Users, Camera, Zap, MessageCircle, Heart, RotateCcw, Megaphone, MoreHorizontal } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Users, Camera, Zap, MoreHorizontal } from 'lucide-react';
+import { fetchFollowersTrend, fetchPostsTrend, fetchConversionsTrend, fetchCommentsTrend, fetchLikesTrend, fetchMentionsTrend } from '../api/socialMedia';
 
 const SocialMediaMetricsCard: React.FC = () => {
-  // Sample data for top metrics
+  const [metrics, setMetrics] = useState<any>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchAllMetrics() {
+      setLoading(true);
+      try {
+        const followersRes = await fetchFollowersTrend({
+          search_type: 'account',
+          data_source_ids: 301,
+          company_id: 101,
+          time_units: 'H'
+        });
+        const postsRes = await fetchPostsTrend({
+          search_type: 'account',
+          data_source_ids: 301,
+          company_id: 101,
+          time_units: 'H'
+        });
+        const conversionsRes = await fetchConversionsTrend({
+          company_id: 101,
+          time_units: 'H'
+        });
+        // const commentsRes = await fetchCommentsTrend({
+        //   search_type: 'account',
+        //   data_source_ids: 301,
+        //   company_id: 101,
+        //   time_units: 'H'
+        // });
+        const likesRes = await fetchLikesTrend({
+          search_type: 'account',
+          data_source_ids: 301,
+          company_id: 101,
+          time_units: 'H',
+          // indices: ['twitter', 'tiktok']
+        });
+        const mentionsRes = await fetchMentionsTrend({
+          search_type: 'keywords',
+          data_source_ids: 201,
+          company_id: 101,
+          time_units: 'H',
+          indices: ['twitter', 'tiktok']
+        });
+        setMetrics({
+          followers: followersRes,
+          posts: postsRes,
+          conversions: conversionsRes,
+          // comments: commentsRes.data[0],
+          // likes: likesRes.data[0],
+          // mentions: mentionsRes.data[0]
+        });
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load metrics', err);
+        setError('Failed to load metrics');
+      }
+      setLoading(false);
+    }
+    fetchAllMetrics();
+  }, []);
+
+  // Helper to extract latest and previous metric values from API arrays
+  interface MetricItem {
+    [key: string]: any;
+    created_at?: string;
+  }
+  interface LatestPreviousResult {
+    current: string | number;
+    previous: string | number;
+    pct: string;
+  }
+  function getLatestAndPrevious(
+    arr: MetricItem[] | undefined,
+    valueKey: string,
+    pctKey: string
+  ): LatestPreviousResult {
+    if (!Array.isArray(arr) || arr.length === 0) {
+      return { current: '-', previous: '-', pct: '-' };
+    }
+    // Sort descending by created_at
+    const sorted = [...arr].sort((a, b) => {
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return dateB - dateA;
+    });
+    const current = sorted[0][valueKey] ?? '-';
+    const previous = sorted[1] ? sorted[1][valueKey] : '-';
+    let pct = sorted[0][pctKey];
+    if (typeof pct === 'number') {
+      pct = Math.abs(pct) < 1 ? `${(pct * 100).toFixed(2)}%` : `${pct.toFixed(2)}%`;
+    } else {
+      pct = '-';
+    }
+    return { current, previous, pct };
+  }
+
+  // Extract latest and previous values for top metrics
+  const followersMetric = getLatestAndPrevious(metrics.followers, 'followers_count', 'followers_pct_change');
+  const postsMetric = getLatestAndPrevious(metrics.posts, 'posts', 'posts_pct_change');
+  const conversionsMetric = getLatestAndPrevious(metrics.conversions, 'conversions', 'conversions_pct_change');
+
+  // Top metrics (Followers, Posts, Conversions)
   const topMetrics = [
     {
       title: 'Followers',
       icon: Users,
       iconBg: 'bg-blue-100',
       iconColor: 'text-blue-600',
-      currentValue: 45280,
-      lastMonthValue: 42150,
-      growth: '+7.4%'
+      currentValue: followersMetric.current,
+      lastMonthValue: followersMetric.previous,
+      growth: followersMetric.pct
     },
     {
       title: 'Posts',
       icon: Camera,
       iconBg: 'bg-blue-100',
       iconColor: 'text-blue-600',
-      currentValue: 156,
-      lastMonthValue: 142,
-      growth: '+9.9%'
+      currentValue: postsMetric.current,
+      lastMonthValue: postsMetric.previous,
+      growth: postsMetric.pct
     },
     {
       title: 'Conversions',
       icon: Zap,
       iconBg: 'bg-green-100',
       iconColor: 'text-green-600',
-      currentValue: 1256,
-      lastMonthValue: 987,
-      growth: '+27.3%'
+      currentValue: conversionsMetric.current,
+      lastMonthValue: conversionsMetric.previous,
+      growth: conversionsMetric.pct
     }
   ];
 
-  // Sample data for engagement metrics
-  const engagementMetrics = [
-    {
-      title: 'Comments',
-      icon: MessageCircle,
-      iconColor: 'text-blue-500',
-      borderColor: 'border-blue-500',
-      currentValue: 2847,
-      lastMonthValue: 2156,
-      growth: '+32.0%'
-    },
-    {
-      title: 'Likes',
-      icon: Heart,
-      iconColor: 'text-cyan-500',
-      borderColor: 'border-cyan-500',
-      currentValue: 18420,
-      lastMonthValue: 15680,
-      growth: '+17.5%'
-    },
-    {
-      title: 'Conversions',
-      icon: RotateCcw,
-      iconColor: 'text-green-500',
-      borderColor: 'border-green-500',
-      currentValue: 1256,
-      lastMonthValue: 987,
-      growth: '+27.3%'
-    },
-    {
-      title: 'Mentions',
-      icon: Megaphone,
-      iconColor: 'text-green-500',
-      borderColor: 'border-cyan-500',
-      currentValue: 892,
-      lastMonthValue: 743,
-      growth: '+20.1%'
-    }
-  ];
+  // if (loading) return <div className="p-6">Loading metrics...</div>;
+  // if (error) return <div className="p-6 text-red-500">{error}</div>;
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -117,33 +183,7 @@ const SocialMediaMetricsCard: React.FC = () => {
       {/* Bottom Section - Engagement Metrics Grid */}
       <div className="p-8">
         <div className="grid grid-cols-2 gap-8">
-          {engagementMetrics.map((metric, index) => {
-            const Icon = metric.icon;
-            
-            return (
-              <div key={index} className="text-center">
-                <div className={`w-16 h-16 bg-white border-2 ${metric.borderColor} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                  <Icon className={`w-6 h-6 ${metric.iconColor}`} />
-                </div>
-                <h4 className="text-xl font-medium text-gray-700 mb-2">{metric.title}</h4>
-                
-                {/* Current Value */}
-                <div className="text-2xl font-bold text-gray-900 mb-1">
-                  {metric.currentValue.toLocaleString()}
-                </div>
-                
-                {/* Last Month Comparison */}
-                <div className="space-y-1">
-                  <p className="text-sm text-gray-500">
-                    Last month: {metric.lastMonthValue.toLocaleString()}
-                  </p>
-                  <p className="text-sm font-medium text-green-600">
-                    {metric.growth}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+          {/* Engagement metrics can be added here if needed */}
         </div>
       </div>
     </div>

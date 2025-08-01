@@ -1,15 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
+import { fetchSentimentSplits } from '../api/socialMedia';
 
 const SentimentAnalysisCard: React.FC = () => {
-  // Sample sentiment data
-  const sentimentData = [
-    { name: 'Positive', value: 65, color: '#10b981', count: 4550 },
-    { name: 'Neutral', value: 25, color: '#f59e0b', count: 1750 },
-    { name: 'Negative', value: 10, color: '#ef4444', count: 700 }
-  ];
+  const [sentimentData, setSentimentData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const totalComments = sentimentData.reduce((sum, item) => sum + item.count, 0);
+  useEffect(() => {
+    async function fetchSentiment() {
+      setLoading(true);
+      try {
+        const res = await fetchSentimentSplits({
+          search_type: "all",
+          data_source_ids: [201],
+          company_id: 101,
+          influencers: 'SafaricomPLC',
+          time_units: 'H',
+          indices: ['twitter', 'tiktok']
+        });
+        setSentimentData(Array.isArray(res.data) ? res.data : []);
+        setError(null);
+      } catch (err: any) {
+        setError('Failed to load sentiment analysis');
+      }
+      setLoading(false);
+    }
+    fetchSentiment();
+  }, []);
+
+  const safeSentimentData = Array.isArray(sentimentData) ? sentimentData : [];
+  const totalComments = safeSentimentData.reduce((sum, item) => sum + (item.count || 0), 0);
 
   const chartOption = {
     grid: {
@@ -96,6 +117,9 @@ const SentimentAnalysisCard: React.FC = () => {
       show: false
     }
   };
+
+  if (loading) return <div className="p-6">Loading sentiment analysis...</div>;
+  if (error) return <div className="p-6 text-red-500">{error}</div>;
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">

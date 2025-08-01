@@ -5,6 +5,23 @@ import ConversionsDistributionCard from '../components/ConversionsDistributionCa
 import SentimentAnalysisCard from '../components/SentimentAnalysisCard';
 import InfluencersCard from '../components/InfluencersCard';
 
+/*
+Reference: API calls and functions from social-media.html
+- getFollowersTrend(dataSource)
+- getMentionsTrend(dataSource)
+- getLikesTrend(dataSource)
+- getPostsTrend(dataSource)
+- getConversionsTrend(dataSource)
+- getCommentsTrend(dataSource)
+- getKeywords(dataSource)
+- getConversionsSplits(dataSource)
+- getSentimentSplits(dataSource)
+- getAccountInfluencers()
+- getDataSources()
+These are used for metrics, trending keywords, conversions, sentiment, influencers, and data source selection.
+You can use these as reference for wiring up API calls in React components.
+*/
+
 const SocialMediaPage: React.FC = () => {
   const handleInfluencerSelect = (influencer: any) => {
     console.log('Selected influencer:', influencer);
