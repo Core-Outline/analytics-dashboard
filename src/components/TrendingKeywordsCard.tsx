@@ -1,63 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import ReactECharts from 'echarts-for-react';
-import * as echarts from 'echarts/core';
-import 'echarts-wordcloud'; // Import the wordcloud extension
-import { fetchTrendingKeywords } from '../api/socialMedia';
+import React from 'react';
 
 const TrendingKeywordsCard: React.FC = () => {
-  const [keywords, setKeywords] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Sample trending keywords with different sizes based on frequency/importance
+  const keywords = [
+    { text: 'social media', size: 'text-4xl', color: 'text-blue-600', weight: 'font-bold' },
+    { text: 'marketing', size: 'text-3xl', color: 'text-green-600', weight: 'font-semibold' },
+    { text: 'engagement', size: 'text-2xl', color: 'text-purple-600', weight: 'font-medium' },
+    { text: 'analytics', size: 'text-3xl', color: 'text-orange-600', weight: 'font-semibold' },
+    { text: 'content', size: 'text-2xl', color: 'text-pink-600', weight: 'font-medium' },
+    { text: 'brand', size: 'text-xl', color: 'text-indigo-600', weight: 'font-normal' },
+    { text: 'influencer', size: 'text-2xl', color: 'text-red-600', weight: 'font-medium' },
+    { text: 'viral', size: 'text-lg', color: 'text-yellow-600', weight: 'font-normal' },
+    { text: 'trending', size: 'text-xl', color: 'text-cyan-600', weight: 'font-normal' },
+    { text: 'hashtag', size: 'text-lg', color: 'text-teal-600', weight: 'font-normal' },
+    { text: 'followers', size: 'text-2xl', color: 'text-blue-500', weight: 'font-medium' },
+    { text: 'likes', size: 'text-xl', color: 'text-green-500', weight: 'font-normal' },
+    { text: 'shares', size: 'text-lg', color: 'text-purple-500', weight: 'font-normal' },
+    { text: 'comments', size: 'text-xl', color: 'text-orange-500', weight: 'font-normal' },
+    { text: 'reach', size: 'text-lg', color: 'text-pink-500', weight: 'font-normal' },
+    { text: 'impressions', size: 'text-lg', color: 'text-indigo-500', weight: 'font-normal' },
+    { text: 'campaign', size: 'text-xl', color: 'text-red-500', weight: 'font-normal' },
+    { text: 'audience', size: 'text-lg', color: 'text-yellow-500', weight: 'font-normal' },
+    { text: 'growth', size: 'text-2xl', color: 'text-cyan-500', weight: 'font-medium' },
+    { text: 'strategy', size: 'text-lg', color: 'text-teal-500', weight: 'font-normal' }
+  ];
 
-  useEffect(() => {
-    async function fetchKeywords() {
-      setLoading(true);
-      try {
-        const res = await fetchTrendingKeywords({
-          search_type: 'keywords',
-          data_source_ids: [201],
-          company_id: 101,
-          influencers: 'SafaricomPLC',
-          time_units: 'H',
-          indices: ['twitter', 'tiktok']
-        });
-        setKeywords(res);
-        setError(null);
-      } catch (err: any) {
-        setError('Failed to load trending keywords');
-      }
-      setLoading(false);
-    }
-    fetchKeywords();
-  }, []);
-
-  // Prepare data for ECharts WordCloud
-  const wordCloudData = keywords.map((keyword: any) => ({
-    name: keyword.text,
-    value: keyword.frequency || keyword.size || 1,
-    textStyle: {
-      color: keyword.color || undefined,
-      fontWeight: keyword.weight || undefined,
-    }
-  }));
-
-  const option = {
-    tooltip: {},
-    series: [
-      {
-        type: 'wordCloud',
-        gridSize: 8,
-        sizeRange: [16, 48],
-        rotationRange: [-45, 45],
-        shape: 'circle',
-        textStyle: {
-          fontFamily: 'inherit',
-          fontWeight: 'bold',
-        },
-        data: wordCloudData,
-      }
-    ]
-  };
+  // Shuffle keywords for more natural word cloud appearance
+  const shuffledKeywords = [...keywords].sort(() => Math.random() - 0.5);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -65,21 +34,21 @@ const TrendingKeywordsCard: React.FC = () => {
         <h3 className="text-lg font-medium text-gray-900">Trending Keywords</h3>
         <div className="text-sm text-gray-500">Last 30 days</div>
       </div>
-
-      <div className="flex items-center justify-center bg-gray-50 rounded-lg min-h-[300px] p-4">
-        {loading ? (
-          <div>Loading keywords...</div>
-        ) : error ? (
-          <div className="text-red-500">{error}</div>
-        ) : (
-          <ReactECharts
-            option={option}
-            style={{ height: 320, width: '100%' }}
-            notMerge={true}
-            lazyUpdate={true}
-            echarts={echarts} // Pass the echarts instance
-          />
-        )}
+      
+      {/* Word Cloud */}
+      <div className="flex flex-wrap items-center justify-center gap-4 p-8 bg-gray-50 rounded-lg min-h-[300px]">
+        {shuffledKeywords.map((keyword, index) => (
+          <span
+            key={index}
+            className={`${keyword.size} ${keyword.color} ${keyword.weight} cursor-pointer hover:opacity-75 transition-opacity duration-200 select-none`}
+            style={{
+              transform: `rotate(${Math.random() * 20 - 10}deg)`,
+              margin: `${Math.random() * 8}px ${Math.random() * 12}px`
+            }}
+          >
+            {keyword.text}
+          </span>
+        ))}
       </div>
 
       {/* Legend */}

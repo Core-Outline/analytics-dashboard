@@ -1,16 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useEffect, useState } from 'react';
 import * as echarts from 'echarts';
 import ReactECharts from 'echarts-for-react';
 import { RotateCcw, MoreHorizontal, ChevronRight } from 'lucide-react';
 
 const OrderLocationsCard: React.FC = () => {
   const [mapReady, setMapReady] = useState(false);
-  const [sessionData, setSessionData] = useState<any[]>([]);
-  const [userData, setUserData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
   useEffect(() => {
+    // Register a simplified world map using ECharts built-in world map
     fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
       .then(response => response.json())
       .then(worldGeoJson => {
@@ -18,29 +16,28 @@ const OrderLocationsCard: React.FC = () => {
         setMapReady(true);
       })
       .catch(() => {
+        // Fallback: use a simple world map configuration
+        console.warn('Could not load world map data, using fallback');
         setMapReady(false);
       });
   }, []);
 
-  useEffect(() => {
-    setLoading(true);
-    fetch('http://localhost:5000/user-sessions-country?company=101')
-      .then(res => res.json())
-      .then(data => {
-        setSessionData(data.sessions);
-        setUserData(data.users);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError(true);
-        setLoading(false);
-      });
-  }, []);
+  // Sample data for order locations
+  const locationData = [
+    { city: 'New York', country: 'United States', sessions: 12450, users: 8920, percentage: 23.5 },
+    { city: 'London', country: 'United Kingdom', sessions: 9680, users: 7240, percentage: 18.2 },
+    { city: 'Tokyo', country: 'Japan', sessions: 8320, users: 6180, percentage: 15.6 },
+    { city: 'Berlin', country: 'Germany', sessions: 7150, users: 5340, percentage: 13.4 },
+    { city: 'Sydney', country: 'Australia', sessions: 5890, users: 4420, percentage: 11.1 },
+    { city: 'Toronto', country: 'Canada', sessions: 4720, users: 3580, percentage: 8.9 },
+    { city: 'Paris', country: 'France', sessions: 3960, users: 2980, percentage: 7.4 },
+    { city: 'Mumbai', country: 'India', sessions: 2840, users: 2150, percentage: 5.3 }
+  ];
 
-  // Map data for visualization
-  const mapData = sessionData.map(item => ({
+  // World map data for visualization
+  const mapData = locationData.map(item => ({
     name: item.country,
-    value: item.count
+    value: item.sessions
   }));
 
   const mapOption = {
@@ -59,10 +56,40 @@ const OrderLocationsCard: React.FC = () => {
           areaColor: '#4a90e2'
         }
       },
-      regions: sessionData.map((item, idx) => ({
-        name: item.country,
-        itemStyle: { areaColor: ['#1e40af','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe','#dbeafe','#eff6ff'][idx % 8] }
-      }))
+      regions: [
+        {
+          name: 'United States',
+          itemStyle: { areaColor: '#1e40af' }
+        },
+        {
+          name: 'United Kingdom', 
+          itemStyle: { areaColor: '#2563eb' }
+        },
+        {
+          name: 'Japan',
+          itemStyle: { areaColor: '#3b82f6' }
+        },
+        {
+          name: 'Germany',
+          itemStyle: { areaColor: '#60a5fa' }
+        },
+        {
+          name: 'Australia',
+          itemStyle: { areaColor: '#93c5fd' }
+        },
+        {
+          name: 'Canada',
+          itemStyle: { areaColor: '#bfdbfe' }
+        },
+        {
+          name: 'France',
+          itemStyle: { areaColor: '#dbeafe' }
+        },
+        {
+          name: 'India',
+          itemStyle: { areaColor: '#eff6ff' }
+        }
+      ]
     },
     series: [
       {
@@ -81,12 +108,13 @@ const OrderLocationsCard: React.FC = () => {
         fontSize: 12
       },
       formatter: function(params: any) {
-        const locationInfo = sessionData.find(item => item.country === params.name);
+        const locationInfo = locationData.find(item => item.country === params.name);
         if (locationInfo) {
           return `
             <div style="font-weight: 600; margin-bottom: 4px;">${params.name}</div>
-            <div>Sessions: ${locationInfo.count.toLocaleString()}</div>
-            <div>Percentage: ${locationInfo.percentage.toFixed(2)}%</div>
+            <div>Sessions: ${locationInfo.sessions.toLocaleString()}</div>
+            <div>Users: ${locationInfo.users.toLocaleString()}</div>
+            <div>Percentage: ${locationInfo.percentage}%</div>
           `;
         }
         return params.name;
@@ -129,35 +157,54 @@ const OrderLocationsCard: React.FC = () => {
 
       {/* Data Table */}
       <div className="overflow-x-auto">
-        {loading ? (
-          <div className="text-center py-8 text-gray-500">Loading...</div>
-        ) : error ? (
-          <div className="text-center py-8 text-red-500">Error loading data</div>
-        ) : (
-        <table className="w-full border-separate border-spacing-y-2">
+        <table className="w-full">
           <thead>
-            <tr className="bg-gray-50">
-              <th className="text-left text-xs font-semibold text-gray-700 py-2 px-3 rounded-tl-lg">Country</th>
-              <th className="text-right text-xs font-semibold text-gray-700 py-2 px-3">Sessions</th>
-              <th className="text-right text-xs font-semibold text-gray-700 py-2 px-3">Users</th>
-              <th className="text-right text-xs font-semibold text-gray-700 py-2 px-3 rounded-tr-lg">Percentage</th>
+            <tr className="border-b border-gray-200">
+              <th className="text-left text-sm font-medium text-gray-500 pb-3 flex items-center">
+                City
+                <svg className="w-3 h-3 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                </svg>
+              </th>
+              <th className="text-left text-sm font-medium text-gray-500 pb-3 flex items-center">
+                Sessions
+                <svg className="w-3 h-3 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                </svg>
+              </th>
+              <th className="text-left text-sm font-medium text-gray-500 pb-3 flex items-center">
+                Users
+                <svg className="w-3 h-3 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                </svg>
+              </th>
+              <th className="text-right text-sm font-medium text-gray-500 pb-3">
+                Percentage
+              </th>
             </tr>
           </thead>
           <tbody>
-            {sessionData.map((session, idx) => {
-              const user = userData.find(u => u.country === session.country);
-              return (
-                <tr key={idx} className="bg-white shadow-sm rounded-lg transition hover:bg-blue-50">
-                  <td className="py-3 px-3 text-sm font-medium text-gray-900">{session.country}</td>
-                  <td className="py-3 px-3 text-sm text-right font-semibold text-blue-700">{session.count.toLocaleString()}</td>
-                  <td className="py-3 px-3 text-sm text-right font-semibold text-green-700">{user ? user.count.toLocaleString() : '-'}</td>
-                  <td className="py-3 px-3 text-sm text-right font-semibold text-purple-700">{session.percentage.toFixed(2)}%</td>
-                </tr>
-              );
-            })}
+            {locationData.slice(0, 6).map((location, index) => (
+              <tr key={index} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
+                <td className="text-sm text-gray-900 py-4">
+                  <div>
+                    <div className="font-medium">{location.city}</div>
+                    <div className="text-gray-500 text-xs">{location.country}</div>
+                  </div>
+                </td>
+                <td className="text-sm text-gray-900 py-4 font-medium">
+                  {location.sessions.toLocaleString()}
+                </td>
+                <td className="text-sm text-gray-900 py-4 font-medium">
+                  {location.users.toLocaleString()}
+                </td>
+                <td className="text-sm text-gray-900 py-4 text-right font-medium">
+                  {location.percentage}%
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
-        )}
       </div>
 
       {/* View All Link */}

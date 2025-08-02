@@ -13,12 +13,6 @@ const CustomerMetricsCard: React.FC = () => {
   const [userCount, setUserCount] = useState<number | null>(null);
   const [userLoading, setUserLoading] = useState(true);
   const [userError, setUserError] = useState(false);
-  const [countryCount, setCountryCount] = useState<number | null>(null);
-  const [countryLoading, setCountryLoading] = useState(true);
-  const [countryError, setCountryError] = useState(false);
-  const [transactionCount, setTransactionCount] = useState<number | null>(null);
-  const [transactionLoading, setTransactionLoading] = useState(true);
-  const [transactionError, setTransactionError] = useState(false);
 
   useEffect(() => {
     setUserLoading(true);
@@ -33,32 +27,6 @@ const CustomerMetricsCard: React.FC = () => {
         console.error('Error fetching user data:', e);
         setUserError(true);
         setUserLoading(false);
-      });
-  }, []);
-
-  useEffect(() => {
-    setCountryLoading(true);
-    fetch('http://localhost:5000/unique-countries?company=101')
-      .then(res => res.json())
-      .then(data => {
-        setCountryCount(data.countries);
-        setCountryLoading(false);
-      })
-      .catch((e) => {
-        setCountryError(true);
-        setCountryLoading(false);
-      });
-
-    setTransactionLoading(true);
-    fetch('http://localhost:5000/unique-transactions?company=101')
-      .then(res => res.json())
-      .then(data => {
-        setTransactionCount(data.transactions);
-        setTransactionLoading(false);
-      })
-      .catch((e) => {
-        setTransactionError(true);
-        setTransactionLoading(false);
       });
   }, []);
 
@@ -80,10 +48,8 @@ const CustomerMetricsCard: React.FC = () => {
       iconBg: 'bg-blue-100',
       iconColor: 'text-blue-600',
       label: 'countries',
-      count: countryCount,
-      target: null,
-      loading: countryLoading,
-      error: countryError
+      count: 0,
+      target: null
     },
     {
       title: 'Transaction data',
@@ -91,10 +57,8 @@ const CustomerMetricsCard: React.FC = () => {
       iconBg: 'bg-green-100',
       iconColor: 'text-green-600',
       label: 'transactions',
-      count: transactionCount,
-      target: null,
-      loading: transactionLoading,
-      error: transactionError
+      count: 0,
+      target: null
     }
   ];
 
@@ -140,7 +104,7 @@ const CustomerMetricsCard: React.FC = () => {
                   )
                 ) : (
                   <div className="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
-                    Target: {metric.count !== null && metric.count !== undefined ? metric.count.toLocaleString() : '—'}
+                    Target: {metric.count.toLocaleString()}
                   </div>
                 )}
               </div>

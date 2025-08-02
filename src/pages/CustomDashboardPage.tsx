@@ -1,15 +1,92 @@
+// Helper component to parse and render ECHARTS_CODE
+interface EchartsCodeRendererProps {
+  code: string;
+  pageData: any;
+}
+
+const EchartsCodeRenderer: React.FC<EchartsCodeRendererProps> = ({ code, pageData }) => {
+  const [option, setOption] = React.useState<any>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    try {
+      // Remove <script> blocks
+      let jsCode = code.replace(/<script[^>]*>|<\/script>/gi, '');
+      // Remove console.log and chartDom/myChart initializations
+      jsCode = jsCode.replace(/console\.log\([^)]*\);?/g, '');
+      jsCode = jsCode.replace(/var chartDom = [^;]*;?/g, '');
+      jsCode = jsCode.replace(/var myChart = [^;]*;?/g, '');
+      // Replace data assignment
+      jsCode = jsCode.replace(/var data = page_data;/g, 'var data = __pageData;');
+      jsCode = jsCode.replace(/var data = transaction_data;/g, 'var data = __pageData;');
+      jsCode = jsCode.replace(/var data = data;/g, 'var data = __pageData;');
+      // Replace transaction_data and page_data references
+      jsCode = jsCode.replace(/transaction_data/g, '__pageData');
+      jsCode = jsCode.replace(/page_data/g, '__pageData');
+      // Evaluate option/chartOption, providing both pageData and __pageData
+      const func = new Function(
+        '__pageData',
+        'pageData',
+        jsCode + `;
+        if (typeof option !== 'undefined') return option;
+        if (typeof chartOption !== 'undefined') return chartOption;
+        return null;`
+      );
+      const optionObj = func(pageData, pageData);
+      setOption(optionObj);
+      console.log(optionObj)
+      setError(null);
+    } catch (err: any) {
+      setOption(null);
+      console.error("Chart rendering error: ",err)
+      setError(err && err.message ? err.message : String(err));
+    }
+  }, [code, pageData]);
+
+  if (error) return <div className="text-red-500">Chart error: {error}</div>;
+  if (!option) return <div className="text-gray-400">Chart could not be rendered</div>;
+  return <ReactECharts option={option} style={{ height: '400px', width: '100%' }} opts={{ renderer: 'canvas' }} />;
+};
 import React, { useState, useEffect } from 'react';
-import { Search, FileText, MoreHorizontal, Sparkles, BarChart3, PieChart, MapPin, Send, Paperclip, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, FileText, MoreHorizontal, Sparkles, BarChart3, Send, Paperclip, ChevronLeft, ChevronRight } from 'lucide-react';
 import ReactECharts from 'echarts-for-react';
+import { v4 as uuidv4 } from 'uuid';
 
 const CustomDashboardPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedQuery, setSelectedQuery] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState('Queries');
+  const [activeTab, setActiveTab] = useState('Dashboard');
   const [queries, setQueries] = useState<any[]>([]);
   const [queriesLoading, setQueriesLoading] = useState(false);
   const [queriesError, setQueriesError] = useState<string | null>(null);
+  const [userPrompt, setUserPrompt] = useState('Plot a pie chart of the seven best customers');
+  const [chartOption, setChartOption] = useState<any>(null);
+  const [chartLoading, setChartLoading] = useState(false);
+  const [chartError, setChartError] = useState<string | null>(null);
+
+  // State for new dashboard details
+  const [pageDetails, setPageDetails] = useState<{ page_id: string; page_name: string } | null>(null);
+
+  // State for modal visibility and new dashboard name
+  const [showModal, setShowModal] = useState(false);
+  const [newDashboardName, setNewDashboardName] = useState('');
+
+  // Sample transaction data that would be available on the page
+  const pageData = [
+    { customer: 'Alice Johnson', amount: 5200, date: '2024-01-15', product: 'Laptop' },
+    { customer: 'Bob Smith', amount: 3800, date: '2024-01-20', product: 'Phone' },
+    { customer: 'Charlie Brown', amount: 6500, date: '2024-02-10', product: 'Tablet' },
+    { customer: 'Diana Prince', amount: 4200, date: '2024-02-15', product: 'Monitor' },
+    { customer: 'Eve Adams', amount: 7800, date: '2024-03-05', product: 'Laptop' },
+    { customer: 'Frank Miller', amount: 2100, date: '2024-03-10', product: 'Mouse' },
+    { customer: 'Grace Lee', amount: 5900, date: '2024-03-20', product: 'Keyboard' },
+    { customer: 'Henry Wilson', amount: 3300, date: '2024-04-01', product: 'Phone' },
+    { customer: 'Alice Johnson', amount: 2800, date: '2024-04-05', product: 'Accessories' },
+    { customer: 'Bob Smith', amount: 4600, date: '2024-04-10', product: 'Tablet' },
+    { customer: 'Charlie Brown', amount: 1900, date: '2024-04-15', product: 'Cable' },
+    { customer: 'Diana Prince', amount: 5500, date: '2024-05-01', product: 'Monitor' }
+  ];
 
   // Fetch queries from API
   useEffect(() => {
@@ -29,95 +106,293 @@ const CustomDashboardPage: React.FC = () => {
     fetchQueries();
   }, []);
 
-  // Sample dashboards data
-  const dashboards = [
-    {
-      id: 'sales_overview_2024',
-      name: 'Sales Overview 2024',
-      type: 'dashboard',
-      icon: BarChart3,
-      color: 'text-green-600',
-      lastModified: '2 hours ago',
-      charts: 5
-    },
-    {
-      id: 'customer_analytics',
-      name: 'Customer Analytics',
-      type: 'dashboard',
-      icon: PieChart,
-      color: 'text-blue-600',
-      lastModified: '1 day ago',
-      charts: 8
-    },
-    {
-      id: 'financial_report_q4',
-      name: 'Financial Report Q4',
-      type: 'dashboard',
-      icon: BarChart3,
-      color: 'text-purple-600',
-      lastModified: '3 days ago',
-      charts: 6
-    },
-    {
-      id: 'marketing_performance',
-      name: 'Marketing Performance',
-      type: 'dashboard',
-      icon: MapPin,
-      color: 'text-orange-600',
-      lastModified: '1 week ago',
-      charts: 4
-    }
-  ];
+  // Fetch dashboards from API
+  const [dashboards, setDashboards] = useState<any[]>([]);
+  const [dashboardsLoading, setDashboardsLoading] = useState(false);
+  const [dashboardsError, setDashboardsError] = useState<string | null>(null);
 
-  // Sample suggested queries
-  const suggestedQueries = [
-    {
-      id: 'trend_line_chart',
-      text: 'What is the trend of transaction amounts over time, visualized by a line chart?',
-      icon: BarChart3
-    },
-    {
-      id: 'products_bar_chart',
-      text: 'Which products have the highest total sales, visualized by a bar chart?',
-      icon: BarChart3
-    },
-    {
-      id: 'geographical_pie_chart',
-      text: 'What is the geographical distribution of transactions, visualized by a pie chart based on latitude and longitude?',
-      icon: PieChart
+  useEffect(() => {
+    async function fetchDashboards() {
+      setDashboardsLoading(true);
+      try {
+        const res = await fetch('http://localhost:5000/custom-dashboards?user_id=101');
+        if (!res.ok) throw new Error('Failed to fetch dashboards');
+        const data = await res.json();
+        setDashboards(data);
+        setDashboardsError(null);
+      } catch (err) {
+        setDashboardsError('Failed to load dashboards');
+      }
+      setDashboardsLoading(false);
     }
-  ];
+    fetchDashboards();
+  }, []);
+
+  // State for visualizations
+  const [visualizations, setVisualizations] = useState<any[]>([]);
+  const [visualizationsLoading, setVisualizationsLoading] = useState(false);
+  const [visualizationsError, setVisualizationsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchVisualizations() {
+      setVisualizationsLoading(true);
+      try {
+        const res = await fetch('http://localhost:5000/visualizations?user_id=101&page_id=0c8e0d4f-12ba-4840-ac15-22756dba72ab&thread_id');
+        if (!res.ok) throw new Error('Failed to fetch visualizations');
+        const data = await res.json();
+        setVisualizations(data);
+        setVisualizationsError(null);
+      } catch (err) {
+        setVisualizationsError('Failed to load visualizations');
+      }
+      setVisualizationsLoading(false);
+    }
+    fetchVisualizations();
+  }, []);
+
+  // Function to execute code returned from backend
+  const executeChartCode = (codeString: string) => {
+    try {
+      // Create a safe execution context with available variables and functions
+      const context = {
+        pageData,
+        React,
+        ReactECharts,
+        console
+      };
+
+      // Create a function that executes the code and returns the chart option
+      const executeCode = new Function(
+        'pageData',
+        'React',
+        'ReactECharts',
+        'console',
+        `
+        ${codeString}
+        return chartOption;
+        `
+      );
+
+      const option = executeCode(
+        context.pageData,
+        context.React,
+        context.ReactECharts,
+        context.console
+      );
+
+      return option;
+    } catch (error) {
+      console.error('Error executing chart code:', error);
+      throw error;
+    }
+  };
+
+  // Mock function to simulate backend API call
+  const fetchChartFromPrompt = async (prompt: string) => {
+    setChartLoading(true);
+    setChartError(null);
+
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Mock backend response - this would come from your actual API
+      let mockCode = '';
+
+      if (prompt.toLowerCase().includes('pie chart') && prompt.toLowerCase().includes('customer')) {
+        mockCode = `
+// Function to get top customers by total transaction amount
+function getTopCustomers(data, count = 7) {
+  const customerTotals = {};
+  
+  // Sum up amounts for each customer
+  data.forEach(transaction => {
+    const customer = transaction.customer;
+    customerTotals[customer] = (customerTotals[customer] || 0) + transaction.amount;
+  });
+
+  // Convert to array, sort by amount, and take top N
+  return Object.entries(customerTotals)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, count)
+    .map(([name, value]) => ({ name, value }));
+}
+
+// Generate chart option
+const chartOption = {
+  title: {
+    text: 'Top 7 Customers by Total Purchases',
+    left: 'center',
+    textStyle: {
+      fontSize: 16,
+      fontWeight: 'bold'
+    }
+  },
+  tooltip: {
+    trigger: 'item',
+  },
+  legend: {
+    orient: 'vertical',
+    left: 'left',
+    top: 'middle'
+  },
+  series: [
+    {
+      name: 'Customer Sales',
+      type: 'pie',
+      radius: ['40%', '70%'],
+      center: ['60%', '50%'],
+      data: getTopCustomers(pageData, 7),
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      },
+      label: {
+      }
+    }
+  ]
+};`;
+      } else if (prompt.toLowerCase().includes('bar chart') && prompt.toLowerCase().includes('product')) {
+        mockCode = `
+// Function to get product sales data
+function getProductSales(data) {
+  const productTotals = {};
+  
+  data.forEach(transaction => {
+    const product = transaction.product;
+    productTotals[product] = (productTotals[product] || 0) + transaction.amount;
+  });
+
+  return Object.entries(productTotals)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, value]) => ({ name, value }));
+}
+
+const productData = getProductSales(pageData);
+
+const chartOption = {
+  title: {
+    text: 'Product Sales Analysis',
+    left: 'center'
+  },
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      type: 'shadow'
+    }
+  },
+  xAxis: {
+    type: 'category',
+    data: productData.map(item => item.name),
+    axisLabel: {
+      rotate: 45
+    }
+  },
+  yAxis: {
+    type: 'value',
+    axisLabel: {
+    }
+  },
+  series: [
+    {
+      name: 'Sales',
+      type: 'bar',
+      data: productData.map(item => item.value),
+      itemStyle: {
+        color: '#3b82f6'
+      }
+    }
+  ]
+};`;
+      } else {
+        // Default pie chart for customers
+        mockCode = `
+function getTopCustomers(data, count = 7) {
+  const customerTotals = {};
+  
+  data.forEach(transaction => {
+    const customer = transaction.customer;
+    customerTotals[customer] = (customerTotals[customer] || 0) + transaction.amount;
+  });
+
+  return Object.entries(customerTotals)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, count)
+    .map(([name, value]) => ({ name, value }));
+}
+
+const chartOption = {
+  title: {
+    text: 'Customer Analysis',
+    left: 'center'
+  },
+  tooltip: {
+    trigger: 'item'
+  },
+  series: [
+    {
+      name: 'Customers',
+      type: 'pie',
+      radius: '60%',
+      data: getTopCustomers(pageData),
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
+    }
+  ]
+};`;
+      }
+
+      // Execute the code and get the chart option
+      const option = executeChartCode(mockCode);
+      setChartOption(option);
+
+    } catch (error) {
+      setChartError('Failed to generate chart from prompt');
+      console.error('Chart generation error:', error);
+    } finally {
+      setChartLoading(false);
+    }
+  };
+
+  // Handle prompt submission
+  const handleSubmitPrompt = async (e?: any) => {
+    if (e) e.preventDefault();
+    if (userPrompt.trim()) {
+      await fetchChartFromPrompt(userPrompt);
+    }
+  };
 
   const filteredQueries = queries.filter(query =>
     query.name && query.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const filteredDashboards = dashboards.filter(dashboard =>
-    dashboard.name.toLowerCase().includes(searchQuery.toLowerCase())
+    dashboard.page_name && dashboard.page_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Sample API call for chart code
-  const [chartCode, setChartCode] = useState<string | null>(null);
-  const [chartLoading, setChartLoading] = useState(false);
-  const [chartError, setChartError] = useState<string | null>(null);
-
+  // Initialize with default chart on component mount
   useEffect(() => {
-    async function fetchChartCode() {
-      setChartLoading(true);
-      try {
-        // The API returns a string of code for the chart
-        // const res = await fetch('http://localhost:5000/sample-chart-code');
-        // Sample output for demonstration (replace with actual API call in production)
-        const data = { code: "return <ReactECharts option={{ xAxis: { type: 'category', data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] }, yAxis: { type: 'value' }, series: [{ data: [120, 200, 150, 80, 70], type: 'bar' }] }} />;" };
-        setChartCode(data.code);
-        setChartError(null);
-      } catch (err) {
-        setChartError('Failed to load chart code');
-      }
-      setChartLoading(false);
-    }
-    fetchChartCode();
+    fetchChartFromPrompt('Plot a pie chart of the seven best customers');
   }, []);
+
+  // Add new dashboard to dashboards list when pageDetails changes
+  useEffect(() => {
+    if (pageDetails) {
+      setDashboards(prev => [{ page_id: pageDetails.page_id, page_name: pageDetails.page_name }, ...prev]);
+    }
+  }, [pageDetails]);
+
+  // Get selected dashboard name
+  const selectedDashboard = filteredDashboards.find(d => d.page_id === selectedQuery);
+  const dashboardTitle = selectedDashboard ? selectedDashboard.page_name : '';
 
   return (
     <div className="min-h-screen bg-gray-50 flex relative">
@@ -127,31 +402,29 @@ const CustomDashboardPage: React.FC = () => {
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center space-x-2 mb-4">
             <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
-              <span className="text-white text-sm font-bold"></span>
+              <BarChart3 className="text-white w-4 h-4" />
             </div>
             <span className="font-medium text-gray-900">Custom Dashboard</span>
           </div>
-          
+
           {/* Tab */}
           <div className="border-b border-gray-200">
             <div className="flex">
-              <button 
+              <button
                 onClick={() => setActiveTab('Queries')}
-                className={`px-4 py-2 text-sm font-medium ${
-                  activeTab === 'Queries'
+                className={`px-4 py-2 text-sm font-medium ${activeTab === 'Queries'
                     ? 'text-blue-600 border-b-2 border-blue-600'
                     : 'text-gray-500 hover:text-gray-700'
-                }`}
+                  }`}
               >
                 Queries
               </button>
-              <button 
+              <button
                 onClick={() => setActiveTab('Dashboard')}
-                className={`px-4 py-2 text-sm font-medium ${
-                  activeTab === 'Dashboard'
+                className={`px-4 py-2 text-sm font-medium ${activeTab === 'Dashboard'
                     ? 'text-blue-600 border-b-2 border-blue-600'
                     : 'text-gray-500 hover:text-gray-700'
-                }`}
+                  }`}
               >
                 Dashboard
               </button>
@@ -185,7 +458,6 @@ const CustomDashboardPage: React.FC = () => {
                 <div className="p-4 text-gray-500">No queries found.</div>
               ) : (
                 filteredQueries.map((query) => {
-                  // Choose icon based on data_source_type
                   let Icon = FileText;
                   let color = 'text-blue-600';
                   if (query.data_source_type === 'mongodb') {
@@ -203,11 +475,10 @@ const CustomDashboardPage: React.FC = () => {
                     <div
                       key={query.query_id}
                       onClick={() => setSelectedQuery(query.query_id || query.data_source_id)}
-                      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
-                        selectedQuery === (query.query_id || query.data_source_id)
+                      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${selectedQuery === (query.query_id || query.data_source_id)
                           ? 'bg-blue-50 border border-blue-200'
                           : 'hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center space-x-3">
                         <Icon className={`w-4 h-4 ${color}`} />
@@ -229,31 +500,56 @@ const CustomDashboardPage: React.FC = () => {
                 })
               )
             ) : (
-              filteredDashboards.map((dashboard) => {
-                const Icon = dashboard.icon;
-                return (
-                  <div
-                    key={dashboard.id}
-                    onClick={() => setSelectedQuery(dashboard.id)}
-                    className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
-                      selectedQuery === dashboard.id
-                        ? 'bg-blue-50 border border-blue-200'
-                        : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <Icon className={`w-4 h-4 ${dashboard.color}`} />
-                      <div className="flex flex-col">
-                        <span className="text-sm text-gray-900">{dashboard.name}</span>
-                        <span className="text-xs text-gray-500">{dashboard.charts} charts • {dashboard.lastModified}</span>
+              dashboardsLoading ? (
+                <div className="p-4 text-gray-500">Loading dashboards...</div>
+              ) : dashboardsError ? (
+                <div className="p-4 text-red-500">{dashboardsError}</div>
+              ) : filteredDashboards.length === 0 ? (
+                <div className="p-4 text-gray-500">No dashboards found.</div>
+              ) : (
+                filteredDashboards.map((dashboard) => {
+                  return (
+                    <div
+                      key={dashboard.page_id}
+                      onClick={() => setSelectedQuery(dashboard.page_id)}
+                      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${selectedQuery === dashboard.page_id
+                          ? 'bg-blue-50 border border-blue-200'
+                          : 'hover:bg-gray-50'
+                        }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <BarChart3 className="w-4 h-4 text-green-600" />
+                        <span className="text-sm text-gray-900">{dashboard.page_name}</span>
                       </div>
+                      <MoreHorizontal className="w-4 h-4 text-gray-400" />
                     </div>
-                    <MoreHorizontal className="w-4 h-4 text-gray-400" />
-                  </div>
-                );
-              })
+                  );
+                })
+              )
             )}
           </div>
+        </div>
+
+        {/* Suggested Queries */}
+        <div className="border-t border-gray-200 p-4">
+          <div className="flex items-center space-x-2 mb-3">
+            <Sparkles className="w-4 h-4 text-purple-500" />
+            <h4 className="text-sm font-medium text-gray-900">Suggested</h4>
+          </div>
+          {/* <div className="space-y-2">
+            {suggestedQueries.slice(0, 3).map((query) => (
+              <button
+                key={query.id}
+                onClick={() => {
+                  setUserPrompt(query.text);
+                  fetchChartFromPrompt(query.text);
+                }}
+                className="w-full text-left p-2 text-xs text-gray-600 hover:bg-gray-50 rounded transition-colors"
+              >
+                {query.text}
+              </button>
+            ))}
+          </div> */}
         </div>
       </div>
 
@@ -274,62 +570,66 @@ const CustomDashboardPage: React.FC = () => {
       <div className="flex-1 flex flex-col">
         {/* Top Header */}
         <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <div className="text-lg font-medium text-gray-900">transaction_data.csv</div>
+          <div className="text-lg font-medium text-gray-900">{dashboardTitle}</div>
+          <div className="text-sm text-gray-500">
+          </div>
         </div>
 
         {/* Content Area */}
         <div className="flex-1 p-6">
-          {/* Sample Chart using code from API */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Sample Chart (from API code)</h3>
-            {chartLoading ? (
-              <div className="text-gray-500">Loading chart...</div>
-            ) : chartError ? (
-              <div className="text-red-500">{chartError}</div>
-            ) : chartCode ? (
-              (() => {
-                // Remove 'return' if present and wrap in parentheses for JSX
-                let code = chartCode.trim();
-                if (code.startsWith('return')) {
-                  code = code.replace(/^return\s+/, '');
-                }
-                if (!code.startsWith('(')) {
-                  code = '(' + code;
-                }
-                if (!code.endsWith(')')) {
-                  code = code + ')';
-                }
-                // eslint-disable-next-line no-eval
-                return eval(code);
-              })()
-            ) : (
-              <div className="text-gray-500">No chart code available.</div>
-            )}
-          </div>
-
-          {/* Suggested Queries */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-            <div className="flex items-center space-x-2 mb-4">
-              <Sparkles className="w-5 h-5 text-purple-500" />
-              <h3 className="text-lg font-medium text-gray-900">Suggested</h3>
-            </div>
-            
-            <div className="space-y-4">
-              {suggestedQueries.map((query) => {
-                const Icon = query.icon;
-                return (
-                  <div
-                    key={query.id}
-                    className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                  >
-                    <Icon className="w-5 h-5 text-gray-400 mt-0.5" />
-                    <span className="text-sm text-gray-700 leading-relaxed">
-                      {query.text}
-                    </span>
+          {/* Chart Display - Render all visualizations from API */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            {visualizationsLoading ? (
+              <div className="flex items-center justify-center h-96 col-span-3">
+                <div className="text-gray-500">Loading visualizations...</div>
+              </div>
+            ) : visualizationsError ? (
+              <div className="flex items-center justify-center h-96 col-span-3">
+                <div className="text-red-500">{visualizationsError}</div>
+              </div>
+            ) : visualizations.length > 0 ? (
+              visualizations.map((viz, idx) => (
+                <div key={viz.VISUALIZATION_ID || idx} className="bg-white rounded-lg border border-gray-200 shadow p-4 flex flex-col relative">
+                  {/* Dropdown menu - moved to top right */}
+                    <div className="absolute right-4 top-4 z-10">
+                    <div className="relative">
+                      {/* Dropdown trigger button */}
+                      <button
+                      className="flex items-center px-2 py-1 text-xs font-medium bg-gray-100 rounded hover:bg-gray-200 focus:outline-none"
+                      onClick={() => {
+                        setVisualizations(prev =>
+                        prev.map((v, i) =>
+                          i === idx
+                          ? { ...v, showDropdown: !v.showDropdown }
+                          : { ...v, showDropdown: false }
+                        )
+                        );
+                      }}
+                      >
+                      <MoreHorizontal className="w-4 h-4 mr-1 text-gray-500" />
+                      <span></span>
+                      </button>
+                      {/* Dropdown menu */}
+                      {viz.showDropdown && (
+                      <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded shadow-lg py-1 z-20">
+                        <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">History</button>
+                        <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</button>
+                      </div>
+                      )}
+                    </div>
+                    </div>
+                  {/* Card content */}
+                  <div className="mb-2 font-semibold text-gray-800 pl-2 pr-8 pt-2">{viz.PROMPT}</div>
+                  <div className="flex-1 flex items-center justify-center">
+                    <EchartsCodeRenderer code={viz.ECHARTS_CODE} pageData={pageData} />
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              ))
+            ) : (
+              <div className="flex items-center justify-center h-96 col-span-3">
+                <div className="text-gray-500">No visualizations to display</div>
+              </div>
+            )}
           </div>
 
           {/* Query Input */}
@@ -339,13 +639,24 @@ const CustomDashboardPage: React.FC = () => {
               <div className="flex-1">
                 <input
                   type="text"
-                  placeholder="What were my top 5 products last month from @SalesData ?"
+                  placeholder="Ask me to create a chart... e.g., 'Plot a pie chart of the seven best customers'"
                   className="w-full text-sm text-gray-700 placeholder-gray-400 border-none outline-none"
-                  defaultValue="What were my top 5 products last month from @SalesData ?"
+                  value={userPrompt}
+                  onChange={(e) => setUserPrompt(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmitPrompt(e);
+                    }
+                  }}
                 />
               </div>
               <div className="flex items-center space-x-2">
-                <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
+                <button
+                  onClick={handleSubmitPrompt}
+                  disabled={chartLoading}
+                  className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
                   <Send className="w-4 h-4 text-white" />
                 </button>
               </div>
@@ -353,6 +664,51 @@ const CustomDashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating Action Button for creating a new dashboard */}
+      <button
+        onClick={() => setShowModal(true)}
+        className="fixed bottom-8 right-8 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl transition-colors"
+        title="Create New Dashboard"
+      >
+        +
+      </button>
+
+      {/* Modal for new dashboard name */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-8 w-96">
+            <h2 className="text-lg font-bold mb-4">Create New Dashboard</h2>
+            <input
+              type="text"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4 text-sm"
+              placeholder="Enter dashboard name..."
+              value={newDashboardName}
+              onChange={e => setNewDashboardName(e.target.value)}
+            />
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const newPageId = uuidv4();
+                  setPageDetails({ page_id: newPageId, page_name: newDashboardName || 'New Dashboard' });
+                  setShowModal(false);
+                  setNewDashboardName('');
+                }}
+                disabled={!newDashboardName.trim()}
+                className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

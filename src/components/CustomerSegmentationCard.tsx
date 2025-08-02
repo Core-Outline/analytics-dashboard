@@ -1,30 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Mail, Phone, MoreHorizontal } from 'lucide-react';
 
 const CustomerSegmentationCard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Best Customers');
-  const [customers, setCustomers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    setLoading(true);
-    fetch('http://127.0.0.1:5000/customer-segmentation?company=101')
-      .then(res => res.json())
-      .then(data => {
-        setCustomers(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError(true);
-        setLoading(false);
-      });
-  }, []);
 
   const tabs = [
     'Best Customers',
     'High ARPU',
-    'Low ARPU',
+    'Low ARPU', 
     'High Repeat',
     'Low Repeat',
     'Churned',
@@ -33,34 +16,238 @@ const CustomerSegmentationCard: React.FC = () => {
     'Low LTV'
   ];
 
-  // Segment logic (example: Best Customers = highest RFMScore)
-  const getSegmentedCustomers = () => {
-    if (loading || error) return [];
-    switch (activeTab) {
-      case 'Best Customers':
-        return customers.sort((a, b) => b.RFMScore - a.RFMScore).slice(0, 10);
-      case 'High ARPU':
-        return customers.sort((a, b) => b.arpu - a.arpu).slice(0, 10);
-      case 'Low ARPU':
-        return customers.sort((a, b) => a.arpu - b.arpu).slice(0, 10);
-      case 'High Repeat':
-        return customers.sort((a, b) => b.frequency - a.frequency).slice(0, 10);
-      case 'Low Repeat':
-        return customers.sort((a, b) => a.frequency - b.frequency).slice(0, 10);
-      case 'Churned':
-        return customers.filter(c => c.frequency === 0 || c.ltv < 1000).slice(0, 10);
-      case 'Recent':
-        return customers.sort((a, b) => b.recency - a.recency).slice(0, 10);
-      case 'High LTV':
-        return customers.sort((a, b) => b.ltv - a.ltv).slice(0, 10);
-      case 'Low LTV':
-        return customers.sort((a, b) => a.ltv - b.ltv).slice(0, 10);
-      default:
-        return customers.slice(0, 10);
-    }
+  // Sample customer data for different segments
+  const customerData = {
+    'Best Customers': [
+      {
+        name: 'Sarah Johnson',
+        email: 'sarah.johnson@email.com',
+        phone: '+1 (555) 123-4567',
+        arpu: '$2,450',
+        ltv: '$12,250',
+        recencyScore: 5,
+        frequencyScore: 5,
+        rfmScore: 'AAA',
+        action: 'Retain'
+      },
+      {
+        name: 'Michael Chen',
+        email: 'michael.chen@email.com',
+        phone: '+1 (555) 234-5678',
+        arpu: '$2,180',
+        ltv: '$10,900',
+        recencyScore: 5,
+        frequencyScore: 4,
+        rfmScore: 'AAB',
+        action: 'Upsell'
+      },
+      {
+        name: 'Emily Davis',
+        email: 'emily.davis@email.com',
+        phone: '+1 (555) 345-6789',
+        arpu: '$1,980',
+        ltv: '$9,900',
+        recencyScore: 4,
+        frequencyScore: 5,
+        rfmScore: 'ABA',
+        action: 'Retain'
+      }
+    ],
+    'High ARPU': [
+      {
+        name: 'David Wilson',
+        email: 'david.wilson@email.com',
+        phone: '+1 (555) 456-7890',
+        arpu: '$3,200',
+        ltv: '$8,500',
+        recencyScore: 3,
+        frequencyScore: 4,
+        rfmScore: 'BAB',
+        action: 'Engage'
+      },
+      {
+        name: 'Lisa Anderson',
+        email: 'lisa.anderson@email.com',
+        phone: '+1 (555) 567-8901',
+        arpu: '$2,850',
+        ltv: '$7,200',
+        recencyScore: 4,
+        frequencyScore: 3,
+        rfmScore: 'ABB',
+        action: 'Retain'
+      }
+    ],
+    'Low ARPU': [
+      {
+        name: 'James Brown',
+        email: 'james.brown@email.com',
+        phone: '+1 (555) 678-9012',
+        arpu: '$180',
+        ltv: '$900',
+        recencyScore: 3,
+        frequencyScore: 2,
+        rfmScore: 'BBC',
+        action: 'Nurture'
+      },
+      {
+        name: 'Maria Garcia',
+        email: 'maria.garcia@email.com',
+        phone: '+1 (555) 789-0123',
+        arpu: '$220',
+        ltv: '$1,100',
+        recencyScore: 4,
+        frequencyScore: 2,
+        rfmScore: 'ABC',
+        action: 'Upsell'
+      }
+    ],
+    'High Repeat': [
+      {
+        name: 'Robert Taylor',
+        email: 'robert.taylor@email.com',
+        phone: '+1 (555) 890-1234',
+        arpu: '$1,450',
+        ltv: '$14,500',
+        recencyScore: 5,
+        frequencyScore: 5,
+        rfmScore: 'AAA',
+        action: 'Retain'
+      },
+      {
+        name: 'Jennifer White',
+        email: 'jennifer.white@email.com',
+        phone: '+1 (555) 901-2345',
+        arpu: '$1,280',
+        ltv: '$12,800',
+        recencyScore: 4,
+        frequencyScore: 5,
+        rfmScore: 'ABA',
+        action: 'Reward'
+      }
+    ],
+    'Low Repeat': [
+      {
+        name: 'Thomas Miller',
+        email: 'thomas.miller@email.com',
+        phone: '+1 (555) 012-3456',
+        arpu: '$850',
+        ltv: '$1,700',
+        recencyScore: 2,
+        frequencyScore: 1,
+        rfmScore: 'CCC',
+        action: 'Win Back'
+      },
+      {
+        name: 'Amanda Jones',
+        email: 'amanda.jones@email.com',
+        phone: '+1 (555) 123-4567',
+        arpu: '$920',
+        ltv: '$1,840',
+        recencyScore: 3,
+        frequencyScore: 1,
+        rfmScore: 'BCC',
+        action: 'Engage'
+      }
+    ],
+    'Churned': [
+      {
+        name: 'Christopher Lee',
+        email: 'christopher.lee@email.com',
+        phone: '+1 (555) 234-5678',
+        arpu: '$0',
+        ltv: '$2,400',
+        recencyScore: 1,
+        frequencyScore: 1,
+        rfmScore: 'CCC',
+        action: 'Win Back'
+      },
+      {
+        name: 'Michelle Clark',
+        email: 'michelle.clark@email.com',
+        phone: '+1 (555) 345-6789',
+        arpu: '$0',
+        ltv: '$1,800',
+        recencyScore: 1,
+        frequencyScore: 2,
+        rfmScore: 'CBC',
+        action: 'Reactivate'
+      }
+    ],
+    'Recent': [
+      {
+        name: 'Daniel Rodriguez',
+        email: 'daniel.rodriguez@email.com',
+        phone: '+1 (555) 456-7890',
+        arpu: '$450',
+        ltv: '$450',
+        recencyScore: 5,
+        frequencyScore: 1,
+        rfmScore: 'ACC',
+        action: 'Onboard'
+      },
+      {
+        name: 'Ashley Martinez',
+        email: 'ashley.martinez@email.com',
+        phone: '+1 (555) 567-8901',
+        arpu: '$380',
+        ltv: '$380',
+        recencyScore: 5,
+        frequencyScore: 1,
+        rfmScore: 'ACC',
+        action: 'Welcome'
+      }
+    ],
+    'High LTV': [
+      {
+        name: 'Kevin Thompson',
+        email: 'kevin.thompson@email.com',
+        phone: '+1 (555) 678-9012',
+        arpu: '$1,850',
+        ltv: '$18,500',
+        recencyScore: 4,
+        frequencyScore: 5,
+        rfmScore: 'ABA',
+        action: 'VIP'
+      },
+      {
+        name: 'Rachel Green',
+        email: 'rachel.green@email.com',
+        phone: '+1 (555) 789-0123',
+        arpu: '$1,650',
+        ltv: '$16,500',
+        recencyScore: 5,
+        frequencyScore: 4,
+        rfmScore: 'AAB',
+        action: 'Retain'
+      }
+    ],
+    'Low LTV': [
+      {
+        name: 'Brian Wilson',
+        email: 'brian.wilson@email.com',
+        phone: '+1 (555) 890-1234',
+        arpu: '$120',
+        ltv: '$240',
+        recencyScore: 2,
+        frequencyScore: 1,
+        rfmScore: 'CCC',
+        action: 'Nurture'
+      },
+      {
+        name: 'Nicole Adams',
+        email: 'nicole.adams@email.com',
+        phone: '+1 (555) 901-2345',
+        arpu: '$150',
+        ltv: '$300',
+        recencyScore: 3,
+        frequencyScore: 1,
+        rfmScore: 'BCC',
+        action: 'Develop'
+      }
+    ]
   };
 
-  const currentData = getSegmentedCustomers();
+  const currentData = customerData[activeTab] || [];
 
   const getActionColor = (action: string) => {
     switch (action.toLowerCase()) {
@@ -114,57 +301,65 @@ const CustomerSegmentationCard: React.FC = () => {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        {loading ? (
-          <div className="text-center py-8 text-gray-500">Loading...</div>
-        ) : error ? (
-          <div className="text-center py-8 text-red-500">Error loading data</div>
-        ) : (
-        <table className="w-full border-separate border-spacing-y-2">
+        <table className="w-full">
           <thead>
-            <tr className="bg-gray-50">
-              <th className="text-left text-xs font-semibold text-gray-700 py-2 px-3 rounded-tl-lg">Name</th>
-              <th className="text-left text-xs font-semibold text-gray-700 py-2 px-3">Contact</th>
-              <th className="text-left text-xs font-semibold text-gray-700 py-2 px-3">ARPU</th>
-              <th className="text-left text-xs font-semibold text-gray-700 py-2 px-3">LTV</th>
-              <th className="text-center text-xs font-semibold text-gray-700 py-2 px-3">Recency</th>
-              <th className="text-center text-xs font-semibold text-gray-700 py-2 px-3">Frequency</th>
-              <th className="text-center text-xs font-semibold text-gray-700 py-2 px-3">RFM Class</th>
-              <th className="text-center text-xs font-semibold text-gray-700 py-2 px-3 rounded-tr-lg">RFM Score</th>
+            <tr className="border-b border-gray-200">
+              <th className="text-left text-sm font-medium text-gray-600 pb-3">Name</th>
+              <th className="text-left text-sm font-medium text-gray-600 pb-3">Email and Phone</th>
+              <th className="text-left text-sm font-medium text-gray-600 pb-3">ARPU</th>
+              <th className="text-left text-sm font-medium text-gray-600 pb-3">LTV</th>
+              <th className="text-center text-sm font-medium text-gray-600 pb-3">Recency Score</th>
+              <th className="text-center text-sm font-medium text-gray-600 pb-3">Frequency Score</th>
+              <th className="text-center text-sm font-medium text-gray-600 pb-3">RFM Score</th>
+              <th className="text-center text-sm font-medium text-gray-600 pb-3">Action</th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((customer, index) => (
-              <tr key={index} className="bg-white shadow-sm rounded-lg transition hover:bg-blue-50">
-                <td className="py-3 px-3 text-sm font-medium text-gray-900 flex items-center gap-2">
-                  <span className="inline-block w-2 h-2 rounded-full bg-blue-400 mr-2"></span>
-                  {customer.name}
+              <tr key={index} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
+                <td className="text-sm text-gray-900 py-4 font-medium">{customer.name}</td>
+                <td className="text-sm text-gray-600 py-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-1">
+                      <Mail className="w-3 h-3" />
+                      <span>{customer.email}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Phone className="w-3 h-3" />
+                      <span>{customer.phone}</span>
+                    </div>
+                  </div>
                 </td>
-                <td className="py-3 px-3 text-sm text-gray-600">
-                  <span className="inline-block bg-gray-100 rounded px-2 py-1 text-xs font-mono text-gray-700">{customer.contact}</span>
+                <td className="text-sm text-gray-900 py-4 font-medium">{customer.arpu}</td>
+                <td className="text-sm text-gray-900 py-4 font-medium">{customer.ltv}</td>
+                <td className="text-sm text-gray-900 py-4 text-center">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                    <span className="text-blue-800 font-bold text-xs">{customer.recencyScore}</span>
+                  </div>
                 </td>
-                <td className="py-3 px-3 text-sm font-semibold text-blue-700">{customer.arpu.toLocaleString()}</td>
-                <td className="py-3 px-3 text-sm font-semibold text-green-700">{customer.ltv.toLocaleString()}</td>
-                <td className="py-3 px-3 text-sm text-center">
-                  <span className="inline-block w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-700">{customer.recency}</span>
+                <td className="text-sm text-gray-900 py-4 text-center">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                    <span className="text-green-800 font-bold text-xs">{customer.frequencyScore}</span>
+                  </div>
                 </td>
-                <td className="py-3 px-3 text-sm text-center">
-                  <span className="inline-block w-8 h-8 rounded-full bg-green-100 flex items-center justify-center font-bold text-green-700">{customer.frequency}</span>
+                <td className="text-sm py-4 text-center">
+                  <span className={`font-mono text-sm ${getRFMScoreColor(customer.rfmScore)}`}>
+                    {customer.rfmScore}
+                  </span>
                 </td>
-                <td className="py-3 px-3 text-sm text-center">
-                  <span className="inline-block px-2 py-1 rounded font-mono text-xs bg-yellow-100 text-yellow-800">{customer.RFMClass}</span>
-                </td>
-                <td className="py-3 px-3 text-sm text-center font-mono font-bold">
-                  <span className="inline-block px-2 py-1 rounded bg-purple-100 text-purple-800">{customer.RFMScore}</span>
+                <td className="text-sm py-4 text-center">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getActionColor(customer.action)}`}>
+                    {customer.action}
+                  </span>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        )}
       </div>
 
       {/* Empty state */}
-      {!loading && !error && currentData.length === 0 && (
+      {currentData.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           No customers found in this segment
         </div>
