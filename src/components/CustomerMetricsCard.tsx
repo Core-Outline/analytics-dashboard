@@ -10,23 +10,54 @@ function abbreviateNumber(value: number): string {
 }
 
 const CustomerMetricsCard: React.FC = () => {
-  const [userCount, setUserCount] = useState<number | null>(null);
+  const [userCount, setUserCount] = useState<number | null>(0);
   const [userLoading, setUserLoading] = useState(true);
   const [userError, setUserError] = useState(false);
+
+  const [countryCount, setCountryCount] = useState<number | null>(0);
+  const [countryLoading, setCountryLoading] = useState(true);
+  const [countryError, setCountryError] = useState(false);
+
+  const [transactionCount, setTransactionCount] = useState<number | null>(0);
+  const [transactionLoading, setTransactionLoading] = useState(true);
+  const [transactionError, setTransactionError] = useState(false);
+
 
   useEffect(() => {
     setUserLoading(true);
     fetch('http://localhost:5000/unique-users?company=101')
       .then(res => res.json())
       .then(data => {
-        console.log('User data:', data);
         setUserCount(data.users);
         setUserLoading(false);
       })
       .catch((e) => {
-        console.error('Error fetching user data:', e);
         setUserError(true);
         setUserLoading(false);
+      });
+
+    setCountryLoading(true);
+    fetch('http://localhost:5000/unique-countries?company=101')
+      .then(res => res.json())
+      .then(data => {
+        setCountryCount(data.countries);
+        setCountryLoading(false);
+      })
+      .catch((e) => {
+        setCountryError(true);
+        setCountryLoading(false);
+      });
+
+    setTransactionLoading(true);
+    fetch('http://localhost:5000/unique-transactions?company=101')
+      .then(res => res.json())
+      .then(data => {
+        setTransactionCount(data.transactions);
+        setTransactionLoading(false);
+      })
+      .catch((e) => {
+        setTransactionError(true);
+        setTransactionLoading(false);
       });
   }, []);
 
@@ -48,8 +79,10 @@ const CustomerMetricsCard: React.FC = () => {
       iconBg: 'bg-blue-100',
       iconColor: 'text-blue-600',
       label: 'countries',
-      count: 0,
-      target: null
+      count: countryCount,
+      target: null,
+      loading: countryLoading,
+      error: countryError,
     },
     {
       title: 'Transaction data',
@@ -57,9 +90,12 @@ const CustomerMetricsCard: React.FC = () => {
       iconBg: 'bg-green-100',
       iconColor: 'text-green-600',
       label: 'transactions',
-      count: 0,
-      target: null
+      count: transactionCount,
+      target: null,
+      loading: transactionLoading,
+      error: transactionError,
     }
+    
   ];
 
   return (
@@ -88,7 +124,10 @@ const CustomerMetricsCard: React.FC = () => {
                   ) : metric.error ? (
                     <div className="text-red-600">Error loading data</div>
                   ) : (
+                    <div className="flex flex-row">
                     <div className="text-2xl font-bold text-gray-900">{abbreviateNumber(metric.count)}</div>
+                    <div className="text-sm font-light text-gray-900 mt-2 ml-2">{(metric.label)}</div>
+                    </div>
                   )
                 }
                 {/* <div className="text-sm text-gray-600">{abbreviateNumber(metric.count)} {metric.label}</div> */}
@@ -99,12 +138,12 @@ const CustomerMetricsCard: React.FC = () => {
                     <div className="inline-block bg-red-50 text-red-700 px-3 py-1 rounded-full text-xs font-medium">Error</div>
                   ) : (
                     <div className="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
-                      {metric.target !== null && metric.target !== undefined ? `Target: ${abbreviateNumber(metric.target)}` : '—'}
+                      {metric.target !== null && metric.target !== undefined ? `Target: ${abbreviateNumber(metric.target)}` : '—'}  
                     </div>
                   )
                 ) : (
                   <div className="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
-                    Target: {metric.count.toLocaleString()}
+                    Target: {metric.count.toLocaleString()} {}
                   </div>
                 )}
               </div>

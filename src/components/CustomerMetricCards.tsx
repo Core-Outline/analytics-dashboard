@@ -3,15 +3,52 @@ import ReactECharts from 'echarts-for-react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
 const CustomerMetricCards: React.FC = () => {
+  const [growthData, setGrowthData] = React.useState<number[]>([]);
+  const [growthLabels, setGrowthLabels] = React.useState<string[]>([]);
+  const [growthLoading, setGrowthLoading] = React.useState(true);
+  const [growthError, setGrowthError] = React.useState(false);
+
+  // Fetch Customer Growth Rate data
+  React.useEffect(() => {
+    setGrowthLoading(true);
+    setGrowthError(false);
+    fetch('http://127.0.0.1:5000/customer-growth-rate?time_units=M')
+      .then(res => res.json())
+      .then((data) => {
+        // data is an array: [{ period, customer_growth, customer_growth_pct }]
+        const labels = data.map((d: any) => d.period.slice(0, 7)); // 'YYYY-MM'
+        const values = data.map((d: any) => d.customer_growth_pct);
+        setGrowthLabels(labels);
+        setGrowthData(values);
+        setGrowthLoading(false);
+      })
+      .catch(() => {
+        setGrowthError(true);
+        setGrowthLoading(false);
+      });
+  }, []);
+
+  // Calculate latest value, previous value, growth, positivity
+  const lastIdx = growthData.length - 1;
+  const latest = growthData[lastIdx] ?? 0;
+  const prev = growthData[lastIdx - 1] ?? 0;
+  const growth = prev === 0 ? 0 : latest - prev;
+  const growthLabel = (growth >= 0 ? '+' : '') + growth.toFixed(1) + '%';
+  const isPositive = growth >= 0;
+  const target = '15%'; // Static for now, can be dynamic if needed
+
   const metrics = [
     {
       title: 'Customer Growth Rate',
-      value: '12.5%',
-      target: '15%',
-      growth: '+2.3%',
-      isPositive: true,
-      data: [8.2, 9.1, 10.5, 11.2, 10.8, 11.9, 12.5, 13.1, 12.8, 12.5],
-      color: '#3b82f6'
+      value: growthLoading ? '...' : latest.toFixed(1) + '%',
+      target: target,
+      growth: growthLoading ? '...' : growthLabel,
+      isPositive: isPositive,
+      data: growthData,
+      color: '#3b82f6',
+      loading: growthLoading,
+      error: growthError,
+      labels: growthLabels,
     },
     {
       title: 'Churn Rate',
@@ -51,7 +88,7 @@ const CustomerMetricCards: React.FC = () => {
     }
   ];
 
-  const createChartOption = (data: number[], color: string) => ({
+  const createChartOption = (data: number[], color: string, labels?: string[]) => ({
     grid: {
       left: '0%',
       right: '0%',
@@ -61,7 +98,7 @@ const CustomerMetricCards: React.FC = () => {
     },
     xAxis: {
       type: 'category',
-      data: Array.from({ length: data.length }, (_, i) => i),
+      data: labels || Array.from({ length: data.length }, (_, i) => i),
       show: false
     },
     yAxis: {
@@ -100,7 +137,7 @@ const CustomerMetricCards: React.FC = () => {
       }
     ],
     tooltip: {
-      show: false
+      show: true
     }
   });
 
@@ -111,8 +148,13 @@ const CustomerMetricCards: React.FC = () => {
           {/* Header */}
           <div className="mb-4">
             <h3 className="text-sm font-medium text-gray-600 mb-2">{metric.title}</h3>
-            <div className="text-2xl font-bold text-gray-900 mb-1">{metric.value}</div>
-            
+            {metric.loading ? (
+              <div className="h-7 w-1/3 bg-gray-200 rounded animate-pulse mb-1" />
+            ) : metric.error ? (
+              <div className="text-red-500 mb-1">Error loading data</div>
+            ) : (
+              <div className="text-2xl font-bold text-gray-900 mb-1">{metric.value}</div>
+            )}
             {/* Target and Growth */}
             <div className="flex items-center justify-between text-xs">
               <span className="text-gray-500">Target: {metric.target}</span>
@@ -133,11 +175,17 @@ const CustomerMetricCards: React.FC = () => {
 
           {/* Chart */}
           <div className="h-16">
-            <ReactECharts 
-              option={createChartOption(metric.data, metric.color)} 
-              style={{ height: '64px', width: '100%' }}
-              opts={{ renderer: 'canvas' }}
-            />
+            {metric.loading ? (
+              <div className="h-full w-full bg-gray-100 animate-pulse rounded" />
+            ) : metric.error ? (
+              <div className="text-red-400 text-sm">Chart unavailable</div>
+            ) : (
+              <ReactECharts 
+                option={createChartOption(metric.data, metric.color, metric.labels)} 
+                style={{ height: '64px', width: '100%' }}
+                opts={{ renderer: 'canvas' }}
+              />
+            )}
           </div>
         </div>
       ))}

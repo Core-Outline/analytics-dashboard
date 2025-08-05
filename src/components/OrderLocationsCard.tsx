@@ -22,23 +22,61 @@ const OrderLocationsCard: React.FC = () => {
       });
   }, []);
 
-  // Sample data for order locations
-  const locationData = [
-    { city: 'New York', country: 'United States', sessions: 12450, users: 8920, percentage: 23.5 },
-    { city: 'London', country: 'United Kingdom', sessions: 9680, users: 7240, percentage: 18.2 },
-    { city: 'Tokyo', country: 'Japan', sessions: 8320, users: 6180, percentage: 15.6 },
-    { city: 'Berlin', country: 'Germany', sessions: 7150, users: 5340, percentage: 13.4 },
-    { city: 'Sydney', country: 'Australia', sessions: 5890, users: 4420, percentage: 11.1 },
-    { city: 'Toronto', country: 'Canada', sessions: 4720, users: 3580, percentage: 8.9 },
-    { city: 'Paris', country: 'France', sessions: 3960, users: 2980, percentage: 7.4 },
-    { city: 'Mumbai', country: 'India', sessions: 2840, users: 2150, percentage: 5.3 }
-  ];
+  // --- API State ---
+  interface CountryStat {
+    country: string;
+    count: number;
+    percentage: number;
+  }
+  interface MergedCountry {
+    country: string;
+    sessions: number;
+    users: number;
+    percentage: number;
+  }
+  const [sessionsData, setSessionsData] = useState<CountryStat[]>([]);
+  const [usersData, setUsersData] = useState<CountryStat[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
 
-  // World map data for visualization
-  const mapData = locationData.map(item => ({
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+    fetch('http://localhost:5000/user-sessions-country?company=101')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch');
+        return res.json();
+      })
+      .then(data => {
+        setSessionsData(data.sessions || []);
+        setUsersData(data.users || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      });
+  }, []);
+
+  // Merge sessions and users by country
+  const mergedData: MergedCountry[] = sessionsData.map(session => {
+    const user = usersData.find(u => u.country === session.country);
+    return {
+      country: session.country,
+      sessions: session.count,
+      users: user ? user.count : 0,
+      percentage: session.percentage
+    };
+  });
+
+  // For the map
+  const mapData = mergedData.map(item => ({
     name: item.country,
     value: item.sessions
   }));
+
+  // For the table (top 6 by sessions)
+  const tableData = [...mergedData].sort((a, b) => b.sessions - a.sessions).slice(0, 6);
 
   const mapOption = {
     geo: {
@@ -55,41 +93,7 @@ const OrderLocationsCard: React.FC = () => {
         itemStyle: {
           areaColor: '#4a90e2'
         }
-      },
-      regions: [
-        {
-          name: 'United States',
-          itemStyle: { areaColor: '#1e40af' }
-        },
-        {
-          name: 'United Kingdom', 
-          itemStyle: { areaColor: '#2563eb' }
-        },
-        {
-          name: 'Japan',
-          itemStyle: { areaColor: '#3b82f6' }
-        },
-        {
-          name: 'Germany',
-          itemStyle: { areaColor: '#60a5fa' }
-        },
-        {
-          name: 'Australia',
-          itemStyle: { areaColor: '#93c5fd' }
-        },
-        {
-          name: 'Canada',
-          itemStyle: { areaColor: '#bfdbfe' }
-        },
-        {
-          name: 'France',
-          itemStyle: { areaColor: '#dbeafe' }
-        },
-        {
-          name: 'India',
-          itemStyle: { areaColor: '#eff6ff' }
-        }
-      ]
+      }
     },
     series: [
       {
@@ -108,13 +112,13 @@ const OrderLocationsCard: React.FC = () => {
         fontSize: 12
       },
       formatter: function(params: any) {
-        const locationInfo = locationData.find(item => item.country === params.name);
+        const locationInfo = mergedData.find(item => item.country === params.name);
         if (locationInfo) {
           return `
             <div style="font-weight: 600; margin-bottom: 4px;">${params.name}</div>
             <div>Sessions: ${locationInfo.sessions.toLocaleString()}</div>
             <div>Users: ${locationInfo.users.toLocaleString()}</div>
-            <div>Percentage: ${locationInfo.percentage}%</div>
+            <div>Percentage: ${locationInfo.percentage?.toFixed(2)}%</div>
           `;
         }
         return params.name;
@@ -157,40 +161,46 @@ const OrderLocationsCard: React.FC = () => {
 
       {/* Data Table */}
       <div className="overflow-x-auto">
+        {loading ? (
+          <div className="py-8 text-center text-gray-400">Loading data...</div>
+        ) : error ? (
+          <div className="py-8 text-center text-red-500">Failed to load location data.</div>
+        ) : (
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-200">
               <th className="text-left text-sm font-medium text-gray-500 pb-3 flex items-center">
-                City
+                Country
                 <svg className="w-3 h-3 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                 </svg>
               </th>
-              <th className="text-left text-sm font-medium text-gray-500 pb-3 flex items-center">
-                Sessions
-                <svg className="w-3 h-3 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                </svg>
-              </th>
-              <th className="text-left text-sm font-medium text-gray-500 pb-3 flex items-center">
-                Users
-                <svg className="w-3 h-3 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                </svg>
-              </th>
+              <th className="text-left text-sm font-medium text-gray-500 pb-3">
+  <span className="flex items-center">
+    Sessions
+    <svg className="w-3 h-3 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+    </svg>
+  </span>
+</th>
+              <th className="text-left text-sm font-medium text-gray-500 pb-3">
+  <span className="flex items-center">
+    Users
+    <svg className="w-3 h-3 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+    </svg>
+  </span>
+</th>
               <th className="text-right text-sm font-medium text-gray-500 pb-3">
                 Percentage
               </th>
             </tr>
           </thead>
           <tbody>
-            {locationData.slice(0, 6).map((location, index) => (
+            {tableData.map((location, index) => (
               <tr key={index} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
-                <td className="text-sm text-gray-900 py-4">
-                  <div>
-                    <div className="font-medium">{location.city}</div>
-                    <div className="text-gray-500 text-xs">{location.country}</div>
-                  </div>
+                <td className="text-sm text-gray-900 py-4 font-medium">
+                  {location.country}
                 </td>
                 <td className="text-sm text-gray-900 py-4 font-medium">
                   {location.sessions.toLocaleString()}
@@ -199,12 +209,13 @@ const OrderLocationsCard: React.FC = () => {
                   {location.users.toLocaleString()}
                 </td>
                 <td className="text-sm text-gray-900 py-4 text-right font-medium">
-                  {location.percentage}%
+                  {location.percentage?.toFixed(2)}%
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        )}
       </div>
 
       {/* View All Link */}
