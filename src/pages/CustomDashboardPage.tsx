@@ -4,6 +4,20 @@ interface EchartsCodeRendererProps {
   pageData: any;
 }
 
+interface Visualization {
+  VISUALIZATION_ID: string;
+  THREAD_ID: string;
+  IS_ACTIVE: boolean;
+  PROMPT: string;
+  ECHARTS_CODE: string;
+  CREATED_DATE: string;
+}
+
+interface VisualizationState {
+  active: Visualization[];
+  history: { [key: string]: Visualization[] };
+}
+
 const EchartsCodeRenderer: React.FC<EchartsCodeRendererProps> = ({ code, pageData }) => {
   const [option, setOption] = React.useState<any>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -38,7 +52,7 @@ const EchartsCodeRenderer: React.FC<EchartsCodeRendererProps> = ({ code, pageDat
       setError(null);
     } catch (err: any) {
       setOption(null);
-      console.error("Chart rendering error: ",err)
+      console.error("Chart rendering error: ", err)
       setError(err && err.message ? err.message : String(err));
     }
   }, [code, pageData]);
@@ -48,11 +62,18 @@ const EchartsCodeRenderer: React.FC<EchartsCodeRendererProps> = ({ code, pageDat
   return <ReactECharts option={option} style={{ height: '400px', width: '100%' }} opts={{ renderer: 'canvas' }} />;
 };
 import React, { useState, useEffect } from 'react';
-import { Search, FileText, MoreHorizontal, Sparkles, BarChart3, Send, Paperclip, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, FileText, MoreHorizontal, Sparkles, BarChart3, Send, Paperclip, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import ReactECharts from 'echarts-for-react';
 import { v4 as uuidv4 } from 'uuid';
 
 const CustomDashboardPage: React.FC = () => {
+  // State for visualization modal
+  const [showVizModal, setShowVizModal] = useState(false);
+  const [activeViz, setActiveViz] = useState<any>(null);
+  const [editPrompt, setEditPrompt] = useState('');
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyVisualizations, setHistoryVisualizations] = useState<any[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedQuery, setSelectedQuery] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -60,7 +81,7 @@ const CustomDashboardPage: React.FC = () => {
   const [queries, setQueries] = useState<any[]>([]);
   const [queriesLoading, setQueriesLoading] = useState(false);
   const [queriesError, setQueriesError] = useState<string | null>(null);
-  const [userPrompt, setUserPrompt] = useState('Plot a pie chart of the seven best customers');
+  const [userPrompt, setUserPrompt] = useState(null);
   const [chartOption, setChartOption] = useState<any>(null);
   const [chartLoading, setChartLoading] = useState(false);
   const [chartError, setChartError] = useState<string | null>(null);
@@ -129,26 +150,76 @@ const CustomDashboardPage: React.FC = () => {
   }, []);
 
   // State for visualizations
-  const [visualizations, setVisualizations] = useState<any[]>([]);
+  const [visualizations, setVisualizations] = useState<VisualizationState>(
+    { active: [], history: {} }
+  );
+
+  // Add showDropdown property to Visualization interface
+  interface Visualization {
+    VISUALIZATION_ID: string;
+    THREAD_ID: string;
+    IS_ACTIVE: boolean;
+    PROMPT: string;
+    ECHARTS_CODE: string;
+    CREATED_DATE: string;
+    showDropdown?: boolean;
+  }
   const [visualizationsLoading, setVisualizationsLoading] = useState(false);
   const [visualizationsError, setVisualizationsError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchVisualizations() {
-      setVisualizationsLoading(true);
-      try {
-        const res = await fetch('http://localhost:5000/visualizations?user_id=101&page_id=0c8e0d4f-12ba-4840-ac15-22756dba72ab&thread_id');
-        if (!res.ok) throw new Error('Failed to fetch visualizations');
-        const data = await res.json();
-        setVisualizations(data);
-        setVisualizationsError(null);
-      } catch (err) {
-        setVisualizationsError('Failed to load visualizations');
-      }
-      setVisualizationsLoading(false);
+  // Modified: fetchVisualizations now accepts pageId
+  const fetchVisualizations = async (pageId?: string) => {
+    setVisualizationsLoading(true);
+    try {
+      const page_id_param = pageId || '0c8e0d4f-12ba-4840-ac15-22756dba72ab';
+      const res = await fetch(`http://localhost:5000/visualizations?user_id=101&page_id=${page_id_param}&thread_id`);
+      if (!res.ok) throw new Error('Failed to fetch visualizations');
+      const data: Visualization[] = await res.json();
+      
+      // Separate active and historical visualizations
+      const activeViz = data.filter((viz: Visualization) => viz.IS_ACTIVE === true);
+      const historicalViz = data.filter((viz: Visualization) => viz.IS_ACTIVE === false);
+      
+      // Group historical visualizations by thread_id
+      const threadHistory = new Map<string, Visualization[]>();
+      historicalViz.forEach((viz: Visualization) => {
+        if (!threadHistory.has(viz.THREAD_ID)) {
+          threadHistory.set(viz.THREAD_ID, []);
+        }
+        threadHistory.get(viz.THREAD_ID)?.push(viz);
+      });
+
+      // Sort historical visualizations by creation date for each thread
+      threadHistory.forEach((history, threadId) => {
+        threadHistory.set(threadId, history.sort((a: Visualization, b: Visualization) => 
+          new Date(b.CREATED_DATE).getTime() - new Date(a.CREATED_DATE).getTime()
+        ));
+      });
+
+      // Store the processed data
+      setVisualizations({
+        active: activeViz,
+        history: Object.fromEntries(threadHistory)
+      });
+      setVisualizationsError(null);
+    } catch (err) {
+      setVisualizationsError('Failed to load visualizations');
     }
-    fetchVisualizations();
-  }, []);
+    setVisualizationsLoading(false);
+  };
+
+  const fetchEditHistory = async (threadId: string) => {
+    setHistoryLoading(true);
+    try {
+      const res = await fetch(`http://localhost:5000/visualizations?user_id=101&thread_id=${threadId}`);
+      if (!res.ok) throw new Error('Failed to fetch edit history');
+      const data = await res.json();
+      setHistoryVisualizations(data.sort((a: any, b: any) => new Date(b.CREATED_DATE) - new Date(a.CREATED_DATE)));
+    } catch (err) {
+      console.error('Failed to fetch edit history:', err);
+    }
+    setHistoryLoading(false);
+  };
 
   // Function to execute code returned from backend
   const executeChartCode = (codeString: string) => {
@@ -397,7 +468,11 @@ const chartOption = {
   return (
     <div className="min-h-screen bg-gray-50 flex relative">
       {/* Left Sidebar */}
-      <div className={`${isSidebarCollapsed ? 'w-0' : 'w-80'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300 overflow-hidden`}>
+      <div
+        className={`${isSidebarCollapsed ? 'w-0' : 'w-80'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300 overflow-hidden`}
+        style={{ height: '92vh' }}
+      >
+
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center space-x-2 mb-4">
@@ -413,8 +488,8 @@ const chartOption = {
               <button
                 onClick={() => setActiveTab('Queries')}
                 className={`px-4 py-2 text-sm font-medium ${activeTab === 'Queries'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
                   }`}
               >
                 Queries
@@ -422,8 +497,8 @@ const chartOption = {
               <button
                 onClick={() => setActiveTab('Dashboard')}
                 className={`px-4 py-2 text-sm font-medium ${activeTab === 'Dashboard'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
                   }`}
               >
                 Dashboard
@@ -431,6 +506,18 @@ const chartOption = {
             </div>
           </div>
         </div>
+        {/* Sidebar Toggle Button */}
+        <button
+          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          className="absolute left-0 top-20 transform -translate-y-1/2 z-10 bg-white border border-gray-200 rounded-r-lg p-2 shadow-md hover:bg-gray-50 transition-colors"
+          style={{ left: isSidebarCollapsed ? '0px' : '320px' }}
+        >
+          {isSidebarCollapsed ? (
+            <ChevronRight className="w-4 h-4 text-gray-600" />
+          ) : (
+            <ChevronLeft className="w-4 h-4 text-gray-600" />
+          )}
+        </button>
 
         {/* Search */}
         <div className="p-4 border-b border-gray-200">
@@ -476,8 +563,8 @@ const chartOption = {
                       key={query.query_id}
                       onClick={() => setSelectedQuery(query.query_id || query.data_source_id)}
                       className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${selectedQuery === (query.query_id || query.data_source_id)
-                          ? 'bg-blue-50 border border-blue-200'
-                          : 'hover:bg-gray-50'
+                        ? 'bg-blue-50 border border-blue-200'
+                        : 'hover:bg-gray-50'
                         }`}
                     >
                       <div className="flex items-center space-x-3">
@@ -511,10 +598,13 @@ const chartOption = {
                   return (
                     <div
                       key={dashboard.page_id}
-                      onClick={() => setSelectedQuery(dashboard.page_id)}
+                      onClick={() => {
+                        setSelectedQuery(dashboard.page_id);
+                        fetchVisualizations(dashboard.page_id);
+                      }}
                       className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${selectedQuery === dashboard.page_id
-                          ? 'bg-blue-50 border border-blue-200'
-                          : 'hover:bg-gray-50'
+                        ? 'bg-blue-50 border border-blue-200'
+                        : 'hover:bg-gray-50'
                         }`}
                     >
                       <div className="flex items-center space-x-3">
@@ -551,20 +641,11 @@ const chartOption = {
             ))}
           </div> */}
         </div>
+
+
       </div>
 
-      {/* Sidebar Toggle Button */}
-      <button
-        onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white border border-gray-200 rounded-r-lg p-2 shadow-md hover:bg-gray-50 transition-colors"
-        style={{ left: isSidebarCollapsed ? '0px' : '320px' }}
-      >
-        {isSidebarCollapsed ? (
-          <ChevronRight className="w-4 h-4 text-gray-600" />
-        ) : (
-          <ChevronLeft className="w-4 h-4 text-gray-600" />
-        )}
-      </button>
+
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
@@ -587,53 +668,144 @@ const chartOption = {
               <div className="flex items-center justify-center h-96 col-span-3">
                 <div className="text-red-500">{visualizationsError}</div>
               </div>
-            ) : visualizations.length > 0 ? (
-              visualizations.map((viz, idx) => (
+            ) : visualizations && visualizations.active.length > 0 ? (
+              visualizations?.active?.map((viz, idx) => (
                 <div key={viz.VISUALIZATION_ID || idx} className="bg-white rounded-lg border border-gray-200 shadow p-4 flex flex-col relative">
                   {/* Dropdown menu - moved to top right */}
-                    <div className="absolute right-4 top-4 z-10">
+                  <div className="absolute right-4 top-4 z-10">
                     <div className="relative">
                       {/* Dropdown trigger button */}
-                      <button
-                      className="flex items-center px-2 py-1 text-xs font-medium bg-gray-100 rounded hover:bg-gray-200 focus:outline-none"
-                      onClick={() => {
-                        setVisualizations(prev =>
-                        prev.map((v, i) =>
-                          i === idx
-                          ? { ...v, showDropdown: !v.showDropdown }
-                          : { ...v, showDropdown: false }
-                        )
-                        );
-                      }}
-                      >
-                      <MoreHorizontal className="w-4 h-4 mr-1 text-gray-500" />
-                      <span></span>
-                      </button>
-                      {/* Dropdown menu */}
-                      {viz.showDropdown && (
-                      <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded shadow-lg py-1 z-20">
-                        <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">History</button>
-                        <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</button>
-                      </div>
-                      )}
+                          <button className=" text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => { 
+                            setActiveViz(viz); 
+                            setShowVizModal(true); 
+                            setVisualizations(prev => ({ 
+                              ...prev, 
+                              active: prev.active.map(v => ({ 
+                                ...v, 
+                                showDropdown: false 
+                              })) 
+                            }));
+                          }}>
+                            <Maximize2 className=" h-4 mr-1 text-gray-500" />
+                          </button>
                     </div>
-                    </div>
+                  </div>
                   {/* Card content */}
                   <div className="mb-2 font-semibold text-gray-800 pl-2 pr-8 pt-2">{viz.PROMPT}</div>
                   <div className="flex-1 flex items-center justify-center">
                     <EchartsCodeRenderer code={viz.ECHARTS_CODE} pageData={pageData} />
                   </div>
+                  {/* Show history count if available */}
+                  {visualizations?.history?.[viz.THREAD_ID] && (
+                    <div className="mt-2 text-sm text-gray-500">
+                      {visualizations.history[viz.THREAD_ID].length} previous versions
+                    </div>
+                  )}
                 </div>
               ))
             ) : (
               <div className="flex items-center justify-center h-96 col-span-3">
-                <div className="text-gray-500">No visualizations to display</div>
+                <div className="text-gray-500">No active visualizations to display</div>
               </div>
             )}
+
+            {/* Visualization Fullscreen Modal */}
+            {showVizModal && activeViz && (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-60">
+                <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-5xl h-[90vh] flex flex-col relative">
+                  {/* Close button */}
+                  <button
+                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
+                    onClick={() => { setShowVizModal(false); setActiveViz(null); }}
+                    title="Close"
+                  >
+                    &times;
+                  </button>
+                  {/* Visualization Title */}
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className="text-lg font-semibold text-gray-900">{activeViz.PROMPT}</div>
+                    <button
+                      className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm"
+                      onClick={() => {
+                        setShowHistory(true);
+                        fetchEditHistory(activeViz.THREAD_ID);
+                      }}
+                    >
+                      View Edit History
+                    </button>
+                  </div>
+                  {/* Visualization Chart */}
+                  <div className="flex-1 flex items-center justify-center mb-6">
+                    <EchartsCodeRenderer code={activeViz.ECHARTS_CODE} pageData={pageData} />
+                  </div>
+                  {/* Edit Prompt */}
+                  <div className="mt-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Edit Visualization Prompt</label>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="text"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        placeholder="Describe how you want to edit this visualization..."
+                        value={editPrompt}
+                        onChange={e => setEditPrompt(e.target.value)}
+                      />
+                      <button
+                        className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 text-sm"
+                        onClick={() => {/* TODO: handle edit visualization */ }}
+                      >
+                        Send
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Visualization Edit History Modal */}
+            {showHistory && (
+              <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black bg-opacity-70">
+                <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-2xl h-[70vh] flex flex-col relative">
+                  <button
+                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
+                    onClick={() => {
+                      setShowHistory(false);
+                      setHistoryVisualizations([]);
+                    }}
+                    title="Close"
+                  >
+                    &times;
+                  </button>
+                  <div className="mb-4 text-lg font-semibold text-gray-900">Edit History for Visualization</div>
+                  {/* TODO: Render actual history data here */}
+                  <div className="flex-1 overflow-y-auto">
+                    {historyLoading ? (
+                      <div className="text-gray-500">Loading edit history...</div>
+                    ) : historyVisualizations.length === 0 ? (
+                      <div className="text-gray-500">No edit history available.</div>
+                    ) : (
+                      historyVisualizations.map((viz, idx) => (
+                        <div key={viz.VISUALIZATION_ID || idx} className="bg-white rounded-lg border border-gray-200 shadow p-4 flex flex-col relative mb-4">
+                          <div className="mb-2 font-semibold text-gray-800 pl-2 pr-8 pt-2">{viz.PROMPT}</div>
+                          <div className="flex-1 flex items-center justify-center">
+                            <EchartsCodeRenderer code={viz.ECHARTS_CODE} pageData={pageData} />
+                          </div>
+                        </div>
+                      ))
+                    )}
+                    <div className="text-gray-500">No history available (demo placeholder).</div>
+                  </div>
+                </div>
+              </div>
+            )}
+             : (
+            <div className="flex items-center justify-center h-96 col-span-3">
+              <div className="text-gray-500">No visualizations to display</div>
+            </div>
+            )
           </div>
 
           {/* Query Input */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="fixed bottom-2 right-20 bg-white rounded-lg border border-gray-200 p-4 w-1/2">
             <div className="flex items-center space-x-3">
               <Paperclip className="w-5 h-5 text-gray-400" />
               <div className="flex-1">
@@ -668,7 +840,7 @@ const chartOption = {
       {/* Floating Action Button for creating a new dashboard */}
       <button
         onClick={() => setShowModal(true)}
-        className="fixed bottom-8 right-8 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl transition-colors"
+        className="fixed top-20 right-8 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl transition-colors"
         title="Create New Dashboard"
       >
         +

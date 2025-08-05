@@ -1,23 +1,86 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { ChevronDown } from 'lucide-react';
 
-const AdCampaignsCard: React.FC = () => {
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  
-  // Sample data for clicks and cost
-  const clicksData = [3600, 3700, 3900, 3800, 3500, 3700, 3800];
-  const costData = [10200, 10500, 10900, 10800, 10600, 10700, 10870];
+// Type for ad campaign data from API
+interface AdCampaign {
+  ad_id: string;
+  source: string;
+  datetime: string;
+  campaign_id: string;
+  campaign_name: string;
+  cost: number;
+  ad_group_id: string;
+  ad_group_name: string;
+  impressions: number;
+  clicks: number;
+  click_through_rate: number;
+  cost_per_click: number;
+  conversions: number;
+  cost_micros: number;
+  reach: number;
+  organization_id: number;
+}
 
-  // Table data matching the image
-  const campaignData = [
-    { name: 'Black Friday Sale', source: 'Google', cost: '$1304.28', clicks: '543217' },
-    { name: 'Christmas Bundle', source: 'Facebook', cost: '$9876.56', clicks: '3904' },
-    { name: 'Halloween Party Started 🎃👻', source: 'Facebook', cost: '$3267.84', clicks: '7654' },
-    { name: 'Grab your reward', source: 'Instagram', cost: '$87545.28', clicks: '68654' },
-    { name: 'Black Friday Sale', source: 'Google', cost: '$1304.28', clicks: '3904' },
-    { name: 'Boxing Day offer', source: 'Instagram', cost: '$1200.5', clicks: '5004' }
-  ];
+const AdCampaignsCard: React.FC = () => {
+  const [adData, setAdData] = useState<AdCampaign[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch data from API
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch('http://localhost:5000/get-ads-data?company_id=301');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        console.log("This is the ads data: ",data)
+        setAdData(data);
+      } catch (err: any) {
+        setError(err.message || 'Unknown error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Extract days for the last 7 days (if needed for chart)
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']; // Placeholder, ideally map from data
+
+  // Aggregate clicks and cost per day (simple example, can be improved)
+  const getChartData = (key: keyof AdCampaign) => {
+    // Group by day, sum values
+    const today = new Date();
+    const chartArr = Array(7).fill(0);
+    adData.forEach(item => {
+      const date = new Date(item.datetime);
+      // Calculate day index (0 = today, 6 = 6 days ago)
+      const diff = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+      if (diff >= 0 && diff < 7) {
+        chartArr[6 - diff] += Number(item[key]);
+      }
+    });
+    return chartArr;
+  };
+
+  const clicksData = getChartData('clicks');
+  const costData = getChartData('cost');
+
+  // Table data: show latest campaigns (sort by datetime desc)
+  const campaignData = adData
+    .slice()
+    .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime())
+    .slice(0, 6)
+    .map(item => ({
+      name: item.campaign_name,
+      source: item.source,
+      cost: `$${item.cost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      clicks: item.clicks.toLocaleString(),
+    }));
+
 
   const createChartOption = (data: number[], color: string, gradientColor: string) => ({
     grid: {
@@ -68,7 +131,7 @@ const AdCampaignsCard: React.FC = () => {
       }
     ],
     tooltip: {
-      show: false
+      show: true
     }
   });
 
@@ -83,7 +146,9 @@ const AdCampaignsCard: React.FC = () => {
         <div>
           <div className="mb-2">
             <div className="text-sm text-gray-600 mb-1">Cost</div>
-            <div className="text-2xl font-bold text-gray-900">$10.87k</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {`$${costData.reduce((a, b) => a + b, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            </div>
           </div>
           <div className="h-16">
             <ReactECharts 
@@ -98,7 +163,12 @@ const AdCampaignsCard: React.FC = () => {
         <div>
           <div className="mb-2">
             <div className="text-sm text-gray-600 mb-1">Clicks</div>
-            <div className="text-2xl font-bold text-gray-900">3.8k</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {(() => {
+                const total = clicksData.reduce((a, b) => a + b, 0);
+                return total >= 1000 ? `${(total / 1000).toFixed(1)}k` : total.toLocaleString();
+              })()}
+            </div>
           </div>
           <div className="h-16">
             <ReactECharts 
