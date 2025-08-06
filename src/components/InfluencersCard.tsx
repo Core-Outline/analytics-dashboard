@@ -13,204 +13,51 @@ const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect })
   const analyticsRef = useRef<HTMLDivElement>(null);
   const influencersPerPage = 5;
 
-  // Sample influencer data
-  const influencers = [
-    {
-      id: 'sarah_lifestyle',
-      name: 'Sarah Johnson',
-      handle: '@sarah_lifestyle',
-      platform: 'Instagram',
-      followers: '2.4M',
-      engagement: '4.8%',
-      posts: 156,
-      avgLikes: '115K',
-      avgComments: '2.3K',
-      category: 'Lifestyle',
-      avatar: 'SJ'
-    },
-    {
-      id: 'tech_mike',
-      name: 'Michael Chen',
-      handle: '@tech_mike',
-      platform: 'YouTube',
-      followers: '1.8M',
-      engagement: '6.2%',
-      posts: 89,
-      avgLikes: '89K',
-      avgComments: '4.1K',
-      category: 'Technology',
-      avatar: 'MC'
-    },
-    {
-      id: 'fitness_emily',
-      name: 'Emily Davis',
-      handle: '@fitness_emily',
-      platform: 'TikTok',
-      followers: '3.1M',
-      engagement: '7.5%',
-      posts: 234,
-      avgLikes: '187K',
-      avgComments: '5.8K',
-      category: 'Fitness',
-      avatar: 'ED'
-    },
-    {
-      id: 'food_david',
-      name: 'David Wilson',
-      handle: '@food_david',
-      platform: 'Instagram',
-      followers: '1.2M',
-      engagement: '5.4%',
-      posts: 298,
-      avgLikes: '65K',
-      avgComments: '1.9K',
-      category: 'Food',
-      avatar: 'DW'
-    },
-    {
-      id: 'travel_lisa',
-      name: 'Lisa Anderson',
-      handle: '@travel_lisa',
-      platform: 'Instagram',
-      followers: '2.8M',
-      engagement: '4.1%',
-      posts: 187,
-      avgLikes: '142K',
-      avgComments: '3.2K',
-      category: 'Travel',
-      avatar: 'LA'
-    },
-    {
-      id: 'gaming_alex',
-      name: 'Alex Rodriguez',
-      handle: '@gaming_alex',
-      platform: 'Twitch',
-      followers: '1.5M',
-      engagement: '8.2%',
-      posts: 145,
-      avgLikes: '78K',
-      avgComments: '3.7K',
-      category: 'Gaming',
-      avatar: 'AR'
-    },
-    {
-      id: 'beauty_sophia',
-      name: 'Sophia Martinez',
-      handle: '@beauty_sophia',
-      platform: 'Instagram',
-      followers: '2.1M',
-      engagement: '5.9%',
-      posts: 312,
-      avgLikes: '124K',
-      avgComments: '2.8K',
-      category: 'Beauty',
-      avatar: 'SM'
-    },
-    {
-      id: 'business_james',
-      name: 'James Thompson',
-      handle: '@business_james',
-      platform: 'LinkedIn',
-      followers: '890K',
-      engagement: '4.3%',
-      posts: 78,
-      avgLikes: '38K',
-      avgComments: '1.2K',
-      category: 'Business',
-      avatar: 'JT'
-    },
-    {
-      id: 'music_taylor',
-      name: 'Taylor Swift Fan',
-      handle: '@music_taylor',
-      platform: 'TikTok',
-      followers: '4.2M',
-      engagement: '9.1%',
-      posts: 567,
-      avgLikes: '312K',
-      avgComments: '8.9K',
-      category: 'Music',
-      avatar: 'TS'
-    },
-    {
-      id: 'fashion_olivia',
-      name: 'Olivia Brown',
-      handle: '@fashion_olivia',
-      platform: 'Instagram',
-      followers: '1.9M',
-      engagement: '6.7%',
-      posts: 289,
-      avgLikes: '127K',
-      avgComments: '3.4K',
-      category: 'Fashion',
-      avatar: 'OB'
-    },
-    {
-      id: 'sports_marcus',
-      name: 'Marcus Johnson',
-      handle: '@sports_marcus',
-      platform: 'YouTube',
-      followers: '2.3M',
-      engagement: '5.8%',
-      posts: 134,
-      avgLikes: '156K',
-      avgComments: '4.2K',
-      category: 'Sports',
-      avatar: 'MJ'
-    },
-    {
-      id: 'art_emma',
-      name: 'Emma Wilson',
-      handle: '@art_emma',
-      platform: 'Instagram',
-      followers: '756K',
-      engagement: '7.4%',
-      posts: 198,
-      avgLikes: '56K',
-      avgComments: '1.8K',
-      category: 'Art',
-      avatar: 'EW'
-    },
-    {
-      id: 'comedy_ryan',
-      name: 'Ryan Davis',
-      handle: '@comedy_ryan',
-      platform: 'TikTok',
-      followers: '3.8M',
-      engagement: '11.2%',
-      posts: 423,
-      avgLikes: '425K',
-      avgComments: '12.1K',
-      category: 'Comedy',
-      avatar: 'RD'
-    },
-    {
-      id: 'pets_anna',
-      name: 'Anna Garcia',
-      handle: '@pets_anna',
-      platform: 'Instagram',
-      followers: '1.4M',
-      engagement: '8.9%',
-      posts: 345,
-      avgLikes: '124K',
-      avgComments: '5.6K',
-      category: 'Pets',
-      avatar: 'AG'
-    },
-    {
-      id: 'diy_kevin',
-      name: 'Kevin Lee',
-      handle: '@diy_kevin',
-      platform: 'YouTube',
-      followers: '1.1M',
-      engagement: '6.5%',
-      posts: 87,
-      avgLikes: '71K',
-      avgComments: '2.9K',
-      category: 'DIY',
-      avatar: 'KL'
-    }
-  ];
+  // Helper to get unique influencer ID (screen_name)
+  const getInfluencerId = (inf: any) => inf.screen_name || inf.id || inf.handle || inf.name;
+
+
+  // Influencer data fetched from API
+  const [influencers, setInfluencers] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchInfluencers = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Step 1: Fetch influencer queries
+        const queriesRes = await fetch(
+          'http://localhost:4000/query?data_source_id=301&type=twitter_account,instagram_account,ttiktok_account,facebook_account'
+        );
+        const queriesData = await queriesRes.json();
+        const queries = Array.from(
+          new Set(
+            (queriesData || [])
+              .map((q: any) => q.QUERIES)
+              .filter(Boolean)
+          )
+        );
+        if (queries.length === 0) {
+          setInfluencers([]);
+          setLoading(false);
+          return;
+        }
+        // Step 2: Fetch influencer metrics
+        const metricsRes = await fetch(
+          `http://localhost:5000/get-influencer-metrics?search_type=influencer&influencers=${queries.join(",")}&company_id=301`
+        );
+        const metricsData = await metricsRes.json();
+        setInfluencers(metricsData || []);
+      } catch (err: any) {
+        setError('Failed to load influencer data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInfluencers();
+  }, []);
 
   // Calculate pagination
   const totalPages = Math.ceil(influencers.length / influencersPerPage);
@@ -220,11 +67,10 @@ const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect })
 
   const handleInfluencerSelect = (influencerId: string) => {
     setSelectedInfluencer(influencerId);
-    const selectedInfluencerData = influencers.find(inf => inf.id === influencerId);
+    const selectedInfluencerData = influencers.find(inf => getInfluencerId(inf) === influencerId);
     if (selectedInfluencerData && onInfluencerSelect) {
       onInfluencerSelect(selectedInfluencerData);
     }
-    
     // Scroll to analytics card after a short delay to ensure it's rendered
     setTimeout(() => {
       if (analyticsRef.current) {
@@ -258,6 +104,33 @@ const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect })
     }
   };
 
+  // Skeleton Loader for Influencer List
+  const InfluencerSkeleton = () => (
+    <div className="space-y-4">
+      {[...Array(influencersPerPage)].map((_, idx) => (
+        <div key={idx} className="p-4 rounded-lg border-2 border-gray-200 bg-gray-50 animate-pulse flex items-center space-x-4">
+          <div className="w-4 h-4 rounded-full bg-gray-200" />
+          <div className="w-12 h-12 rounded-full bg-gray-200" />
+          <div className="flex-1 min-w-0">
+            <div className="h-4 bg-gray-200 rounded w-1/3 mb-2" />
+            <div className="h-3 bg-gray-200 rounded w-1/4 mb-1" />
+            <div className="h-3 bg-gray-200 rounded w-1/5" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  if (loading) {
+    return <InfluencerSkeleton />;
+  }
+  if (error) {
+    return <div>{error}</div>;
+  }
+  if (!influencers.length) {
+    return <div>No influencers found.</div>;
+  }
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
       <div className="flex items-center justify-between mb-6">
@@ -271,58 +144,74 @@ const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect })
       </div>
 
       <div className="space-y-4">
-        {currentInfluencers.map((influencer) => (
-          <div
-            key={influencer.id}
-            className={`p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
-              selectedInfluencer === influencer.id
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'
-            }`}
-            onClick={() => handleInfluencerSelect(influencer.id)}
-          >
-            <div className="flex items-center space-x-4">
-              {/* Radio Button */}
-              <div className="flex-shrink-0">
-                <input
-                  type="radio"
-                  id={influencer.id}
-                  name="influencer"
-                  value={influencer.id}
-                  checked={selectedInfluencer === influencer.id}
-                  onChange={() => handleInfluencerSelect(influencer.id)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                />
-              </div>
+        {
+         currentInfluencers.map((influencer) => {
+          const influencerId = getInfluencerId(influencer);
+          return (
+            <div
+              key={influencerId}
+              className={`p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
+                selectedInfluencer === influencerId
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+              onClick={() => handleInfluencerSelect(influencerId)}
+            >
+              <div className="flex items-center space-x-4">
+                {/* Radio Button */}
+                <div className="flex-shrink-0">
+                  <input
+                    type="radio"
+                    id={influencerId}
+                    name="influencer"
+                    value={influencerId}
+                    checked={selectedInfluencer === influencerId}
+                    onChange={() => handleInfluencerSelect(influencerId)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                  />
+                </div>
 
               {/* Avatar */}
               <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                  {influencer.avatar}
-                </div>
+                {influencer.profile_picture && typeof influencer.profile_picture === 'string' && influencer.profile_picture.startsWith('http') ? (
+                  <img
+                    src={influencer.profile_picture}
+                    alt={influencer.screen_name || influencer.full_name || 'Avatar'}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-blue-400"
+                  />
+                ) : (
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                    {(
+                      influencer.screen_name?.[0] ||
+                      influencer.full_name?.[0] ||
+                      '?'
+                    ).toUpperCase()}
+                  </div>
+                )}
               </div>
 
               {/* Influencer Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-3 mb-2">
                   <h4 className="text-lg font-medium text-gray-900 truncate">
-                    {influencer.name}
+                    {influencer.full_name && influencer.full_name !== 0 ? influencer.full_name : influencer.screen_name}
                   </h4>
-                  <span className="text-sm text-gray-500">{influencer.handle}</span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPlatformColor(influencer.platform)}`}>
-                    {influencer.platform}
+                  <span className="text-sm text-gray-500">
+                    @{influencer.screen_name && influencer.screen_name !== 0 ? influencer.screen_name : ''}
                   </span>
-                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
-                    {influencer.category}
-                  </span>
+                  {influencer.topic && influencer.topic !== 0 && (
+                    <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                      {influencer.topic.toString().replace(/_/g, ' ')}
+                    </span>
+                  )}
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-5 gap-4 text-sm">
+                <div className="grid grid-cols-4 gap-4 text-sm">
                   <div className="flex items-center space-x-1">
                     <Users className="w-4 h-4 text-blue-500" />
                     <div>
-                      <div className="font-medium text-gray-900">{influencer.followers}</div>
+                      <div className="font-medium text-gray-900">{influencer.followers_count != null ? influencer.followers_count.toLocaleString() : '-'}</div>
                       <div className="text-gray-500 text-xs">Followers</div>
                     </div>
                   </div>
@@ -330,7 +219,7 @@ const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect })
                   <div className="flex items-center space-x-1">
                     <TrendingUp className="w-4 h-4 text-green-500" />
                     <div>
-                      <div className="font-medium text-gray-900">{influencer.engagement}</div>
+                      <div className="font-medium text-gray-900">{influencer.engagement != null ? influencer.engagement.toFixed(2) : '-'}</div>
                       <div className="text-gray-500 text-xs">Engagement</div>
                     </div>
                   </div>
@@ -338,7 +227,7 @@ const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect })
                   <div className="flex items-center space-x-1">
                     <Share2 className="w-4 h-4 text-purple-500" />
                     <div>
-                      <div className="font-medium text-gray-900">{influencer.posts}</div>
+                      <div className="font-medium text-gray-900">{influencer.posts != null ? influencer.posts : '-'}</div>
                       <div className="text-gray-500 text-xs">Posts</div>
                     </div>
                   </div>
@@ -346,23 +235,17 @@ const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect })
                   <div className="flex items-center space-x-1">
                     <Heart className="w-4 h-4 text-red-500" />
                     <div>
-                      <div className="font-medium text-gray-900">{influencer.avgLikes}</div>
-                      <div className="text-gray-500 text-xs">Avg Likes</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-1">
-                    <MessageCircle className="w-4 h-4 text-orange-500" />
-                    <div>
-                      <div className="font-medium text-gray-900">{influencer.avgComments}</div>
-                      <div className="text-gray-500 text-xs">Avg Comments</div>
+                      <div className="font-medium text-gray-900">{influencer.reach != null ? influencer.reach.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '-'}</div>
+                      <div className="text-gray-500 text-xs">Reach</div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        ))}
+          )
+        })
+      }
       </div>
 
       {/* Pagination Controls */}
@@ -414,7 +297,8 @@ const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect })
       {selectedInfluencer && (
         <div ref={analyticsRef} className="mt-8">
           <InfluencerAnalyticsCard 
-            influencer={influencers.find(i => i.id === selectedInfluencer)!}
+            influencer={influencers.find(i => getInfluencerId(i) === selectedInfluencer)!}
+            influencerId={selectedInfluencer}
           />
         </div>
       )}

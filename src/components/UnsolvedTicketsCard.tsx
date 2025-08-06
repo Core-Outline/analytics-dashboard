@@ -1,88 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Filter, Plus, Download, MoreHorizontal, ChevronDown } from 'lucide-react';
 
 const UnsolvedTicketsCard: React.FC = () => {
   const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const tickets = [
-    {
-      id: '1',
-      client: 'Emma Watson',
-      avatar: 'EW',
-      subject: 'Synapse Design #1125',
-      status: 'Recent',
-      statusColor: 'bg-green-100 text-green-800',
-      priority: 'Urgent',
-      priorityColor: 'text-red-500',
-      priorityIcon: '●',
-      agent: 'Anindya'
-    },
-    {
-      id: '2',
-      client: 'Luke',
-      avatar: 'L',
-      subject: 'Change of refund my last buy | Order #125631',
-      status: 'Overdue',
-      statusColor: 'bg-red-100 text-red-800',
-      priority: 'High',
-      priorityColor: 'text-orange-500',
-      priorityIcon: '◐',
-      agent: 'Anindya'
-    },
-    {
-      id: '3',
-      client: 'Finley',
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face',
-      subject: 'I need your help #2256',
-      status: 'Remaining',
-      statusColor: 'bg-orange-100 text-orange-800',
-      priority: 'Medium',
-      priorityColor: 'text-blue-500',
-      priorityIcon: '◐',
-      agent: 'Nowrin'
-    },
-    {
-      id: '4',
-      client: 'Peter Gill',
-      avatar: 'PG',
-      subject: 'I need your help #2256',
-      status: 'Responded',
-      statusColor: 'bg-blue-100 text-blue-800',
-      priority: 'Low',
-      priorityColor: 'text-green-500',
-      priorityIcon: '◐',
-      agent: 'Nowrin'
-    },
-    {
-      id: '5',
-      client: 'Freya',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face',
-      subject: 'Contact Froms #3264',
-      status: 'Closed',
-      statusColor: 'bg-gray-100 text-gray-800',
-      priority: 'Medium',
-      priorityColor: 'text-blue-500',
-      priorityIcon: '◐',
-      agent: 'Khalid'
-    },
-    {
-      id: '6',
-      client: 'Morrison',
-      avatar: 'M',
-      subject: 'I need your help #2256',
-      status: 'Responded',
-      statusColor: 'bg-blue-100 text-blue-800',
-      priority: 'Medium',
-      priorityColor: 'text-blue-500',
-      priorityIcon: '◐',
-      agent: 'Khalid'
-    }
-  ];
+  useEffect(() => {
+    setLoading(true);
+    fetch('http://localhost:5000/get-feedback?company_id=301')
+      .then(res => res.json())
+      .then(data => setTickets(data))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filteredTickets = tickets.filter(ticket =>
+    (ticket.full_text || '').toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Pagination
+  const pageSize = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(filteredTickets.length / pageSize);
+  const paginatedTickets = filteredTickets.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  const goToPrevPage = () => setCurrentPage(p => Math.max(1, p - 1));
+  const goToNextPage = () => setCurrentPage(p => Math.min(totalPages, p + 1));
+
+  // Reset to page 1 if filter changes and current page is out of range
+  React.useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(1);
+  }, [filteredTickets.length, totalPages]);
 
   const toggleTicket = (ticketId: string) => {
-    setSelectedTickets(prev => 
-      prev.includes(ticketId) 
+    setSelectedTickets(prev =>
+      prev.includes(ticketId)
         ? prev.filter(id => id !== ticketId)
         : [...prev, ticketId]
     );
@@ -101,7 +57,7 @@ const UnsolvedTicketsCard: React.FC = () => {
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-gray-900">Unsolved Tickets</h3>
+          <h3 className="text-lg font-medium text-gray-900">Customer Feedback</h3>
           <div className="flex items-center space-x-2">
             <button className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
               <Filter className="w-4 h-4" />
@@ -138,109 +94,83 @@ const UnsolvedTicketsCard: React.FC = () => {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="w-12 px-6 py-3">
-                <input
-                  type="checkbox"
-                  checked={selectedTickets.length === tickets.length}
-                  onChange={toggleAllTickets}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-              </th>
-              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">
-                Client
-              </th>
-              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">
-                Subject
-              </th>
-              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">
-                Status
-              </th>
-              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">
-                Priority
-              </th>
-              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">
-                Agent
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {tickets.map((ticket) => (
-              <tr key={ticket.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">
-                  <input
-                    type="checkbox"
-                    checked={selectedTickets.includes(ticket.id)}
-                    onChange={() => toggleTicket(ticket.id)}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center space-x-3">
-                    {ticket.avatar.startsWith('http') ? (
-                      <img
-                        src={ticket.avatar}
-                        alt={ticket.client}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                        {ticket.avatar}
-                      </div>
-                    )}
-                    <span className="text-sm font-medium text-gray-900">
-                      {ticket.client}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
-                    {ticket.subject}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${ticket.statusColor}`}>
-                    {ticket.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center space-x-2">
-                    <span className={`text-lg ${ticket.priorityColor}`}>
-                      {ticket.priorityIcon}
-                    </span>
-                    <span className="text-sm text-gray-900">
-                      {ticket.priority}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-900">{ticket.agent}</span>
-                    <ChevronDown className="w-4 h-4 text-gray-400" />
-                  </div>
-                </td>
+      {/* Ticket Table */}
+      <div className="mt-4 overflow-x-auto">
+        {loading ? (
+          <div className="text-gray-400 text-center py-10">Loading tickets...</div>
+        ) : filteredTickets.length === 0 ? (
+          <div className="text-center text-gray-400 py-8">No tickets found.</div>
+        ) : (
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Summary</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Urgency</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sentiment</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-100">
+              {paginatedTickets.map(ticket => (
+                <tr key={ticket.feedback_id} className="hover:bg-gray-50">
+                  {/* Summary (truncated full_text) */}
+                  <td className="px-4 py-2 text-gray-800 text-sm max-w-xs truncate">
+                    {(ticket.full_text || '').length > 60
+                      ? ticket.full_text.slice(0, 60) + '...'
+                      : ticket.full_text}
+                  </td>
+                  {/* Urgency pill */}
+                  <td className="px-4 py-2">
+                    <span className={`text-xs px-2 py-1 rounded-full font-semibold 
+                      ${ticket.urgency?.toLowerCase().includes('high') ? 'bg-blue-100 text-blue-700' : 
+                        ticket.urgency?.toLowerCase().includes('medium') ? 'bg-yellow-100 text-yellow-700' : 
+                        'bg-gray-100 text-gray-700'}`}
+                    >
+                      {ticket.urgency?.replace(/_/g, ' ') || '—'}
+                    </span>
+                  </td>
+                  {/* Sentiment pill */}
+                  <td className="px-4 py-2">
+                    <span className={`text-xs px-2 py-1 rounded-full font-semibold ${ticket.sentiment === 'positive' ? 'bg-green-100 text-green-700' : ticket.sentiment === 'negative' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}`}>{ticket.sentiment}</span>
+                  </td>
+                  {/* Date pill */}
+                  <td className="px-4 py-2">
+                    <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600 font-semibold">
+                      {ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : '—'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
-      {/* Footer */}
-      <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-        <span className="text-sm text-gray-700">1 to 6 of 12</span>
-        <div className="flex items-center space-x-2">
-          <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            Previous
-          </button>
-          <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
-            Next
-          </button>
+      {/* Pagination Controls */}
+      {filteredTickets.length > 0 && (
+        <div className="px-6 py-4 flex items-center justify-between">
+          <span className="text-sm text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={goToPrevPage}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${currentPage === 1 ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+            >
+              Previous
+            </button>
+            <button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages || totalPages === 0}
+              className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${currentPage === totalPages || totalPages === 0 ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'}`}
+            >
+              Next
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
     </div>
   );
 };

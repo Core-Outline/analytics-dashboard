@@ -1,13 +1,33 @@
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
 
+const SENTIMENT_COLORS: Record<string, string> = {
+  positive: '#10b981', // emerald
+  neutral: '#f59e0b',  // amber
+  negative: '#ef4444', // red
+};
+
 const SentimentAnalysisCard: React.FC = () => {
-  // Sample sentiment data
-  const sentimentData = [
-    { name: 'Positive', value: 65, color: '#10b981', count: 4550 },
-    { name: 'Neutral', value: 25, color: '#f59e0b', count: 1750 },
-    { name: 'Negative', value: 10, color: '#ef4444', count: 700 }
-  ];
+  const [sentimentData, setSentimentData] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    setLoading(true);
+    fetch('http://localhost:5000/sentiment?search_type=all&data_source_ids=201&company_id=101&influencers=SafaricomPLC&indices=tiktok,twitter')
+      .then(res => res.json())
+      .then(data => {
+        // Map API data to chart data
+        const mapped = data.map((item: any) => ({
+          name: item.sentiment.charAt(0).toUpperCase() + item.sentiment.slice(1),
+          value: item.proportion,
+          color: SENTIMENT_COLORS[item.sentiment] || '#6b7280',
+          count: item.count,
+        }));
+        setSentimentData(mapped);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
   const totalComments = sentimentData.reduce((sum, item) => sum + item.count, 0);
 
@@ -22,7 +42,7 @@ const SentimentAnalysisCard: React.FC = () => {
     xAxis: {
       type: 'value',
       show: true,
-      max: Math.max(...sentimentData.map(s => s.count)),
+      max: sentimentData.length > 0 ? Math.max(...sentimentData.map(s => s.count)) : 100,
       axisLine: {
         show: false
       },
@@ -68,7 +88,7 @@ const SentimentAnalysisCard: React.FC = () => {
       itemStyle: {
         color: function(params: any) {
           const reversedData = [...sentimentData].reverse();
-          return reversedData[params.dataIndex].color;
+          return reversedData[params.dataIndex]?.color || '#6b7280';
         },
         borderRadius: [12, 12, 12, 12]
       },

@@ -1,159 +1,110 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { ChevronDown, MoreHorizontal } from 'lucide-react';
 
 const UserSentimentsCard: React.FC = () => {
-  const [selectedMonth, setSelectedMonth] = useState('March');
+  const [sentimentData, setSentimentData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [visibleSentiments, setVisibleSentiments] = useState({
-    'Positive': true,
-    'Negative': true,
-    'Neutral': true,
-    'Mixed': true
+    'positive': true,
+    'negative': true,
+    'neutral': true,
+    'mixed': true
   });
 
-  const months = ['January', 'February', 'March', 'April', 'May', 'June'];
+  // Fetch data from API
+  useEffect(() => {
+    setLoading(true);
+    fetch('http://localhost:5000/get-feedback-sentiments-trend?company_id=301')
+      .then(res => res.json())
+      .then(data => {
+        setSentimentData(data);
+        // Set latest month as default
+        const uniqueMonths = Array.from(new Set(data.map((d: any) => d.created_at))).sort();
+        setSelectedMonth(uniqueMonths[uniqueMonths.length - 1] || null);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-  // Sample data for different sentiments
-  const sentimentData = {
-    'Positive': {
-      color: '#60a5fa',
-      lightColor: '#60a5fa',
-      count: 125,
-      percentage: '5.3%',
-      trend: 'up',
-      data: [45, 58, 62, 35, 45, 55, 65, 75, 55, 65, 72, 45, 55]
+  // Extract unique months and sentiments from data
+  const months = Array.from(new Set(sentimentData.map((d: any) => d.created_at))).sort();
+  const sentiments = Array.from(new Set(sentimentData.map((d: any) => d.sentiment)));
+
+  // Custom palette for bars and legend
+  const palette = ["#03045e","#023e8a","#0077b6","#0096c7","#00b4d8","#48cae4","#90e0ef","#ade8f4","#caf0f8"];
+  // Map each sentiment to a palette color in order
+  const sentimentColors: Record<string, string> = {};
+  sentiments.forEach((sentiment, idx) => {
+    sentimentColors[sentiment] = palette[idx % palette.length];
+  });
+
+  // Aggregate counts for selected month
+  const sentimentCounts = sentiments.map(sentiment => {
+    const found = sentimentData.find((d: any) => d.sentiment === sentiment && d.created_at === selectedMonth);
+    return {
+      sentiment,
+      count: found ? found.sentiment_count : 0,
+      color: sentimentColors[sentiment] || '#ccc'
+    };
+  });
+
+  // Prepare trend chart series
+  const chartSeries = sentiments
+    .filter(sentiment => visibleSentiments[sentiment])
+    .map(sentiment => ({
+      name: sentiment.charAt(0).toUpperCase() + sentiment.slice(1),
+      type: 'bar',
+      barWidth: '5%', // extra thin bars
+      itemStyle: {
+        color: sentimentColors[sentiment] || '#ccc',
+        borderRadius: [12, 12, 12, 12] // more round at top and bottom
+      },
+      data: months.map(month => {
+        const found = sentimentData.find((d: any) => d.sentiment === sentiment && d.created_at === month);
+        return found ? found.sentiment_count : 0;
+      })
+    }));
+
+  const chartOption = {
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(255,255,255,0.95)',
+      borderColor: '#e5e7eb',
+      borderWidth: 1,
+      textStyle: { color: '#374151', fontSize: 12 }
     },
-    'Negative': {
-      color: '#60a5fa',
-      lightColor: '#60a5fa',
-      count: 100,
-      percentage: '3.20%',
-      trend: 'up',
-      data: [38, 42, 35, 41, 28, 45, 42, 38, 32, 44, 41, 32, 35]
+    legend: {
+      data: sentiments.map(s => s.charAt(0).toUpperCase() + s.slice(1)),
+      top: 10
     },
-    'Neutral': {
-      color: '#60a5fa',
-      lightColor: '#60a5fa',
-      count: 53,
-      percentage: '2.3%',
-      trend: 'down',
-      data: [25, 32, 28, 35, 22, 38, 32, 28, 25, 35, 32, 25, 28]
+    grid: { left: '2%', right: '2%', bottom: '8%', top: 40, containLabel: true },
+    xAxis: {
+      type: 'category',
+      data: months.map(date => {
+        const d = new Date(date);
+        return d.toLocaleString('default', { month: 'short', year: 'numeric' });
+      }),
+      axisLabel: { color: '#9ca3af', fontSize: 12 },
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { show: false }
     },
-    'Mixed': {
-      color: '#60a5fa',
-      lightColor: '#60a5fa',
-      count: 136,
-      percentage: '3.12%',
-      trend: 'up',
-      data: [42, 48, 45, 52, 38, 55, 48, 45, 42, 52, 48, 42, 45]
-    }
+    yAxis: {
+      type: 'value',
+      axisLabel: { color: '#9ca3af', fontSize: 12 },
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { show: false }
+    },
+    series: chartSeries
   };
-
-  const dates = ['Mar 01', 'Mar 02', 'Mar 03', 'Mar 04', 'Mar 05', 'Mar 06'];
 
   const toggleSentiment = (sentimentName: string) => {
     setVisibleSentiments(prev => ({
       ...prev,
       [sentimentName]: !prev[sentimentName]
     }));
-  };
-
-  // Create series data for the chart
-  const series = Object.entries(sentimentData)
-    .filter(([name]) => visibleSentiments[name])
-    .map(([name, config]) => ({
-      name,
-      type: 'bar',
-      data: config.data.slice(0, 6), // Show only 6 data points for the dates
-      itemStyle: {
-        color: {
-          type: 'linear',
-          x: 0,
-          y: 0,
-          x2: 0,
-          y2: 1,
-          colorStops: [
-            {
-              offset: 0,
-              color: '#60a5fa' // Light blue
-            },
-            {
-              offset: 1,
-              color: '#3b82f6' // Darker blue
-            }
-          ]
-        },
-        borderRadius: [8, 8, 8, 8]
-      },
-      barWidth: '10%',
-      barGap: '10%'
-    }));
-
-  const chartOption = {
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '15%',
-      top: '15%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'category',
-      data: dates,
-      axisLine: {
-        show: false
-      },
-      axisTick: {
-        show: false
-      },
-      axisLabel: {
-        color: '#9ca3af',
-        fontSize: 12,
-        fontFamily: 'Inter, system-ui, sans-serif'
-      }
-    },
-    yAxis: {
-      type: 'value',
-      max: 80,
-      axisLine: {
-        show: false
-      },
-      axisTick: {
-        show: false
-      },
-      axisLabel: {
-        color: '#9ca3af',
-        fontSize: 12,
-        fontFamily: 'Inter, system-ui, sans-serif'
-      },
-      splitLine: {
-        lineStyle: {
-          color: '#f1f5f9',
-          width: 1
-        }
-      }
-    },
-    series: series,
-    tooltip: {
-      trigger: 'axis',
-      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      borderColor: '#e5e7eb',
-      borderWidth: 1,
-      textStyle: {
-        color: '#374151',
-        fontSize: 12
-      },
-      formatter: function(params: any) {
-        let result = `<div style="font-weight: 600; margin-bottom: 4px;">${params[0].axisValue}</div>`;
-        params.forEach((param: any) => {
-          result += `<div>${param.marker} ${param.seriesName}: ${param.value}</div>`;
-        });
-        return result;
-      }
-    },
-    legend: {
-      show: false
-    }
   };
 
   return (
@@ -165,55 +116,72 @@ const UserSentimentsCard: React.FC = () => {
 
       {/* Interactive Legend */}
       <div className="flex items-center space-x-6 mb-6">
-        {Object.entries(sentimentData).map(([name, config]) => (
+        {sentiments.map((sentiment) => (
           <button
-            key={name}
-            onClick={() => toggleSentiment(name)}
+            key={sentiment}
+            onClick={() => toggleSentiment(sentiment)}
             className={`flex items-center space-x-2 transition-opacity duration-200 ${
-              visibleSentiments[name] ? 'opacity-100' : 'opacity-50'
+              visibleSentiments[sentiment] ? 'opacity-100' : 'opacity-50'
             }`}
           >
             <div 
               className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: config.color }}
+              style={{ backgroundColor: sentimentColors[sentiment] || '#ccc' }}
             ></div>
-            <span className="text-sm text-gray-600">{name}</span>
+            <span className="text-sm text-gray-600">{sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}</span>
           </button>
         ))}
       </div>
 
+      {/* Month Selector */}
+      <div className="flex items-center mb-4">
+        <label className="mr-2 text-sm text-gray-600">Month:</label>
+        <select
+          className="border border-gray-300 rounded px-2 py-1 text-sm"
+          value={selectedMonth || ''}
+          onChange={e => setSelectedMonth(e.target.value)}
+        >
+          {months.map(month => {
+            const d = new Date(month);
+            return (
+              <option key={month} value={month}>
+                {d.toLocaleString('default', { month: 'short', year: 'numeric' })}
+              </option>
+            );
+          })}
+        </select>
+      </div>
+
       {/* Stats Row */}
       <div className="grid grid-cols-4 gap-6 mb-8">
-        {Object.entries(sentimentData).map(([name, config]) => (
-          <div key={name} className="text-center">
+        {sentimentCounts.map(({ sentiment, count, color }) => (
+          <div key={sentiment} className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-1">
-              <span className="text-2xl font-bold text-gray-900">{config.count}</span>
-              <span className={`text-sm font-medium ${
-                config.trend === 'up' ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {config.trend === 'up' ? '↗' : '↘'} {config.percentage}
-              </span>
+              <span className="text-2xl font-bold text-gray-900">{count}</span>
             </div>
-            <div className="text-sm text-gray-600">{name}</div>
+            <div className="text-sm text-gray-600 flex items-center justify-center">
+              <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ backgroundColor: color }}></span>
+              {sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}
+            </div>
           </div>
         ))}
       </div>
 
       {/* Chart */}
       <div className="mb-6">
-        <ReactECharts 
-          option={chartOption} 
-          style={{ height: '300px', width: '100%' }}
-          opts={{ renderer: 'canvas' }}
-        />
+        {loading ? (
+          <div>Loading sentiment trends...</div>
+        ) : (
+          <ReactECharts 
+            option={chartOption} 
+            style={{ height: '300px', width: '100%' }}
+            opts={{ renderer: 'canvas' }}
+          />
+        )}
       </div>
 
       {/* Bottom Controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2 text-sm text-gray-600 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer">
-          <span>{selectedMonth}</span>
-          <ChevronDown className="w-4 h-4" />
-        </div>
+      <div className="flex items-center justify-end">
         <div className="text-sm text-blue-600 cursor-pointer hover:text-blue-700">
           View all reports →
         </div>

@@ -1,57 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { MoreHorizontal } from 'lucide-react';
 
 const CustomerSatisfactionCard: React.FC = () => {
-  const [visibleSegments, setVisibleSegments] = useState({
-    'Positive': true,
-    'Negative': true
+  const [satisfactionData, setSatisfactionData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [visibleSegments, setVisibleSegments] = useState<Record<string, boolean>>({});
+
+  // Fetch data from API
+  useEffect(() => {
+    setLoading(true);
+    fetch('http://localhost:5000/get-feedback-sentiments-splits?company_id=301')
+      .then(res => res.json())
+      .then(data => {
+        setSatisfactionData(data);
+        // Set all segments visible by default
+        const segs: Record<string, boolean> = {};
+        data.forEach((item: any) => {
+          segs[item.sentiment] = true;
+        });
+        setVisibleSegments(segs);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Custom palette for chart and legend
+  const palette = ["#03045e","#0077b6","#00b4d8","#90e0ef","#caf0f8"];
+  // Assign palette colors in order to sentiments (for legend dots)
+  const sentimentColors: Record<string, string> = {};
+  satisfactionData.forEach((item, idx) => {
+    sentimentColors[item.sentiment] = palette[idx % palette.length];
   });
 
-  // Sample data for customer satisfaction
-  const satisfactionData = [
-    { name: 'Positive', value: 150, percentage: '23.3%', color: '#3b82f6', trend: 'up' },
-    { name: 'Negative', value: 20, percentage: '5.23%', color: '#93c5fd', trend: 'down' }
-  ];
-
-  const toggleSegment = (segmentName: string) => {
-    setVisibleSegments(prev => ({
-      ...prev,
-      [segmentName]: !prev[segmentName]
+  // Prepare chart data and legend (no per-slice color)
+  const chartData = satisfactionData
+    .filter(item => visibleSegments[item.sentiment])
+    .map(item => ({
+      value: item.proportion,
+      name: item.sentiment.charAt(0).toUpperCase() + item.sentiment.slice(1)
     }));
+
+  const toggleSegment = (segment: string) => {
+    setVisibleSegments(prev => ({ ...prev, [segment]: !prev[segment] }));
   };
 
-  // Filter data based on visibility
-  const visibleData = satisfactionData.filter(item => visibleSegments[item.name]);
-
   const chartOption = {
-    series: [
-      {
-        type: 'pie',
-        radius: ['0%', '80%'],
-        center: ['50%', '50%'],
-        data: visibleData.map(item => ({
-          value: item.value,
-          name: item.name,
-          itemStyle: { 
-            color: item.color,
-            borderRadius: 8,
-            borderColor: '#fff',
-            borderWidth: 2
-          }
-        })),
-        label: {
-          show: false
-        },
-        labelLine: {
-          show: false
-        },
-        emphasis: {
-          scale: true,
-          scaleSize: 5
-        }
-      }
-    ],
     tooltip: {
       trigger: 'item',
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -64,9 +57,61 @@ const CustomerSatisfactionCard: React.FC = () => {
       formatter: '{b}: {c} ({d}%)'
     },
     legend: {
-      show: false
-    }
+      show: true,
+      orient: 'vertical',
+      right: '5%',
+      top: '10%',
+      data: satisfactionData.map(item => item.sentiment.charAt(0).toUpperCase() + item.sentiment.slice(1)),
+      textStyle: { color: '#6b7280', fontSize: 13 },
+      icon: 'circle',
+      itemWidth: 16,
+      itemHeight: 16,
+      // Ensure legend color matches chart
+      formatter: function(name: string) {
+        const idx = satisfactionData.findIndex(item => item.sentiment.charAt(0).toUpperCase() + item.sentiment.slice(1) === name);
+        const color = palette[idx % palette.length];
+        // return '●'name;
+        return name;
+      },
+      textStyleRich: {
+        colorDot: {
+          fontSize: 18,
+          fontFamily: 'monospace',
+        }
+      }
+    },
+    series: [
+      {
+        type: 'pie',
+        radius: ['0%', '80%'], // solid pie, no center
+        color: palette, // enforce palette for slices
+        data: chartData,
+        itemStyle: {
+          borderRadius: 8,
+          borderColor: '#fff',
+          borderWidth: 2
+        },
+        label: {
+          show: false
+        },
+        labelLine: {
+          show: false
+        },
+        emphasis: {
+          scale: true,
+          scaleSize: 5,
+          label: {
+            show: true,
+            fontSize: 16,
+            fontWeight: 'bold',
+            color: '#374151',
+            formatter: '{b}\n{d}%'
+          }
+        }
+      }
+    ]
   };
+
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -103,21 +148,36 @@ const CustomerSatisfactionCard: React.FC = () => {
         ))}
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-6">
-        {satisfactionData.map((item) => (
-          <div key={item.name} className="text-center">
-            <div className="text-sm text-gray-600 mb-1">{item.name}</div>
-            <div className="flex items-center justify-center space-x-2">
-              <span className="text-xl font-bold text-gray-900">{item.value}</span>
-              <span className={`text-sm font-medium ${
-                item.trend === 'up' ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {item.trend === 'up' ? '↗' : '↘'} {item.percentage}
-              </span>
-            </div>
-          </div>
-        ))}
+      {/* Stats Table */}
+      <div className="overflow-x-auto mt-4">
+        <table className="min-w-full bg-white rounded-lg shadow border border-gray-100">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"> </th>
+              <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Sentiment</th>
+              <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Count</th>
+              <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Proportion</th>
+            </tr>
+          </thead>
+          <tbody>
+            {satisfactionData.map((item, idx) => (
+              <tr key={item.sentiment} className="border-t border-gray-100 hover:bg-gray-50 transition">
+                <td className="px-4 py-2">
+                  <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: palette[idx % palette.length] }}></span>
+                </td>
+                <td className="px-4 py-2 font-medium text-gray-700">
+                  {item.sentiment.charAt(0).toUpperCase() + item.sentiment.slice(1)}
+                </td>
+                <td className="px-4 py-2 text-right text-gray-900 font-semibold">
+                  {item.count}
+                </td>
+                <td className="px-4 py-2 text-right text-gray-600">
+                  {item.proportion}%
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

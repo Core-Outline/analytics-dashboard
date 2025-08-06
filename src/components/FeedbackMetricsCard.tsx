@@ -1,33 +1,56 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { TrendingUp, TrendingDown, MessageCircle, DollarSign, AlertCircle, Users } from 'lucide-react';
 
 const FeedbackMetricsCard: React.FC = () => {
-  // Sample data for the metrics
+  // State for metrics
+  const [nps, setNps] = useState<any>(null);
+  const [csat, setCsat] = useState<any>(null);
+  const [ces, setCes] = useState<any>(null);
+  const [issuesTrend, setIssuesTrend] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      fetch('http://localhost:5000/get-nps-analysis?company_id=301').then(r => r.json()),
+      fetch('http://localhost:5000/get-csat-analysis?company_id=301').then(r => r.json()),
+      fetch('http://localhost:5000/get-ces-analysis?company_id=301').then(r => r.json()),
+      fetch('http://localhost:5000/get-feedback-issues-trend?company_id=301').then(r => r.json()),
+    ]).then(([npsData, csatData, cesData, issuesTrendData]) => {
+      setNps(npsData);
+      setCsat(csatData);
+      setCes(cesData);
+      setIssuesTrend(issuesTrendData);
+    }).finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div className="p-6">Loading metrics...</div>;
+
+  // Metrics config for rendering
   const metrics = [
     {
       id: 'nps',
       title: 'Net Promoter Score',
-      value: '25',
-      percentage: '5.3%',
+      value: nps?.nps_score ?? '-',
       icon: MessageCircle,
       iconBg: 'bg-blue-100',
       iconColor: 'text-blue-600',
-      trend: 'up',
-      data: [15, 18, 22, 19, 25, 28, 24, 26, 25],
+      trend: nps?.nps_score > 0 ? 'up' : nps?.nps_score < 0 ? 'down' : 'neutral',
+      details: nps ? `Promoters: ${nps.promoters?.toFixed(1)}%, Passives: ${nps.passives?.toFixed(1)}%, Detractors: ${nps.detractors?.toFixed(1)}%` : '',
       color: '#3b82f6'
     },
     {
       id: 'csat',
       title: 'CSAT Score',
-      value: '05',
-      percentage: '3.20%',
-      icon: DollarSign,
+      value: csat?.csat_score ?? '-',
+      icon: Users,
       iconBg: 'bg-green-100',
       iconColor: 'text-green-600',
-      trend: 'up',
-      data: [2.8, 3.1, 2.9, 3.4, 3.6, 3.2, 3.5, 3.2],
-      color: '#10b981'
+      trend: csat?.csat_score > 80 ? 'up' : csat?.csat_score < 60 ? 'down' : 'neutral',
+      details: csat ? `Very Satisfied: ${csat.very_satisfied}%, Satisfied: ${csat.satisfied}%, Neutral: ${csat.neutral}%, Dissatisfied: ${csat.dissatisfied}%, Very Dissatisfied: ${csat.very_dissatisfied}%` : '',
+      color: '#22c55e',
+      data: [2.8, 3.1, 2.9, 3.4, 3.6, 3.2, 3.5, 3.2]
     },
     {
       id: 'ces',
@@ -55,7 +78,7 @@ const FeedbackMetricsCard: React.FC = () => {
     }
   ];
 
-  const createChartOption = (data: number[], color: string) => ({
+  const createChartOption = (data: number[] = [], color: string) => ({
     grid: {
       left: '0%',
       right: '0%',

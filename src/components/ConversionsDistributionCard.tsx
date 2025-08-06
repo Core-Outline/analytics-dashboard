@@ -1,15 +1,31 @@
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
 
+import { scaleOrdinal } from 'd3-scale';
+import { schemeTableau10 } from 'd3-scale-chromatic';
+
 const ConversionsDistributionCard: React.FC = () => {
-  // Sample data for conversions by social media platform
-  const platformData = [
-    { name: 'Facebook', value: 35, color: '#1877f2', conversions: 440 },
-    { name: 'Instagram', value: 28, color: '#e4405f', conversions: 352 },
-    { name: 'Twitter', value: 18, color: '#1da1f2', conversions: 226 },
-    { name: 'LinkedIn', value: 12, color: '#0077b5', conversions: 151 },
-    { name: 'TikTok', value: 7, color: '#000000', conversions: 88 }
-  ];
+  const [platformData, setPlatformData] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const colorScale = scaleOrdinal(schemeTableau10);
+
+  React.useEffect(() => {
+    setLoading(true);
+    fetch('http://localhost:5000/conversions-splits?company_id=101')
+      .then(res => res.json())
+      .then(data => {
+        // Assign a color and readable name for each platform
+        const mapped = data.map((item: any, i: number) => ({
+          name: item.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          value: item.percent,
+          color: colorScale(i),
+          conversions: item.count,
+        }));
+        setPlatformData(mapped);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
   const totalConversions = platformData.reduce((sum, platform) => sum + platform.conversions, 0);
 

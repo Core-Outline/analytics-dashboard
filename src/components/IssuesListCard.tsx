@@ -1,31 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, ChevronRight } from 'lucide-react';
 
 const IssuesListCard: React.FC = () => {
   const [selectedIssues, setSelectedIssues] = useState<string[]>([]);
+  const [issues, setIssues] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
 
-  const issues = [
-    {
-      id: 'login-account',
-      title: 'Login and Account',
-      description: 'I cannot reset my password'
-    },
-    {
-      id: 'cancellations-returns',
-      title: 'Cancellations and Returns',
-      description: 'I should not have to pay before delivery because I also have to pay a fee to return it.'
-    },
-    {
-      id: 'shopping',
-      title: 'Shopping',
-      description: 'Your homepage never seems to have the things that I want to buy. I have to search for it everytime.'
-    },
-    {
-      id: 'order-issue',
-      title: 'Order Issue',
-      description: 'I received the wrong item in my order and the delivery was'
-    }
-  ];
+  useEffect(() => {
+    setLoading(true);
+    fetch('http://localhost:5000/get-feedback-issues?company_id=301')
+      .then(res => res.json())
+      .then(data => setIssues(data))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const totalPages = Math.ceil(issues.length / pageSize);
+  const paginatedIssues = issues.slice((page - 1) * pageSize, page * pageSize);
+
+  const handlePrev = () => setPage(p => Math.max(1, p - 1));
+  const handleNext = () => setPage(p => Math.min(totalPages, p + 1));
 
   const toggleIssue = (issueId: string) => {
     setSelectedIssues(prev => 
@@ -37,48 +32,52 @@ const IssuesListCard: React.FC = () => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium text-gray-900">Issues List</h3>
-        <button className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-          <Plus className="w-4 h-4" />
-          <span>Add</span>
-        </button>
       </div>
 
       {/* Issues List */}
-      <div className="space-y-4">
-        {issues.map((issue) => (
-          <div key={issue.id} className="flex items-start space-x-3">
-            {/* Checkbox */}
-            <input
-              type="checkbox"
-              id={issue.id}
-              checked={selectedIssues.includes(issue.id)}
-              onChange={() => toggleIssue(issue.id)}
-              className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            
-            {/* Issue Content */}
-            <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-medium text-gray-900 mb-1">
-                {issue.title}
-              </h4>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {issue.description}
-              </p>
-            </div>
+      {loading ? (
+        <div className="text-gray-400 text-center py-10">Loading issues...</div>
+      ) : (
+        <>
+        <div>
+          {paginatedIssues.length === 0 ? (
+            <div className="text-center text-gray-400 py-8">No issues found.</div>
+          ) : (
+            paginatedIssues.map(issue => (
+              <div key={issue.feedback_id} className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-100 shadow-sm">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  {/* Urgency pill */}
+                  <span className={`text-xs px-2 py-1 rounded-full font-semibold 
+                    ${issue.urgency.toLowerCase().includes('high') ? 'bg-blue-100 text-blue-700' : 
+                      issue.urgency.toLowerCase().includes('medium') ? 'bg-yellow-100 text-yellow-700' : 
+                      'bg-gray-100 text-gray-700'}`}
+                  >
+                    {issue.urgency.replace(/_/g, ' ')}
+                  </span>
+                  {/* Sentiment pill */}
+                  <span className={`text-xs px-2 py-1 rounded-full font-semibold ${issue.sentiment === 'positive' ? 'bg-green-100 text-green-700' : issue.sentiment === 'negative' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}`}>{issue.sentiment}</span>
+                  {/* Date pill */}
+                  <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600 font-semibold">
+                    {new Date(issue.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="mt-2 text-gray-700 text-sm">{issue.full_text}</div>
+              </div>
+            ))
+          )}
+        </div>
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center space-x-4 mt-4">
+            <button onClick={handlePrev} disabled={page === 1} className={`px-3 py-1 rounded ${page === 1 ? 'bg-gray-100 text-gray-400' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}>Prev</button>
+            <span className="text-gray-600 text-sm">Page {page} of {totalPages}</span>
+            <button onClick={handleNext} disabled={page === totalPages} className={`px-3 py-1 rounded ${page === totalPages ? 'bg-gray-100 text-gray-400' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}>Next</button>
           </div>
-        ))}
-      </div>
-
-      {/* View All Link */}
-      <div className="mt-6 pt-4 border-t border-gray-200">
-        <button className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 text-sm font-medium">
-          <span>View all</span>
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
+        )}
+        </>
+      )}
     </div>
   );
 };
