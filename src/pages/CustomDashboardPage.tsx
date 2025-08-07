@@ -5,12 +5,13 @@ interface EchartsCodeRendererProps {
 }
 
 interface Visualization {
-  VISUALIZATION_ID: string;
-  THREAD_ID: string;
-  IS_ACTIVE: boolean;
-  PROMPT: string;
-  ECHARTS_CODE: string;
-  CREATED_DATE: string;
+  visualization_id: string;
+  thread_id: string;
+  is_active: boolean;
+  prompt: string;
+  echarts_code: string;
+  created_at: string;
+  showDropdown?: boolean;
 }
 
 interface VisualizationState {
@@ -61,6 +62,7 @@ const EchartsCodeRenderer: React.FC<EchartsCodeRendererProps> = ({ code, pageDat
   if (!option) return <div className="text-gray-400">Chart could not be rendered</div>;
   return <ReactECharts option={option} style={{ height: '400px', width: '100%' }} opts={{ renderer: 'canvas' }} />;
 };
+
 import React, { useState, useEffect } from 'react';
 import { Search, FileText, MoreHorizontal, Sparkles, BarChart3, Send, Paperclip, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import ReactECharts from 'echarts-for-react';
@@ -75,7 +77,8 @@ const CustomDashboardPage: React.FC = () => {
   const [historyVisualizations, setHistoryVisualizations] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedQuery, setSelectedQuery] = useState('');
+  const [selectedQuery, setSelectedQuery] = useState('1101');
+  const [selectedQueryId, setSelectedQueryId] = useState<string | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [queries, setQueries] = useState<any[]>([]);
@@ -85,6 +88,7 @@ const CustomDashboardPage: React.FC = () => {
   const [chartOption, setChartOption] = useState<any>(null);
   const [chartLoading, setChartLoading] = useState(false);
   const [chartError, setChartError] = useState<string | null>(null);
+  const [pageData, setPageData] = useState<any>(null);
 
   // State for new dashboard details
   const [pageDetails, setPageDetails] = useState<{ page_id: string; page_name: string } | null>(null);
@@ -93,21 +97,32 @@ const CustomDashboardPage: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [newDashboardName, setNewDashboardName] = useState('');
 
-  // Sample transaction data that would be available on the page
-  const pageData = [
-    { customer: 'Alice Johnson', amount: 5200, date: '2024-01-15', product: 'Laptop' },
-    { customer: 'Bob Smith', amount: 3800, date: '2024-01-20', product: 'Phone' },
-    { customer: 'Charlie Brown', amount: 6500, date: '2024-02-10', product: 'Tablet' },
-    { customer: 'Diana Prince', amount: 4200, date: '2024-02-15', product: 'Monitor' },
-    { customer: 'Eve Adams', amount: 7800, date: '2024-03-05', product: 'Laptop' },
-    { customer: 'Frank Miller', amount: 2100, date: '2024-03-10', product: 'Mouse' },
-    { customer: 'Grace Lee', amount: 5900, date: '2024-03-20', product: 'Keyboard' },
-    { customer: 'Henry Wilson', amount: 3300, date: '2024-04-01', product: 'Phone' },
-    { customer: 'Alice Johnson', amount: 2800, date: '2024-04-05', product: 'Accessories' },
-    { customer: 'Bob Smith', amount: 4600, date: '2024-04-10', product: 'Tablet' },
-    { customer: 'Charlie Brown', amount: 1900, date: '2024-04-15', product: 'Cable' },
-    { customer: 'Diana Prince', amount: 5500, date: '2024-05-01', product: 'Monitor' }
-  ];
+  // Dashboard selection and creation
+  type DashboardType = { page_id: string; page_name: string; query_id: string };
+  const [selectedDashboard, setSelectedDashboard] = useState<DashboardType | null>(null);
+  const [dashboards, setDashboards] = useState<DashboardType[]>([]);
+  const [dashboardsLoading, setDashboardsLoading] = useState(false);
+  const [dashboardsError, setDashboardsError] = useState<string | null>(null);
+
+  const getQueryData = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/query-data?query_id=${selectedQuery}`);
+      if (!res.ok) throw new Error('Failed to fetch query data');
+      const data = await res.json();
+      setPageData(data);
+      return data;
+    } catch (err) {
+      console.error('Failed to fetch query data:', err);
+      return null;
+    }
+  };
+  useEffect(() => {
+    if (selectedQuery) {
+      getQueryData(selectedQuery);
+    } else {
+      setPageData(null);
+    }
+  }, [selectedQuery]);
 
   // Fetch queries from API
   useEffect(() => {
@@ -128,18 +143,20 @@ const CustomDashboardPage: React.FC = () => {
   }, []);
 
   // Fetch dashboards from API
-  const [dashboards, setDashboards] = useState<any[]>([]);
-  const [dashboardsLoading, setDashboardsLoading] = useState(false);
-  const [dashboardsError, setDashboardsError] = useState<string | null>(null);
-
   useEffect(() => {
     async function fetchDashboards() {
       setDashboardsLoading(true);
       try {
         const res = await fetch('http://localhost:5000/custom-dashboards?user_id=101');
         if (!res.ok) throw new Error('Failed to fetch dashboards');
-        const data = await res.json();
-        setDashboards(data);
+        const dashboardsRaw = await res.json();
+        // Ensure all dashboards have query_id for DashboardType compatibility
+        const dashboards = dashboardsRaw.map((d: any) => ({
+          page_id: d.page_id,
+          page_name: d.page_name,
+          query_id: d.query_id || ''
+        }));
+        setDashboards(dashboards);
         setDashboardsError(null);
       } catch (err) {
         setDashboardsError('Failed to load dashboards');
@@ -154,45 +171,151 @@ const CustomDashboardPage: React.FC = () => {
     { active: [], history: {} }
   );
 
-  // Add showDropdown property to Visualization interface
-  interface Visualization {
-    VISUALIZATION_ID: string;
-    THREAD_ID: string;
-    IS_ACTIVE: boolean;
-    PROMPT: string;
-    ECHARTS_CODE: string;
-    CREATED_DATE: string;
-    showDropdown?: boolean;
-  }
   const [visualizationsLoading, setVisualizationsLoading] = useState(false);
   const [visualizationsError, setVisualizationsError] = useState<string | null>(null);
+
+  function removeImportStatements(code: string) {
+    return code
+      .split('\n')                          // Split code into lines
+      .filter(line => !line.trim().startsWith('import')) // Remove lines starting with 'import'
+      .filter(line => !line.trim().startsWith('```tsx')) // Remove lines starting with 'import'
+      .filter(line => !line.trim().startsWith('```')) // Remove lines starting with 'import'
+      .join('\n');                          // Join lines back into a single string
+  }
+
+  // Create a new visualization from prompt using API call
+  const createVisualization = async (prompt: string) => {
+    try {
+      const response = await fetch('http://localhost:5000/create-visualization', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          prompt,
+          data_label: 'transaction',
+          page_id: selectedDashboard?.page_id,
+          page_name: selectedDashboard?.page_name,
+          user_id: 101,
+          query_id: selectedDashboard?.query_id
+        })
+      });
+      if (!response.ok) throw new Error('Failed to create visualization');
+      const data = await response.json();
+      console.log("This is the code: ", removeImportStatements(data?.echarts_code))
+      const option = executeChartCode(removeImportStatements(data?.echarts_code));
+
+      setChartOption(option);
+      // Add new visualization to the active visualizations array
+      setVisualizations(prev => ({
+        ...prev,
+        active: [
+          ...prev.active,
+          {
+            visualization_id: data.VISUALIZATION_ID || uuidv4(),
+            thread_id: data.THREAD_ID || '',
+            is_active: true,
+            prompt: data.prompt || prompt,
+            echarts_code: data.echarts_code || '',
+            created_at: data.created_at || new Date().toISOString(),
+            chartOption: option, // Attach the chartOption for rendering
+            reasoning: data.reasoning || '',
+            business_implications: data.business_implications || '',
+          }
+        ]
+      }));
+      console.log(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+    }
+
+
+
+  }
+
+
+  const editVisualization = async (prompt: string) => {
+    try {
+      const response = await fetch('http://localhost:5000/change-visualization', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          prompt,
+          data_label: 'transaction',
+          page_id: selectedDashboard?.page_id,
+          page_name: selectedDashboard?.page_name,
+          user_id: 101,
+          query_id: selectedDashboard?.query_id,
+          thread_id: activeViz.thread_id
+        })
+      });
+      if (!response.ok) throw new Error('Failed to create visualization');
+      const data = await response.json();
+      console.log("This is the edited output: ",data)
+      const option = executeChartCode(removeImportStatements(data?.echarts_code));
+
+      setChartOption(option);
+      // Add new visualization to the active visualizations array
+      setVisualizations(prev => ({
+        ...prev,
+        active: [
+          ...prev.active,
+          {
+            visualization_id: data.VISUALIZATION_ID || uuidv4(),
+            thread_id: data.THREAD_ID || '',
+            is_active: true,
+            prompt: data.prompt || prompt,
+            echarts_code: data.echarts_code || '',
+            created_at: data.created_at || new Date().toISOString(),
+            chartOption: option, // Attach the chartOption for rendering,
+            reasoning: data.reasoning || '',
+            business_implications: data.business_implications || '',
+          
+          }
+        ]
+      }));
+      setActiveViz(data)
+      console.log(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+    }
+
+
+
+  }
 
   // Modified: fetchVisualizations now accepts pageId
   const fetchVisualizations = async (pageId?: string) => {
     setVisualizationsLoading(true);
+    await getQueryData();
     try {
       const page_id_param = pageId || '0c8e0d4f-12ba-4840-ac15-22756dba72ab';
       const res = await fetch(`http://localhost:5000/visualizations?user_id=101&page_id=${page_id_param}&thread_id`);
       if (!res.ok) throw new Error('Failed to fetch visualizations');
       const data: Visualization[] = await res.json();
-      
+
+      console.log("These are the visualizations: ",data)
       // Separate active and historical visualizations
-      const activeViz = data.filter((viz: Visualization) => viz.IS_ACTIVE === true);
-      const historicalViz = data.filter((viz: Visualization) => viz.IS_ACTIVE === false);
-      
+      const activeViz = data.filter((viz: Visualization) => viz.is_active == true);
+      const historicalViz = data.filter((viz: Visualization) => viz.is_active == false);
+
       // Group historical visualizations by thread_id
       const threadHistory = new Map<string, Visualization[]>();
       historicalViz.forEach((viz: Visualization) => {
-        if (!threadHistory.has(viz.THREAD_ID)) {
-          threadHistory.set(viz.THREAD_ID, []);
+        if (!threadHistory.has(viz.thread_id)) {
+          threadHistory.set(viz.thread_id, []);
         }
-        threadHistory.get(viz.THREAD_ID)?.push(viz);
+        threadHistory.get(viz.thread_id)?.push(viz);
       });
 
       // Sort historical visualizations by creation date for each thread
       threadHistory.forEach((history, threadId) => {
-        threadHistory.set(threadId, history.sort((a: Visualization, b: Visualization) => 
-          new Date(b.CREATED_DATE).getTime() - new Date(a.CREATED_DATE).getTime()
+        threadHistory.set(threadId, history.sort((a: Visualization, b: Visualization) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         ));
       });
 
@@ -208,13 +331,13 @@ const CustomDashboardPage: React.FC = () => {
     setVisualizationsLoading(false);
   };
 
-  const fetchEditHistory = async (threadId: string) => {
+  const fetchEditHistory = async (threadId: string, pageId: string) => {
     setHistoryLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/visualizations?user_id=101&thread_id=${threadId}`);
+      const res = await fetch(`http://localhost:5000/visualizations?user_id=101&thread_id=${threadId}&page_id=${pageId}`);
       if (!res.ok) throw new Error('Failed to fetch edit history');
       const data = await res.json();
-      setHistoryVisualizations(data.sort((a: any, b: any) => new Date(b.CREATED_DATE) - new Date(a.CREATED_DATE)));
+      setHistoryVisualizations(data.sort((a: any, b: any) => new Date(b.created_at) - new Date(a.created_at)));
     } catch (err) {
       console.error('Failed to fetch edit history:', err);
     }
@@ -433,11 +556,12 @@ const chartOption = {
     }
   };
 
+
   // Handle prompt submission
   const handleSubmitPrompt = async (e?: any) => {
     if (e) e.preventDefault();
     if (userPrompt.trim()) {
-      await fetchChartFromPrompt(userPrompt);
+      await createVisualization(userPrompt);
     }
   };
 
@@ -462,8 +586,7 @@ const chartOption = {
   }, [pageDetails]);
 
   // Get selected dashboard name
-  const selectedDashboard = filteredDashboards.find(d => d.page_id === selectedQuery);
-  const dashboardTitle = selectedDashboard ? selectedDashboard.page_name : '';
+  const selectedDashboardName = selectedDashboard ? selectedDashboard.page_name : '';
 
   return (
     <div className="min-h-screen bg-gray-50 flex relative">
@@ -561,7 +684,11 @@ const chartOption = {
                   return (
                     <div
                       key={query.query_id}
-                      onClick={() => setSelectedQuery(query.query_id || query.data_source_id)}
+                      onClick={() => {
+                        setPageData(null);
+                        setVisualizations({ active: [], history: {} });
+                        setSelectedQuery(query.query_id);
+                      }}
                       className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${selectedQuery === (query.query_id || query.data_source_id)
                         ? 'bg-blue-50 border border-blue-200'
                         : 'hover:bg-gray-50'
@@ -599,10 +726,12 @@ const chartOption = {
                     <div
                       key={dashboard.page_id}
                       onClick={() => {
-                        setSelectedQuery(dashboard.page_id);
+                        setPageData(null);
+                        setVisualizations({ active: [], history: {} });
+                        setSelectedDashboard({ page_id: dashboard.page_id, page_name: dashboard.page_name, query_id: selectedQuery });
                         fetchVisualizations(dashboard.page_id);
                       }}
-                      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${selectedQuery === dashboard.page_id
+                      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${selectedDashboard?.page_id === dashboard.page_id
                         ? 'bg-blue-50 border border-blue-200'
                         : 'hover:bg-gray-50'
                         }`}
@@ -651,7 +780,7 @@ const chartOption = {
       <div className="flex-1 flex flex-col">
         {/* Top Header */}
         <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <div className="text-lg font-medium text-gray-900">{dashboardTitle}</div>
+          <div className="text-lg font-medium text-gray-900">{selectedDashboardName}</div>
           <div className="text-sm text-gray-500">
           </div>
         </div>
@@ -670,35 +799,35 @@ const chartOption = {
               </div>
             ) : visualizations && visualizations.active.length > 0 ? (
               visualizations?.active?.map((viz, idx) => (
-                <div key={viz.VISUALIZATION_ID || idx} className="bg-white rounded-lg border border-gray-200 shadow p-4 flex flex-col relative">
+                <div key={viz.visualization_id || idx} className="bg-white rounded-lg border border-gray-200 shadow p-4 flex flex-col relative">
                   {/* Dropdown menu - moved to top right */}
                   <div className="absolute right-4 top-4 z-10">
                     <div className="relative">
                       {/* Dropdown trigger button */}
-                          <button className=" text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => { 
-                            setActiveViz(viz); 
-                            setShowVizModal(true); 
-                            setVisualizations(prev => ({ 
-                              ...prev, 
-                              active: prev.active.map(v => ({ 
-                                ...v, 
-                                showDropdown: false 
-                              })) 
-                            }));
-                          }}>
-                            <Maximize2 className=" h-4 mr-1 text-gray-500" />
-                          </button>
+                      <button className=" text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => {
+                        setActiveViz(viz);
+                        setShowVizModal(true);
+                        setVisualizations(prev => ({
+                          ...prev,
+                          active: prev.active.map(v => ({
+                            ...v,
+                            showDropdown: false
+                          }))
+                        }));
+                      }}>
+                        <Maximize2 className=" h-4 mr-1 text-gray-500" />
+                      </button>
                     </div>
                   </div>
                   {/* Card content */}
-                  <div className="mb-2 font-semibold text-gray-800 pl-2 pr-8 pt-2">{viz.PROMPT}</div>
+                  <div className="mb-2 font-semibold text-gray-800 pl-2 pr-8 pt-2">{viz.prompt}</div>
                   <div className="flex-1 flex items-center justify-center">
-                    <EchartsCodeRenderer code={viz.ECHARTS_CODE} pageData={pageData} />
+                    <EchartsCodeRenderer code={viz.echarts_code} pageData={pageData} />
                   </div>
                   {/* Show history count if available */}
-                  {visualizations?.history?.[viz.THREAD_ID] && (
+                  {visualizations?.history?.[viz.thread_id] && (
                     <div className="mt-2 text-sm text-gray-500">
-                      {visualizations.history[viz.THREAD_ID].length} previous versions
+                      {visualizations.history[viz.thread_id].length} previous versions
                     </div>
                   )}
                 </div>
@@ -723,12 +852,12 @@ const chartOption = {
                   </button>
                   {/* Visualization Title */}
                   <div className="mb-4 flex items-center justify-between">
-                    <div className="text-lg font-semibold text-gray-900">{activeViz.PROMPT}</div>
+                    <div className="text-lg font-semibold text-gray-900">{activeViz.prompt}</div>
                     <button
                       className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm"
                       onClick={() => {
                         setShowHistory(true);
-                        fetchEditHistory(activeViz.THREAD_ID);
+                        fetchEditHistory(activeViz.thread_id, activeViz.page_id);
                       }}
                     >
                       View Edit History
@@ -736,7 +865,7 @@ const chartOption = {
                   </div>
                   {/* Visualization Chart */}
                   <div className="flex-1 flex items-center justify-center mb-6">
-                    <EchartsCodeRenderer code={activeViz.ECHARTS_CODE} pageData={pageData} />
+                    <EchartsCodeRenderer code={activeViz.echarts_code} pageData={pageData} />
                   </div>
                   {/* Edit Prompt */}
                   <div className="mt-2">
@@ -751,7 +880,9 @@ const chartOption = {
                       />
                       <button
                         className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 text-sm"
-                        onClick={() => {/* TODO: handle edit visualization */ }}
+                        onClick={async() => {
+                          await editVisualization(editPrompt)
+                         }}
                       >
                         Send
                       </button>
@@ -784,10 +915,10 @@ const chartOption = {
                       <div className="text-gray-500">No edit history available.</div>
                     ) : (
                       historyVisualizations.map((viz, idx) => (
-                        <div key={viz.VISUALIZATION_ID || idx} className="bg-white rounded-lg border border-gray-200 shadow p-4 flex flex-col relative mb-4">
-                          <div className="mb-2 font-semibold text-gray-800 pl-2 pr-8 pt-2">{viz.PROMPT}</div>
+                        <div key={viz.visualization_id || idx} className="bg-white rounded-lg border border-gray-200 shadow p-4 flex flex-col relative mb-4">
+                          <div className="mb-2 font-semibold text-gray-800 pl-2 pr-8 pt-2">{viz.prompt}</div>
                           <div className="flex-1 flex items-center justify-center">
-                            <EchartsCodeRenderer code={viz.ECHARTS_CODE} pageData={pageData} />
+                            <EchartsCodeRenderer code={viz.echarts_code} pageData={pageData} />
                           </div>
                         </div>
                       ))
@@ -797,7 +928,7 @@ const chartOption = {
                 </div>
               </div>
             )}
-             : (
+            : (
             <div className="flex items-center justify-center h-96 col-span-3">
               <div className="text-gray-500">No visualizations to display</div>
             </div>
@@ -824,63 +955,85 @@ const chartOption = {
                 />
               </div>
               <div className="flex items-center space-x-2">
-                <button
-                  onClick={handleSubmitPrompt}
-                  disabled={chartLoading}
-                  className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors disabled:opacity-50"
-                >
-                  <Send className="w-4 h-4 text-white" />
-                </button>
+                {/* Tooltip logic for disabled button */}
+                <div className="relative group" tabIndex={-1}>
+                  <button
+                    onClick={e => {
+                      if (!selectedDashboard && pageData) {
+                        setShowModal(true);
+                      } else {
+                        handleSubmitPrompt(e);
+                      }
+                    }}
+                    disabled={chartLoading || !pageData}
+                    className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors disabled:opacity-50 focus:outline-none"
+                    aria-label="Send"
+                  >
+                    <Send className="w-4 h-4 text-white" />
+                  </button>
+                  {(chartLoading || !pageData) && (
+                    <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 z-10 hidden group-hover:block group-focus-within:block">
+                      <div className="bg-gray-900 text-white text-xs rounded px-3 py-2 shadow-lg whitespace-nowrap">
+                        Please select a Query or a Dashboard first.
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Floating Action Button for creating a new dashboard */}
+          <button
+            onClick={() => setShowModal(true)}
+            className="fixed top-20 right-8 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl transition-colors"
+            title="Create New Dashboard"
+          >
+            +
+          </button>
+
+          {/* Modal for new dashboard creation */}
+          {showModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+                <h2 className="text-lg font-semibold mb-4">Create Dashboard</h2>
+                <input
+                  type="text"
+                  value={newDashboardName}
+                  onChange={e => setNewDashboardName(e.target.value)}
+                  placeholder="Enter dashboard name"
+                  className="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      // Generate a uuid
+                      const uuid = ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+                        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+                      );
+                      const newDashboard = { page_id: uuid, page_name: newDashboardName, query_id: selectedQuery };
+                      setDashboards(prev => [...prev, newDashboard]);
+                      setSelectedDashboard(newDashboard);
+                      setShowModal(false);
+                      setNewDashboardName("");
+                    }}
+                    disabled={!newDashboardName.trim()}
+                    className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    Create
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Floating Action Button for creating a new dashboard */}
-      <button
-        onClick={() => setShowModal(true)}
-        className="fixed top-20 right-8 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl transition-colors"
-        title="Create New Dashboard"
-      >
-        +
-      </button>
-
-      {/* Modal for new dashboard name */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg p-8 w-96">
-            <h2 className="text-lg font-bold mb-4">Create New Dashboard</h2>
-            <input
-              type="text"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4 text-sm"
-              placeholder="Enter dashboard name..."
-              value={newDashboardName}
-              onChange={e => setNewDashboardName(e.target.value)}
-            />
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  const newPageId = uuidv4();
-                  setPageDetails({ page_id: newPageId, page_name: newDashboardName || 'New Dashboard' });
-                  setShowModal(false);
-                  setNewDashboardName('');
-                }}
-                disabled={!newDashboardName.trim()}
-                className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
-              >
-                Create
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
