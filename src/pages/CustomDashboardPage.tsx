@@ -12,6 +12,9 @@ interface Visualization {
   echarts_code: string;
   created_at: string;
   showDropdown?: boolean;
+  prompt_id?: string;
+  reasoning?: string;
+  business_implications?: string;
 }
 
 interface VisualizationState {
@@ -331,12 +334,14 @@ const CustomDashboardPage: React.FC = () => {
     setVisualizationsLoading(false);
   };
 
+  const [activeVizEditHistory, setActiveVizEditHistory] = useState<Visualization[]>([]);
   const fetchEditHistory = async (threadId: string, pageId: string) => {
     setHistoryLoading(true);
     try {
       const res = await fetch(`http://localhost:5000/visualizations?user_id=101&thread_id=${threadId}&page_id=${pageId}`);
       if (!res.ok) throw new Error('Failed to fetch edit history');
       const data = await res.json();
+      setActiveVizEditHistory(data.filter((viz: Visualization) => viz.is_active == false));
       setHistoryVisualizations(data.sort((a: any, b: any) => new Date(b.created_at) - new Date(a.created_at)));
     } catch (err) {
       console.error('Failed to fetch edit history:', err);
@@ -841,7 +846,8 @@ const chartOption = {
             {/* Visualization Fullscreen Modal */}
             {showVizModal && activeViz && (
               <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-60">
-                <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-5xl h-[90vh] flex flex-col relative">
+                <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-7xl h-[96vh] flex flex-col relative overflow-hidden">
+                  <div className="flex-1 min-h-0 overflow-y-auto pr-2">
                   {/* Close button */}
                   <button
                     className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
@@ -867,7 +873,25 @@ const chartOption = {
                   <div className="flex-1 flex items-center justify-center mb-6">
                     <EchartsCodeRenderer code={activeViz.echarts_code} pageData={pageData} />
                   </div>
+                  {/* Reasoning and Business Implications */}
+                  {(activeViz.reasoning || activeViz.business_implications) && (
+                    <div className="mb-8 flex flex-row gap-6">
+                      {activeViz.reasoning && (
+                        <div className="flex-1 bg-white rounded-xl shadow-lg border border-gray-200 p-6 flex flex-col min-w-[250px] max-w-[50%]">
+                          <div className="font-semibold text-gray-700 mb-2">Reasoning</div>
+                          <div className="text-gray-800 whitespace-pre-line">{activeViz.reasoning}</div>
+                        </div>
+                      )}
+                      {activeViz.business_implications && (
+                        <div className="flex-1 bg-white rounded-xl shadow-lg border border-gray-200 p-6 flex flex-col min-w-[250px] max-w-[50%]">
+                          <div className="font-semibold text-gray-700 mb-2">Business Implications</div>
+                          <div className="text-gray-800 whitespace-pre-line">{activeViz.business_implications}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {/* Edit Prompt */}
+                  </div>
                   <div className="mt-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Edit Visualization Prompt</label>
                     <div className="flex items-center space-x-2">
@@ -911,15 +935,37 @@ const chartOption = {
                   <div className="flex-1 overflow-y-auto">
                     {historyLoading ? (
                       <div className="text-gray-500">Loading edit history...</div>
-                    ) : historyVisualizations.length === 0 ? (
+                    ) : activeVizEditHistory.length == 0 ? (
                       <div className="text-gray-500">No edit history available.</div>
                     ) : (
-                      historyVisualizations.map((viz, idx) => (
+                      activeVizEditHistory.map((viz, idx) => (
                         <div key={viz.visualization_id || idx} className="bg-white rounded-lg border border-gray-200 shadow p-4 flex flex-col relative mb-4">
                           <div className="mb-2 font-semibold text-gray-800 pl-2 pr-8 pt-2">{viz.prompt}</div>
-                          <div className="flex-1 flex items-center justify-center">
+                          <div className="flex-1 flex items-center justify-center mb-4">
                             <EchartsCodeRenderer code={viz.echarts_code} pageData={pageData} />
                           </div>
+                          <button
+                            className="self-end px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 text-sm shadow"
+                            onClick={async () => {
+                              try {
+                                await fetch('http://localhost:5000/revert-visualization', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    prompt_id: viz.prompt_id,
+                                    thread_id: viz.thread_id,
+                                    user_id: '101',
+                                    page_id: viz.page_id || selectedDashboard?.page_id
+                                  })
+                                });
+                                // Optionally: refresh state/UI here
+                              } catch (err) {
+                                console.error('Failed to revert visualization:', err);
+                              }
+                            }}
+                          >
+                            Revert
+                          </button>
                         </div>
                       ))
                     )}
