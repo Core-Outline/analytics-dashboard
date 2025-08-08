@@ -39,6 +39,7 @@ const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect })
               .filter(Boolean)
           )
         );
+        console.log("These are the influencers: ",queries);
         if (queries.length === 0) {
           setInfluencers([]);
           setLoading(false);
@@ -49,6 +50,7 @@ const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect })
           `http://localhost:5000/get-influencer-metrics?search_type=influencer&influencers=${queries.join(",")}&company_id=301`
         );
         const metricsData = await metricsRes.json();
+        console.log("These are the metrics: ",metricsData);
         setInfluencers(metricsData || []);
       } catch (err: any) {
         setError('Failed to load influencer data.');

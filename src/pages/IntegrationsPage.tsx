@@ -33,7 +33,7 @@ const IntegrationsPage: React.FC = () => {
     { id: 'instagram-ads', name: 'Instagram Ads', description: 'Track Instagram ad campaigns, story promotions, and influencer partnerships.', icon: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png', color: 'bg-pink-500', category: 'Ads', isConnected: false, connectionType: 'oauth' },
 
     // Social Media
-    { id: 'social-media', name: 'Social Media', description: 'Comprehensive social media analytics across multiple platforms and channels.', icon: 'https://cdn-icons-png.flaticon.com/512/3670/3670151.png', color: 'bg-purple-500', category: 'Social Media', isConnected: false, connectionType: 'oauth' },
+    { id: 'social-media', name: 'Social Media', description: 'Comprehensive social media analytics across multiple platforms and channels.', icon: 'https://thumbs.dreamstime.com/b/set-popular-social-media-mobile-apps-round-icons-facebook-tiktok-linkedin-twitter-instagram-others-vector-set-288852969.jpg', color: 'bg-purple-500', category: 'Social Media', isConnected: false, connectionType: 'oauth' },
 
     // Payments
     { id: 'stripe', name: 'Stripe', description: 'Payment processing analytics, transaction insights, and revenue tracking.', icon: 'https://images.ctfassets.net/fzn2n1nzq965/3AGidihOJl4nH9D1vDjM84/9540155d584be52fc54c443b6efa4ae6/stripe.svg', color: 'bg-indigo-600', category: 'Payments', isConnected: false, connectionType: 'api-key' },
