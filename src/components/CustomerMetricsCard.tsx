@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Users, MapPin, CreditCard, MoreHorizontal } from 'lucide-react';
 import { count } from 'echarts/types/src/component/dataZoom/history.js';
+import { useParams } from 'react-router-dom'
 
 function abbreviateNumber(value: number): string {
   if (value >= 1e9) return (value / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
@@ -22,10 +23,11 @@ const CustomerMetricsCard: React.FC = () => {
   const [transactionLoading, setTransactionLoading] = useState(true);
   const [transactionError, setTransactionError] = useState(false);
 
+  const { organization_id } = useParams();
 
   useEffect(() => {
     setUserLoading(true);
-    fetch('http://localhost:5000/unique-users?company=101')
+    fetch(`http://localhost:5000/unique-users?company=${organization_id}`)
       .then(res => res.json())
       .then(data => {
         setUserCount(data.users);
@@ -37,7 +39,7 @@ const CustomerMetricsCard: React.FC = () => {
       });
 
     setCountryLoading(true);
-    fetch('http://localhost:5000/unique-countries?company=101')
+    fetch(`http://localhost:5000/unique-countries?company=${organization_id}`)
       .then(res => res.json())
       .then(data => {
         setCountryCount(data.countries);
@@ -49,7 +51,7 @@ const CustomerMetricsCard: React.FC = () => {
       });
 
     setTransactionLoading(true);
-    fetch('http://localhost:5000/unique-transactions?company=101')
+    fetch(`http://localhost:5000/unique-transactions?company=${organization_id}`)
       .then(res => res.json())
       .then(data => {
         setTransactionCount(data.transactions);
@@ -69,7 +71,7 @@ const CustomerMetricsCard: React.FC = () => {
       iconColor: 'text-blue-600',
       label: 'users',
       count: userCount,
-      target: null,
+      target: 0,
       loading: userLoading,
       error: userError
     },
@@ -80,7 +82,7 @@ const CustomerMetricsCard: React.FC = () => {
       iconColor: 'text-blue-600',
       label: 'countries',
       count: countryCount,
-      target: null,
+      target: 0,
       loading: countryLoading,
       error: countryError,
     },
@@ -91,7 +93,7 @@ const CustomerMetricsCard: React.FC = () => {
       iconColor: 'text-green-600',
       label: 'transactions',
       count: transactionCount,
-      target: null,
+      target: 0,
       loading: transactionLoading,
       error: transactionError,
     }
@@ -143,7 +145,7 @@ const CustomerMetricsCard: React.FC = () => {
                   )
                 ) : (
                   <div className="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
-                    Target: {metric.count.toLocaleString()} {}
+                    Target: {metric.target?.toLocaleString()} {}
                   </div>
                 )}
               </div>

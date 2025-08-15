@@ -70,6 +70,8 @@ import React, { useState, useEffect } from 'react';
 import { Search, FileText, MoreHorizontal, Sparkles, BarChart3, Send, Paperclip, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import ReactECharts from 'echarts-for-react';
 import { v4 as uuidv4 } from 'uuid';
+import { useParams } from 'react-router-dom';
+
 
 const CustomDashboardPage: React.FC = () => {
   // State for visualization modal
@@ -106,6 +108,7 @@ const CustomDashboardPage: React.FC = () => {
   const [dashboards, setDashboards] = useState<DashboardType[]>([]);
   const [dashboardsLoading, setDashboardsLoading] = useState(false);
   const [dashboardsError, setDashboardsError] = useState<string | null>(null);
+  const { organization_id, user_id } = useParams();
 
   const getQueryData = async () => {
     try {
@@ -132,7 +135,7 @@ const CustomDashboardPage: React.FC = () => {
     async function fetchQueries() {
       setQueriesLoading(true);
       try {
-        const res = await fetch('http://localhost:5000/queries?company=101&query_type');
+        const res = await fetch(`http://localhost:5000/queries?company=${organization_id}&query_type`);
         if (!res.ok) throw new Error('Failed to fetch queries');
         const data = await res.json();
         setQueries(data);
@@ -150,7 +153,7 @@ const CustomDashboardPage: React.FC = () => {
     async function fetchDashboards() {
       setDashboardsLoading(true);
       try {
-        const res = await fetch('http://localhost:5000/custom-dashboards?user_id=101');
+        const res = await fetch(`http://localhost:5000/custom-dashboards?user_id=${user_id}`);
         if (!res.ok) throw new Error('Failed to fetch dashboards');
         const dashboardsRaw = await res.json();
         // Ensure all dashboards have query_id for DashboardType compatibility
@@ -199,7 +202,7 @@ const CustomDashboardPage: React.FC = () => {
           data_label: 'transaction',
           page_id: selectedDashboard?.page_id,
           page_name: selectedDashboard?.page_name,
-          user_id: 101,
+          user_id: user_id,
           query_id: selectedDashboard?.query_id
         })
       });
@@ -250,7 +253,7 @@ const CustomDashboardPage: React.FC = () => {
           data_label: 'transaction',
           page_id: selectedDashboard?.page_id,
           page_name: selectedDashboard?.page_name,
-          user_id: 101,
+          user_id: user_id,
           query_id: selectedDashboard?.query_id,
           thread_id: activeViz.thread_id
         })
@@ -296,8 +299,8 @@ const CustomDashboardPage: React.FC = () => {
     setVisualizationsLoading(true);
     await getQueryData();
     try {
-      const page_id_param = pageId || '0c8e0d4f-12ba-4840-ac15-22756dba72ab';
-      const res = await fetch(`http://localhost:5000/visualizations?user_id=101&page_id=${page_id_param}&thread_id`);
+      const page_id_param = pageId ;
+      const res = await fetch(`http://localhost:5000/visualizations?user_id=${user_id}&page_id=${page_id_param}&thread_id`);
       if (!res.ok) throw new Error('Failed to fetch visualizations');
       const data: Visualization[] = await res.json();
 
@@ -338,7 +341,7 @@ const CustomDashboardPage: React.FC = () => {
   const fetchEditHistory = async (threadId: string, pageId: string) => {
     setHistoryLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/visualizations?user_id=101&thread_id=${threadId}&page_id=${pageId}`);
+      const res = await fetch(`http://localhost:5000/visualizations?user_id=${user_id}&thread_id=${threadId}&page_id=${pageId}`);
       if (!res.ok) throw new Error('Failed to fetch edit history');
       const data = await res.json();
       setActiveVizEditHistory(data.filter((viz: Visualization) => viz.is_active == false));
@@ -954,7 +957,7 @@ const chartOption = {
                                   body: JSON.stringify({
                                     prompt_id: viz.prompt_id,
                                     thread_id: viz.thread_id,
-                                    user_id: '101',
+                                    user_id: user_id,
                                     page_id: viz.page_id || selectedDashboard?.page_id
                                   })
                                 });
@@ -969,15 +972,15 @@ const chartOption = {
                         </div>
                       ))
                     )}
-                    <div className="text-gray-500">No history available (demo placeholder).</div>
                   </div>
                 </div>
               </div>
             )}
             : (
-            <div className="flex items-center justify-center h-96 col-span-3">
+              <></>
+            {/* <div className="flex items-center justify-center h-96 col-span-3">
               <div className="text-gray-500">No visualizations to display</div>
-            </div>
+            </div> */}
             )
           </div>
 

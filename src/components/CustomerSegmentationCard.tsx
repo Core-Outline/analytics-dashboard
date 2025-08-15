@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MoreHorizontal } from 'lucide-react';
+import { useParams } from 'react-router-dom'
 
 const CustomerSegmentationCard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Best Customers');
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+
+  const { organization_id } = useParams();
 
   const tabs = [
     'Best Customers',
@@ -38,7 +41,7 @@ const CustomerSegmentationCard: React.FC = () => {
       setError(false);
       try {
         const segment = segmentMap[activeTab] || 'best_customers';
-        const res = await fetch(`http://127.0.0.1:5000/customer-segmentation?company=101&segment=${segment}`);
+        const res = await fetch(`http://127.0.0.1:5000/customer-segmentation?company=${organization_id}&segment=${segment}`);
         if (!res.ok) throw new Error('Network response was not ok');
         const data = await res.json();
         setCustomers(data);

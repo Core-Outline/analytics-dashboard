@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
+import { useParams } from 'react-router-dom';
 
 interface CountryYearData {
   country: string;
@@ -13,13 +14,16 @@ interface ApiResponse {
   data: CountryYearData[];
 }
 
-const USERS_COUNTRY_API = 'http://localhost:5000/users-country?time_units=M';
 
-const UsersByCountryMap: React.FC = () => {
+const UsersByCountryMap: React.FC<{ data_source_id: string }> = ({ data_source_id }) => {
   const [mapReady, setMapReady] = useState(false);
   const [countryData, setCountryData] = useState<CountryYearData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { organization_id } = useParams();
+  const USERS_COUNTRY_API = `http://localhost:5000/users-country?time_units=M&company=${organization_id}&data_source_id=${data_source_id}`;
+
 
   // Fetch world map geojson
   useEffect(() => {
@@ -78,39 +82,11 @@ const UsersByCountryMap: React.FC = () => {
         setError('Could not load country data');
         setLoading(false);
       });
-  }, []);
+  }, [data_source_id]);
 
-  // Fallback sample data if API fails
-  const fallbackData: CountryYearData[] = [
-    { country: 'United States', country_code: 'US', year: 2024, users: 15420 },
-    { country: 'China', country_code: 'CN', year: 2024, users: 12850 },
-    { country: 'India', country_code: 'IN', year: 2024, users: 9680 },
-    { country: 'Germany', country_code: 'DE', year: 2024, users: 7320 },
-    { country: 'United Kingdom', country_code: 'GB', year: 2024, users: 6890 },
-    { country: 'France', country_code: 'FR', year: 2024, users: 5640 },
-    { country: 'Japan', country_code: 'JP', year: 2024, users: 5280 },
-    { country: 'Canada', country_code: 'CA', year: 2024, users: 4750 },
-    { country: 'Australia', country_code: 'AU', year: 2024, users: 3920 },
-    { country: 'Brazil', country_code: 'BR', year: 2024, users: 3680 },
-    { country: 'Netherlands', country_code: 'NL', year: 2024, users: 2840 },
-    { country: 'Sweden', country_code: 'SE', year: 2024, users: 2560 },
-    { country: 'South Korea', country_code: 'KR', year: 2024, users: 2340 },
-    { country: 'Italy', country_code: 'IT', year: 2024, users: 2180 },
-    { country: 'Spain', country_code: 'ES', year: 2024, users: 1950 },
-    { country: 'Mexico', country_code: 'MX', year: 2024, users: 1720 },
-    { country: 'Russia', country_code: 'RU', year: 2024, users: 1680 },
-    { country: 'Singapore', country_code: 'SG', year: 2024, users: 1420 },
-    { country: 'Norway', country_code: 'NO', year: 2024, users: 1280 },
-    { country: 'Switzerland', country_code: 'CH', year: 2024, users: 1150 },
-    { country: 'Belgium', country_code: 'BE', year: 2024, users: 980 },
-    { country: 'Denmark', country_code: 'DK', year: 2024, users: 850 },
-    { country: 'Finland', country_code: 'FI', year: 2024, users: 720 },
-    { country: 'Austria', country_code: 'AT', year: 2024, users: 680 },
-    { country: 'New Zealand', country_code: 'NZ', year: 2024, users: 540 }
-  ];
-
+  
   // Use API data or fallback
-  const allData = (!loading && !error && countryData && countryData.length > 0) ? countryData : fallbackData;
+  const allData = (!loading && !error && countryData && countryData.length > 0) ? countryData : [];
 
   // Group by country, get latest year for each country
   const latestYearByCountry: Record<string, CountryYearData> = {};

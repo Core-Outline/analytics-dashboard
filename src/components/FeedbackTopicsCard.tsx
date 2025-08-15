@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { MoreHorizontal, ChevronRight } from 'lucide-react';
+import { useParams } from 'react-router-dom'
 
 const FeedbackTopicsCard: React.FC = () => {
   const [topicsData, setTopicsData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const { organization_id } = useParams();
+
   useEffect(() => {
     setLoading(true);
-    fetch('http://localhost:5000/get-feedback-system-topics?company_id=301')
+    fetch(`http://localhost:5000/get-feedback-system-topics?company_id=${organization_id}`)
       .then(res => res.json())
       .then(data => setTopicsData(data))
       .finally(() => setLoading(false));

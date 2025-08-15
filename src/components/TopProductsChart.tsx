@@ -7,7 +7,7 @@ interface TopProductsChartProps {
   loading: boolean;
 }
 
-const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+const COLORS = ["#03045e","#0077b6","#00b4d8","#90e0ef","#caf0f8"];
 
 const TopProductsChart: React.FC<TopProductsChartProps> = ({ data, loading }) => {
   // Extract unique products and dates
@@ -62,7 +62,7 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({ data, loading }) =>
         color: config.color,
         borderRadius: [12, 12, 12, 12]
       },
-      barWidth: '15%'
+      barWidth: '30pt'
     }));
 
   const option = {

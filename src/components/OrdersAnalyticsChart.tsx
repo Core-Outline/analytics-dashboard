@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { fetchSalesData, getSalesChartData } from '../helpers/financials';
+import { useParams } from 'react-router-dom';
 
 interface TotalSalesChartProps {
   timeUnit: string;
@@ -10,7 +11,8 @@ const TotalSalesChart: React.FC<TotalSalesChartProps> = ({ timeUnit }) => {
   const [salesData, setSalesData] = useState<{ date: string[]; amount: number[] }>({ date: [], amount: [] });
   const [loading, setLoading] = useState(true);
   const [apiConfig, setApiConfig] = useState<any>(null);
-  const company = '301';
+  const { organization_id } = useParams();
+  const company = organization_id;
 
   useEffect(() => {
     fetch('/config.json')
@@ -51,6 +53,9 @@ const TotalSalesChart: React.FC<TotalSalesChartProps> = ({ timeUnit }) => {
   const currentLabel = `Current ${getTimeUnitLabel(timeUnit)}`;
   const previousLabel = `Previous ${getTimeUnitLabel(timeUnit)}`;
 
+  // New color palette
+  const colors = ["#03045e", "#0077b6", "#00b4d8", "#90e0ef", "#caf0f8"];
+
   const option = {
     grid: {
       left: '3%',
@@ -87,7 +92,7 @@ const TotalSalesChart: React.FC<TotalSalesChartProps> = ({ timeUnit }) => {
         type: 'line',
         data: currentData,
         smooth: true,
-        lineStyle: { color: '#f59e0b', width: 2 },
+        lineStyle: { color: colors[1], width: 3 },
         symbol: 'none',
         areaStyle: { opacity: 0 }
       },
@@ -96,7 +101,7 @@ const TotalSalesChart: React.FC<TotalSalesChartProps> = ({ timeUnit }) => {
         type: 'line',
         data: previousData,
         smooth: true,
-        lineStyle: { color: '#1f2937', width: 2 },
+        lineStyle: { color: colors[3], width: 2, type: 'dashed' },
         symbol: 'none',
         areaStyle: { opacity: 0 }
       }
@@ -110,8 +115,9 @@ const TotalSalesChart: React.FC<TotalSalesChartProps> = ({ timeUnit }) => {
       textStyle: { color: '#111827', fontSize: 13 },
       formatter: function(params: any) {
         let html = `<div><strong>${params[0].axisValueLabel}</strong></div>`;
-        params.forEach((item: any) => {
-          html += `<div style=\"margin:2px 0;\"><span style=\"display:inline-block;margin-right:6px;width:10px;height:10px;border-radius:50%;background:${item.color}\"></span>${item.seriesName}: <b>${item.data.toLocaleString()}</b></div>`;
+        params.forEach((item: any, index: number) => {
+          const color = index === 0 ? colors[1] : colors[3]; // Use the same colors as the lines
+          html += `<div style=\"margin:2px 0;\"><span style=\"display:inline-block;margin-right:6px;width:10px;height:10px;border-radius:50%;background:${color}\"></span>${item.seriesName}: <b>${item.data.toLocaleString()}</b></div>`;
         });
         return html;
       },
@@ -147,7 +153,7 @@ const TotalSalesChart: React.FC<TotalSalesChartProps> = ({ timeUnit }) => {
   return (
     <div className="relative group">
       <div className="absolute left-0 top-0 w-full flex justify-center z-10 pointer-events-none">
-        <span className="text-xs text-gray-500 mt-2 mb-1 bg-white bg-opacity-80 px-2 rounded">Comparison of current vs previous {getTimeUnitLabel(timeUnit).toLowerCase()} sales</span>
+        {/* <span className="text-xs text-gray-500 mt-2 mb-1 bg-white bg-opacity-80 px-2 rounded">Comparison of current vs previous {getTimeUnitLabel(timeUnit).toLowerCase()} sales</span> */}
       </div>
       <ReactECharts 
         option={option} 

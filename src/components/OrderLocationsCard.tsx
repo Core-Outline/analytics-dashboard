@@ -3,9 +3,11 @@ import { useEffect, useState } from 'react';
 import * as echarts from 'echarts';
 import ReactECharts from 'echarts-for-react';
 import { RotateCcw, MoreHorizontal, ChevronRight } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 
 const OrderLocationsCard: React.FC = () => {
   const [mapReady, setMapReady] = useState(false);
+  const { organization_id } = useParams();
 
   useEffect(() => {
     // Register a simplified world map using ECharts built-in world map
@@ -42,7 +44,7 @@ const OrderLocationsCard: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     setError(false);
-    fetch('http://localhost:5000/user-sessions-country?company=101')
+    fetch(`http://localhost:5000/user-sessions-country?company=${organization_id}`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch');
         return res.json();
@@ -75,6 +77,21 @@ const OrderLocationsCard: React.FC = () => {
     value: item.sessions
   }));
 
+  const values = mapData.map(item => item.value);
+  const minValue = values.length > 0 ? Math.min(...values) : 0;
+  const maxValue = values.length > 0 ? Math.max(...values) : 1;
+
+  // Color scale helper
+  function getCountryColor(value: number, min: number, max: number) {
+    if (max === min) return '#2563eb';
+    const ratio = (value - min) / (max - min);
+    const blues = [
+      '#e6f3ff', '#bfdbfe', '#93c5fd', '#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af'
+    ];
+    const index = Math.floor(ratio * (blues.length - 1));
+    return blues[index];
+  }
+
   // For the table (top 6 by sessions)
   const tableData = [...mergedData].sort((a, b) => b.sessions - a.sessions).slice(0, 6);
 
@@ -93,7 +110,13 @@ const OrderLocationsCard: React.FC = () => {
         itemStyle: {
           areaColor: '#4a90e2'
         }
-      }
+      },
+      regions: mapData.map(country => ({
+        name:  country.name,
+        itemStyle: {
+          areaColor: getCountryColor(country.value, minValue, maxValue)
+        }
+      }))
     },
     series: [
       {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, ChevronRight } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 
 const IssuesListCard: React.FC = () => {
   const [selectedIssues, setSelectedIssues] = useState<string[]>([]);
@@ -7,10 +8,11 @@ const IssuesListCard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const pageSize = 5;
+  const { organization_id } = useParams();
 
   useEffect(() => {
     setLoading(true);
-    fetch('http://localhost:5000/get-feedback-issues?company_id=301')
+    fetch(`http://localhost:5000/get-feedback-issues?company_id=${organization_id}`)
       .then(res => res.json())
       .then(data => setIssues(data))
       .finally(() => setLoading(false));

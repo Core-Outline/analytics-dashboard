@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { ChevronDown, MoreHorizontal } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 
 const UserSentimentsCard: React.FC = () => {
   const [sentimentData, setSentimentData] = useState<any[]>([]);
@@ -12,11 +13,12 @@ const UserSentimentsCard: React.FC = () => {
     'neutral': true,
     'mixed': true
   });
+  const { organization_id } = useParams();
 
   // Fetch data from API
   useEffect(() => {
     setLoading(true);
-    fetch('http://localhost:5000/get-feedback-sentiments-trend?company_id=301')
+    fetch(`http://localhost:5000/get-feedback-sentiments-trend?company_id=${organization_id}`)
       .then(res => res.json())
       .then(data => {
         setSentimentData(data);

@@ -2,6 +2,7 @@ import React from 'react';
 import WordCloud from 'react-d3-cloud';
 import { scaleOrdinal } from 'd3-scale';
 import { schemeCategory10 } from 'd3-scale-chromatic';
+import { useParams } from 'react-router-dom';
 
 const PALETTE = [
   '#03045e', '#023e8a', '#0077b6', '#0096c7', '#00b4d8', '#48cae4', '#90e0ef', '#ade8f4', '#caf0f8',
@@ -10,20 +11,30 @@ const PALETTE = [
 const TrendingKeywordsCard: React.FC = () => {
   const [keywords, setKeywords] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const { organization_id } = useParams();
 
   React.useEffect(() => {
     setLoading(true);
-    fetch('http://localhost:5000/get-keywords?search_type=influencer&data_source_ids=201&company_id=101&influencers=SafaricomPLC&time_units=H')
-      .then(res => res.json())
-      .then(data => {
-        console.table(data)
-        setKeywords(data);
-        setLoading(false);
-      })
-      .catch((e) => {
-        console.error(e)
-        setLoading(false)
-      });
+    const fetchTrendingKeywords=async()=>{
+      let dataSourceIds = await fetch(`http://localhost:4000/data-source?type=social_media,twitter,instagram,tiktok&organization_id=${organization_id}`)
+      const dataSourceIdsData = await dataSourceIds.json();
+      dataSourceIds = dataSourceIdsData.map((ds: any) => ds.DATA_SOURCE_ID);
+
+
+      fetch(`http://localhost:5000/get-keywords?search_type=all&data_source_ids=${dataSourceIds.join(",")}&company_id=${organization_id}&indices=tiktok,twitter`)
+        .then(res => res.json())
+        .then(data => {
+          setKeywords(data);
+          setLoading(false);
+        })
+        .catch((e) => {
+          console.error(e)
+          setLoading(false)
+        });
+
+      }
+
+      fetchTrendingKeywords()
   }, []);
 
   // Calculate min and max safely

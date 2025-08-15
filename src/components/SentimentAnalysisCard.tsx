@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
+import { useParams } from 'react-router-dom'
 
 const SENTIMENT_COLORS: Record<string, string> = {
   positive: '#10b981', // emerald
@@ -10,23 +11,34 @@ const SENTIMENT_COLORS: Record<string, string> = {
 const SentimentAnalysisCard: React.FC = () => {
   const [sentimentData, setSentimentData] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const { organization_id } = useParams();
 
   React.useEffect(() => {
     setLoading(true);
-    fetch('http://localhost:5000/sentiment?search_type=all&data_source_ids=201&company_id=101&influencers=SafaricomPLC&indices=tiktok,twitter')
-      .then(res => res.json())
-      .then(data => {
-        // Map API data to chart data
-        const mapped = data.map((item: any) => ({
-          name: item.sentiment.charAt(0).toUpperCase() + item.sentiment.slice(1),
-          value: item.proportion,
-          color: SENTIMENT_COLORS[item.sentiment] || '#6b7280',
-          count: item.count,
-        }));
-        setSentimentData(mapped);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    const fetchSentimentData = async () => {
+      let dataSourceIds = await fetch(`http://localhost:4000/data-source?type=social_media,twitter,instagram,tiktok&organization_id=${organization_id}`)
+      const dataSourceIdsData = await dataSourceIds.json();
+      dataSourceIds = dataSourceIdsData.map((ds: any) => ds.DATA_SOURCE_ID);
+
+      fetch(`http://localhost:5000/sentiment?search_type=all&data_source_ids=${dataSourceIds}&company_id=${organization_id}&indices=tiktok,twitter`)
+        .then(res => res.json())
+        .then(data => {
+          // Map API data to chart data
+          const mapped = data.map((item: any) => ({
+            name: item.sentiment.charAt(0).toUpperCase() + item.sentiment.slice(1),
+            value: item.proportion,
+            color: SENTIMENT_COLORS[item.sentiment] || '#6b7280',
+            count: item.count,
+          }));
+          setSentimentData(mapped);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+
+    }
+
+    fetchSentimentData();
+
   }, []);
 
   const totalComments = sentimentData.reduce((sum, item) => sum + item.count, 0);
@@ -53,7 +65,7 @@ const SentimentAnalysisCard: React.FC = () => {
         color: '#9ca3af',
         fontSize: 12,
         fontFamily: 'Inter, system-ui, sans-serif',
-        formatter: function(value: number) {
+        formatter: function (value: number) {
           return value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value.toString();
         }
       },
@@ -86,7 +98,7 @@ const SentimentAnalysisCard: React.FC = () => {
       type: 'bar',
       data: sentimentData.map(s => s.count).reverse(),
       itemStyle: {
-        color: function(params: any) {
+        color: function (params: any) {
           const reversedData = [...sentimentData].reverse();
           return reversedData[params.dataIndex]?.color || '#6b7280';
         },
@@ -103,7 +115,7 @@ const SentimentAnalysisCard: React.FC = () => {
         color: '#374151',
         fontSize: 12
       },
-      formatter: function(params: any) {
+      formatter: function (params: any) {
         const reversedData = [...sentimentData].reverse();
         const sentiment = reversedData[params.dataIndex];
         return `
@@ -133,10 +145,10 @@ const SentimentAnalysisCard: React.FC = () => {
             </div>
             <div className="text-sm text-gray-600">Total Comments Analyzed</div>
           </div>
-          
+
           {/* Horizontal Bar Chart */}
           <div className="mb-6">
-            <ReactECharts 
+            <ReactECharts
               option={chartOption}
               style={{ height: '180px', width: '100%' }}
               opts={{ renderer: 'canvas' }}
@@ -148,7 +160,7 @@ const SentimentAnalysisCard: React.FC = () => {
         <div className="col-span-1 space-y-6">
           {sentimentData.map((sentiment, index) => (
             <div key={index} className="text-center">
-              <div 
+              <div
                 className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-white font-bold text-lg"
                 style={{ backgroundColor: sentiment.color }}
               >

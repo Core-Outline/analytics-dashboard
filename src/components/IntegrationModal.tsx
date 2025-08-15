@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Key, Database, Upload, ExternalLink, CheckCircle, AlertCircle } from 'lucide-react';
-
+import { useParams } from 'react-router-dom';
 interface Integration {
   id: string;
   name: string;
@@ -25,6 +25,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
   // Social Media tag input state (must be at component root, not inside renderConnectionForm)
   const [tagInput, setTagInput] = useState('');
+  const { organization_id } = useParams();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -32,7 +33,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
 
   // Generic API function for creating a data source
   const createDataSource = async (data: any) => {
-    data['organization_id'] = 301
+    data['organization_id'] = organization_id
     const res = await fetch('http://localhost:4000/data-source/create-data-source', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -58,7 +59,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
             database: formData.database,
             schema: formData.schema,
             type: 'mysql',
-            organization_id: formData.organization_id
+            organization_id: organization_id
           };
           break;
         case 'postgresql':
@@ -71,7 +72,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
             schema: formData.schema,
             port: formData.port,
             type: 'postgres',
-            organization_id: formData.organization_id
+            organization_id: organization_id
           };
           break;
         case 'mongodb':
@@ -83,7 +84,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
             database: formData.database,
             url: formData.url,
             type: 'mongodb',
-            organization_id: formData.organization_id
+            organization_id: organization_id
           };
           break;
         case 'facebook-ads':
@@ -93,7 +94,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
             app_id: formData.app_id,
             app_secret: formData.app_secret,
             type: 'facebook_ads',
-            organization_id: formData.organization_id
+            organization_id: organization_id
           };
           break;
         case 'csv':
@@ -101,7 +102,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
             name: formData.name,
             type: 'csv',
             file_name: formData.file_name,
-            organization_id: formData.organization_id
+            organization_id: organization_id
           };
           break;
         case 'stripe':
@@ -109,7 +110,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
             name: formData.name,
             secret_key: formData.secret_key,
             type: 'stripe',
-            organization_id: formData.organization_id
+            organization_id: organization_id
           };
           break;
         case 'social-media':
@@ -119,7 +120,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
             tags: formData.tags || [],
             influencers: formData.influencers || [],
             type: 'social_media',
-            organization_id: formData.organization_id
+            organization_id: organization_id
           };
           break;
         default:

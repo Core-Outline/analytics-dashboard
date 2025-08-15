@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
+import { useParams } from 'react-router-dom';
 
-const DEVICE_SESSIONS_API_URL = 'http://localhost:5000/device-sessions?company=101';
-
-const UsersByDeviceCard: React.FC = () => {
+const UsersByDeviceCard: React.FC<{ data_source_id: string }> = ({ data_source_id }) => {
   const [deviceData, setDeviceData] = useState<{ browser: string[]; count: number[]; percentage: number[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [firstLoad, setFirstLoad] = useState(true);
+  const { organization_id } = useParams();
+
+  const DEVICE_SESSIONS_API_URL = `http://localhost:5000/device-sessions?company=${organization_id}&data_source_id=${data_source_id}`;
+
 
   const fetchDeviceData = () => {
     fetch(DEVICE_SESSIONS_API_URL)
@@ -28,13 +31,16 @@ const UsersByDeviceCard: React.FC = () => {
       fetchDeviceData();
     }, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [data_source_id]);
+
+  const colorPalette = ["#03045e", "#0077b6", "#00b4d8", "#90e0ef", "#caf0f8"];
 
   const chartOption = deviceData ? {
+    color: colorPalette,
     tooltip: {
       trigger: 'item',
       formatter: '{b}: {c} ({d}%)',
-      backgroundColor: 'rgba(255,255,255,0.95)',
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
       borderColor: '#e5e7eb',
       borderWidth: 1,
       textStyle: { color: '#374151', fontSize: 12 },
@@ -57,12 +63,21 @@ const UsersByDeviceCard: React.FC = () => {
         itemStyle: {
           borderRadius: 8,
           borderColor: '#fff',
-          borderWidth: 2
+          borderWidth: 2,
+          color: (params: any) => {
+            // Use the color palette and cycle through if there are more items than colors
+            return colorPalette[params.dataIndex % colorPalette.length];
+          }
         },
         label: {
           show: false
         },
         emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.2)'
+          },
           label: {
             show: true,
             fontWeight: 'bold',
@@ -71,7 +86,10 @@ const UsersByDeviceCard: React.FC = () => {
         },
         data: deviceData.browser.map((b, i) => ({
           value: deviceData.count[i],
-          name: b
+          name: b,
+          itemStyle: {
+            color: colorPalette[i % colorPalette.length]
+          }
         })).sort((a, b) => b.value - a.value) // Order items top-to-bottom
       }
     ]

@@ -1,5 +1,16 @@
 import React from 'react';
 import { formatAmount, formatGrowth } from '../helpers/financials';
+import { useParams } from 'react-router-dom';
+
+// Function to get color based on growth percentage
+const getProgressColor = (growth: number): string => {
+  const colors = ["#03045e", "#0077b6", "#00b4d8", "#90e0ef", "#caf0f8"];
+  if (growth >= 80) return colors[0];
+  if (growth >= 60) return colors[1];
+  if (growth >= 40) return colors[2];
+  if (growth >= 20) return colors[3];
+  return colors[4];
+};
 
 interface RevenueGrowthCardProps {
   value: number | string;
@@ -27,13 +38,12 @@ const RevenueGrowthCard: React.FC<RevenueGrowthCardProps> = ({ value, growth, pe
   const latestGrowth = growthList.length > 0 ? growthList[growthList.length - 1] : 0;
   const radius = 45;
   const circumference = 2 * Math.PI * radius;
-  const strokeDasharray = circumference;
   const strokeDashoffset = circumference - (Math.abs(latestGrowth) / 100) * circumference;
 
   return (
     <div className="flex flex-col h-full">
       {/* Table */}
-      <div className="flex-1 mb-6">
+      <div className="flex-2 mb-6">
         <table className="w-full">
           <thead>
             <tr>
@@ -55,35 +65,40 @@ const RevenueGrowthCard: React.FC<RevenueGrowthCardProps> = ({ value, growth, pe
       </div>
 
       {/* Circular Progress Bar */}
-      <div className="flex justify-center items-center px-4 pb-4">
-        <div className="relative w-24 h-24">
-          <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
+      <div className="flex-1 flex justify-center items-center px-4 pb-4">
+        <div className="relative w-32 h-32 flex items-center justify-center">
+          <svg 
+            className="w-full h-full transform -rotate-90" 
+            viewBox="0 0 100 100"
+            style={{ overflow: 'visible' }}
+          >
             {/* Background circle */}
             <circle
               cx="50"
               cy="50"
-              r={radius}
-              stroke="#f3f4f6"
-              strokeWidth="8"
+              r="45"
+              stroke="#e5e7eb"
+              strokeWidth="12"
               fill="none"
+              className="opacity-50"
             />
             {/* Progress circle */}
             <circle
               cx="50"
               cy="50"
-              r={radius}
-              stroke={latestGrowth >= 0 ? '#10b981' : '#ef4444'}
-              strokeWidth="8"
+              r="45"
+              stroke={getProgressColor(latestGrowth)}
+              strokeWidth="12"
               fill="none"
-              strokeDasharray={strokeDasharray}
+              strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
               strokeLinecap="round"
-              className="transition-all duration-300 ease-in-out"
+              className="transition-all duration-500 ease-in-out"
             />
           </svg>
           {/* Center text */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-lg font-bold text-gray-900">{formatGrowth(latestGrowth / 100)}</span>
+            <span className="text-sm font-bold text-gray-900">{formatGrowth(latestGrowth / 100)}</span>
           </div>
         </div>
       </div>

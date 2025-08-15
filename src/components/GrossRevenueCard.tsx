@@ -1,13 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { TopProductSold } from '../helpers/financials';
+import { useParams } from 'react-router-dom'
 
 interface GrossRevenueCardProps {
   data: TopProductSold[];
   loading: boolean;
 }
 
-const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+const COLORS = ["#03045e","#023e8a","#0077b6","#0096c7","#00b4d8","#48cae4","#90e0ef","#ade8f4","#caf0f8"];
 
 const GrossRevenueCard: React.FC<GrossRevenueCardProps> = ({ data, loading }) => {
   // Extract unique products and dates

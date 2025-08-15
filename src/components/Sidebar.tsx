@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronRight, ChevronLeft, ChevronDown, ChevronUp, BarChart3, Zap, Users, Share2, Heart, Settings, HelpCircle, MessageCircle, LogOut, Plug2 } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 
 interface SidebarProps {
   activeSection: string;
@@ -10,6 +11,24 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCollapsed, onToggleCollapse }) => {
   const [isDashboardExpanded, setIsDashboardExpanded] = React.useState(true);
+  const { organization_id } = useParams();
+  const [organizationDetails, setOrganizationDetails] = React.useState({
+      "CONTACT_EMAIL": "",
+      "INDUSTRY": "",
+      "LATEST_PAYMENT": null,
+      "NAME": "",
+      "NUMBER_OF_EMPLOYEES": "",
+      "ORGANIZATION_ID": organization_id,
+      "PRICING_PLAN": null,
+      "WEBSITE": ""
+  })
+
+  React.useEffect(() => {
+    fetch(`http://localhost:4000/organization/${organization_id}`)
+      .then(res => res.json())
+      .then(data => setOrganizationDetails(data.data))
+      .finally(() => {});
+  }, []);
 
   const navigationItems = [
     { id: 'financials', label: 'Financials', icon: BarChart3 },
@@ -22,23 +41,23 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
   ];
 
   return (
-    <div className={`${isCollapsed ? 'w-16' : 'w-64'} bg-slate-800 text-white flex flex-col rounded-r-2xl fixed left-0 top-0 h-screen z-50 transition-all duration-300`}>
+<div className={`${isCollapsed ? 'w-16' : 'w-64'} bg-[#03045e] text-white flex flex-col rounded-r-2xl fixed left-0 top-0 h-screen z-50 transition-all duration-300`}>
       {/* Logo */}
       <div className={`p-4 flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
-        <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
-          M
+        <div className="w-8 h-8 bg-[#00b4d8] rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
+          {organizationDetails.NAME.charAt(0).toUpperCase()}
         </div>
-        {!isCollapsed && <span className="text-lg font-medium">Core&Outline</span>}
+        {!isCollapsed && <span className="text-lg font-medium text-white">{organizationDetails.NAME}</span>}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3">
+      <nav className="flex-1 px-3 mt-2">
         {/* Dashboard Section */}
         <div className="mb-4">
           {!isCollapsed && (
             <div
               onClick={() => setIsDashboardExpanded(!isDashboardExpanded)}
-              className="flex items-center justify-between px-3 py-2 cursor-pointer text-gray-400 hover:text-white transition-colors"
+              className="flex items-center justify-between px-3 py-2 cursor-pointer text-[#caf0f8] hover:text-white transition-colors"
             >
               <div className="flex items-center space-x-2">
                 <BarChart3 className="w-4 h-4" />
@@ -66,22 +85,20 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
                 <div
                   key={item.id}
                   onClick={() => onSectionChange(item.id)}
-                  className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} ${isCollapsed ? 'px-3' : 'px-3 ml-4'} py-1.5 cursor-pointer font-medium rounded-lg transition-colors ${
+                  className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} ${isCollapsed ? 'px-3' : 'px-3 ml-4'} py-2 cursor-pointer font-medium rounded-lg transition-colors ${
                     isActive 
-                      ? 'text-orange-500 bg-slate-700' 
-                      : 'text-gray-300 hover:text-white hover:bg-slate-700'
+                      ? 'text-white bg-[#0077b6]' 
+                      : 'text-[#caf0f8] hover:text-white hover:bg-[#0077b6]'
                   }`}
                 >
                   <div className="flex items-center">
                     {!isCollapsed && <span className="text-sm">{item.label}</span>}
                   </div>
-                  {!isCollapsed && item.badge ? (
-                    <div className="w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center text-xs font-bold text-white">
+                  {!isCollapsed && item.badge && (
+                    <div className="w-4 h-4 bg-[#90e0ef] rounded-full flex items-center justify-center text-xs font-bold text-[#03045e]">
                       {item.badge}
                     </div>
-                  ) : !isCollapsed ? (
-                    <ChevronRight className="w-3 h-3" />
-                  ) : null}
+                  )}
                 </div>
               );
             })}
@@ -90,16 +107,16 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
       </nav>
 
       {/* Bottom Navigation */}
-      <div className="p-3 space-y-1">
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'} px-3 py-2 text-gray-300 hover:text-white cursor-pointer font-medium rounded-lg hover:bg-slate-700 transition-colors`} title={isCollapsed ? 'Help Centre' : undefined}>
+      <div className="p-3 space-y-1 mt-auto">
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'} px-3 py-2 text-[#caf0f8] hover:text-white cursor-pointer font-medium rounded-lg hover:bg-[#0077b6] transition-colors`}>
           <HelpCircle className="w-4 h-4 flex-shrink-0" />
           {!isCollapsed && <span className="text-sm">Help Centre</span>}
         </div>
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'} px-3 py-2 text-gray-300 hover:text-white cursor-pointer font-medium rounded-lg hover:bg-slate-700 transition-colors`} title={isCollapsed ? 'Contact us' : undefined}>
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'} px-3 py-2 text-[#caf0f8] hover:text-white cursor-pointer font-medium rounded-lg hover:bg-[#0077b6] transition-colors`}>
           <MessageCircle className="w-4 h-4 flex-shrink-0" />
           {!isCollapsed && <span className="text-sm">Contact us</span>}
         </div>
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'} px-3 py-2 text-orange-500 hover:text-orange-400 cursor-pointer font-medium rounded-lg hover:bg-slate-700 transition-colors`} title={isCollapsed ? 'Log out' : undefined}>
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'} px-3 py-2 text-[#caf0f8] hover:text-white cursor-pointer font-medium rounded-lg hover:bg-[#0077b6] transition-colors`}>
           <LogOut className="w-4 h-4 flex-shrink-0" />
           {!isCollapsed && <span className="text-sm">Log out</span>}
         </div>

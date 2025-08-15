@@ -1,10 +1,11 @@
 import React from 'react';
 import { Users, Camera, Zap, MessageCircle, Heart, RotateCcw, Megaphone, MoreHorizontal } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 
 const SocialMediaMetricsCard: React.FC = () => {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(false);
-
+  const { organization_id } = useParams();
   const [topMetrics, setTopMetrics] = React.useState([
     { title: 'Followers', icon: Users, iconBg: 'bg-blue-100', iconColor: 'text-blue-600', currentValue: 0, lastMonthValue: 0, growth: '0%' },
     { title: 'Posts', icon: Camera, iconBg: 'bg-blue-100', iconColor: 'text-blue-600', currentValue: 0, lastMonthValue: 0, growth: '0%' },
@@ -21,10 +22,15 @@ const SocialMediaMetricsCard: React.FC = () => {
     const fetchMetrics = async () => {
       setLoading(true);
       setError(false);
+
+      let dataSourceIds = await fetch(`http://localhost:4000/data-source?type=social_media,twitter,instagram,tiktok&organization_id=${organization_id}`)
+      const dataSourceIdsData = await dataSourceIds.json();
+      dataSourceIds = dataSourceIdsData.map((ds: any) => ds.DATA_SOURCE_ID);
+
       try {
         let followersRes;
         try {
-          followersRes = await fetch('http://localhost:5000/followers-trend?search_type=account&data_source_ids=301&company_id=101&time_units=H');
+          followersRes = await fetch(`http://localhost:5000/followers-trend?search_type=account&data_source_ids=${dataSourceIds}&company_id=${organization_id}&time_units=H`);
         } catch (err) {
           console.error(err);
           followersRes = {
@@ -36,7 +42,7 @@ const SocialMediaMetricsCard: React.FC = () => {
 
         let postsRes;
         try {
-          postsRes = await fetch('http://localhost:5000/post-trend?search_type=account&data_source_ids=301&company_id=101&time_units=H');
+          postsRes = await fetch(`http://localhost:5000/post-trend?search_type=account&data_source_ids=${dataSourceIds}&company_id=${organization_id}&time_units=H`);
         } catch (err) {
           console.error(err);
           postsRes = {
@@ -48,7 +54,7 @@ const SocialMediaMetricsCard: React.FC = () => {
 
         let likesRes;
         try {
-          likesRes = await fetch('http://localhost:5000/likes-trend?search_type=account&data_source_ids=201&company_id=101&influencers=SafaricomPLC&time_units=H');
+          likesRes = await fetch(`http://localhost:5000/likes-trend?search_type=account&data_source_ids=${dataSourceIds}&company_id=${organization_id}&time_units=H`);
         } catch (err) {
           console.error(err);
           likesRes = {
@@ -60,7 +66,7 @@ const SocialMediaMetricsCard: React.FC = () => {
 
         let conversionsRes;
         try {
-          conversionsRes = await fetch('http://localhost:5000/conversions-trend?company_id=101&time_units=H');
+          conversionsRes = await fetch(`http://localhost:5000/conversions-trend?company_id=${organization_id}&time_units=H`);
         } catch (err) {
           console.error(err);
           conversionsRes = {
@@ -72,7 +78,7 @@ const SocialMediaMetricsCard: React.FC = () => {
 
         let mentionsRes;
         try {
-          mentionsRes = await fetch('http://localhost:5000/mentions-trend?search_type=keywords&data_source_ids=201&company_id=101&influencers=SafaricomPLC&time_units=H&indices=tiktok');
+          mentionsRes = await fetch(`http://localhost:5000/mentions-trend?search_type=keywords&data_source_ids=${dataSourceIds}&company_id=${organization_id}&time_units=H&indices=tiktok,twitter`);
         } catch (err) {
           console.error(err);
           mentionsRes = {
@@ -84,7 +90,7 @@ const SocialMediaMetricsCard: React.FC = () => {
 
         let commentsRes;
         try {
-          commentsRes = await fetch('http://localhost:5000/comments-trend?search_type=all&data_source_ids=201&company_id=101&influencers=SafaricomPLC&time_units=H&indices=tiktok');
+          commentsRes = await fetch(`http://localhost:5000/comments-trend?search_type=all&data_source_ids=${dataSourceIds}&company_id=${organization_id}&time_units=H&indices=tiktok,twitter`);
         } catch (err) {
           console.error(err);
           commentsRes = {

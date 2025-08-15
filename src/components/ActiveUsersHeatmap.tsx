@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
+import { useParams } from 'react-router-dom';
 
-const USERS_API_URL = 'http://localhost:5000/active-users?company=101';
 
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const hours = Array.from({ length: 24 }, (_, h) => `${h.toString().padStart(2, '0')}:00`);
@@ -10,6 +10,9 @@ const ActiveUsersHeatmap: React.FC = () => {
   const [heatmapData, setHeatmapData] = useState<number[][]>(Array(7).fill(null).map(() => Array(24).fill(0)));
   const [loading, setLoading] = useState(true);
   const [firstLoad, setFirstLoad] = useState(true);
+  const { organization_id } = useParams();
+
+  const USERS_API_URL = `http://localhost:5000/active-users?company=${organization_id}`;
 
   useEffect(() => {
     const fetchHeatmap = () => {

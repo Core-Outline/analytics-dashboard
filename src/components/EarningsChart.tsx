@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
+import { useParams } from 'react-router-dom'
 
 const EarningsChart: React.FC = () => {
+  const { organization_id } = useParams();
   const option = {
     series: [
       {

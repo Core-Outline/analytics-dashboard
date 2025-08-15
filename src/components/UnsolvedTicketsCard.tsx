@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Plus, Download, MoreHorizontal, ChevronDown } from 'lucide-react';
-
+import { useParams } from 'react-router-dom';
 const UnsolvedTicketsCard: React.FC = () => {
   const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { organization_id } = useParams();
 
   useEffect(() => {
     setLoading(true);
-    fetch('http://localhost:5000/get-feedback?company_id=301')
+    const fetchTickets=async()=>{
+      fetch(`http://localhost:5000/get-feedback?company_id=${organization_id}`)
       .then(res => res.json())
       .then(data => setTickets(data))
       .finally(() => setLoading(false));
+    }
+    fetchTickets();
   }, []);
 
   const filteredTickets = tickets.filter(ticket =>

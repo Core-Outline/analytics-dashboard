@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { ChevronDown } from 'lucide-react';
+import { useParams } from 'react-router-dom'
 
 // Type for ad campaign data from API
 interface AdCampaign {
@@ -26,6 +27,7 @@ const AdCampaignsCard: React.FC = () => {
   const [adData, setAdData] = useState<AdCampaign[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { organization_id } = useParams();
 
   // Fetch data from API
   useEffect(() => {
@@ -33,7 +35,7 @@ const AdCampaignsCard: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch('http://localhost:5000/get-ads-data?company_id=301');
+        const res = await fetch(`http://localhost:5000/get-ads-data?company_id=${organization_id}`);
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         console.log("This is the ads data: ",data)

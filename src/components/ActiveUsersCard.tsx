@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
+import { useParams } from 'react-router-dom';
 
-const ACTIVE_USERS_API_URL = 'http://localhost:5000/active-users?company=101';
-const PAGE_VISITS_API_URL = 'http://localhost:5000/page-visits?company=101';
 
-const ActiveUsersCard: React.FC = () => {
+
+const ActiveUsersCard: React.FC<{ data_source_id: string }> = ({ data_source_id }) => {
   const [activeUsers, setActiveUsers] = useState(0);
   const [chartData, setChartData] = useState<number[]>([]);
   const [mostVisitedPages, setMostVisitedPages] = useState<{ page: string; users: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [firstLoad, setFirstLoad] = useState(true);
   const [pageVisits, setPageVisits] = useState<{ page_name: string; count: number; duration: string }[]>([]);
+  const { organization_id } = useParams();
 
+  const ACTIVE_USERS_API_URL = `http://localhost:5000/active-users?company=${organization_id}&data_source_id=${data_source_id}`;
+  const PAGE_VISITS_API_URL = `http://localhost:5000/page-visits?company=${organization_id}&data_source_id=${data_source_id}`;
   // Generate time labels for the last 24 hours
   const timeLabels = Array.from({ length: 24 }, (_, i) => {
     const hour = (new Date().getHours() - 23 + i + 24) % 24;

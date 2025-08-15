@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';  
+import { useParams } from 'react-router-dom'
 
 const CustomerSatisfactionCard: React.FC = () => {
   const [satisfactionData, setSatisfactionData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [visibleSegments, setVisibleSegments] = useState<Record<string, boolean>>({});
-
+  const { organization_id } = useParams();
   // Fetch data from API
   useEffect(() => {
     setLoading(true);
-    fetch('http://localhost:5000/get-feedback-sentiments-splits?company_id=301')
+    
+    fetch(`http://localhost:5000/get-feedback-sentiments-splits?company_id=${organization_id}`)
       .then(res => res.json())
       .then(data => {
         setSatisfactionData(data);
