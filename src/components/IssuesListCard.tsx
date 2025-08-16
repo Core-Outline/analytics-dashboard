@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, ChevronRight } from 'lucide-react';
-import { useParams } from 'react-router-dom';
-
+import { useLocation} from 'react-router-dom';
 const IssuesListCard: React.FC = () => {
   const [selectedIssues, setSelectedIssues] = useState<string[]>([]);
   const [issues, setIssues] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const pageSize = 5;
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   useEffect(() => {
     setLoading(true);
-    fetch(`http://localhost:5000/get-feedback-issues?company_id=${organization_id}`)
+    fetch(`https://data.coreoutline.com/get-feedback-issues?company_id=${organization_id}`)
       .then(res => res.json())
       .then(data => setIssues(data))
       .finally(() => setLoading(false));

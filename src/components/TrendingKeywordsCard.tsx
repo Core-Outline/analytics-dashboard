@@ -2,8 +2,7 @@ import React from 'react';
 import WordCloud from 'react-d3-cloud';
 import { scaleOrdinal } from 'd3-scale';
 import { schemeCategory10 } from 'd3-scale-chromatic';
-import { useParams } from 'react-router-dom';
-
+import { useLocation} from 'react-router-dom';
 const PALETTE = [
   '#03045e', '#023e8a', '#0077b6', '#0096c7', '#00b4d8', '#48cae4', '#90e0ef', '#ade8f4', '#caf0f8',
 ];
@@ -11,17 +10,19 @@ const PALETTE = [
 const TrendingKeywordsCard: React.FC = () => {
   const [keywords, setKeywords] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   React.useEffect(() => {
     setLoading(true);
     const fetchTrendingKeywords=async()=>{
-      let dataSourceIds = await fetch(`http://localhost:4000/data-source?type=social_media,twitter,instagram,tiktok&organization_id=${organization_id}`)
+      let dataSourceIds = await fetch(`https://api.coreoutline.com/data-source?type=social_media,twitter,instagram,tiktok&organization_id=${organization_id}`)
       const dataSourceIdsData = await dataSourceIds.json();
       dataSourceIds = dataSourceIdsData.map((ds: any) => ds.DATA_SOURCE_ID);
 
 
-      fetch(`http://localhost:5000/get-keywords?search_type=all&data_source_ids=${dataSourceIds.join(",")}&company_id=${organization_id}&indices=tiktok,twitter`)
+      fetch(`https://data.coreoutline.com/get-keywords?search_type=all&data_source_ids=${dataSourceIds.join(",")}&company_id=${organization_id}&indices=tiktok,twitter`)
         .then(res => res.json())
         .then(data => {
           setKeywords(data);

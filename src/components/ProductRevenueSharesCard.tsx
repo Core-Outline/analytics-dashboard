@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
-import { useParams } from 'react-router-dom';
-
+import { useLocation} from 'react-router-dom';
 const COLORS = [
   '#03045e', '#023e8a', '#0077b6', '#0096c7', '#00b4d8', '#48cae4', '#90e0ef', '#ade8f4', '#caf0f8'
 ];
@@ -16,12 +15,14 @@ const ProductRevenueSharesCard: React.FC = () => {
   const [data, setData] = useState<ProductRevenueSharesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`http://localhost:5000/product-revenue-shares?company=${organization_id}`)
+    fetch(`https://data.coreoutline.com/product-revenue-shares?company=${organization_id}`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch data');
         return res.json();

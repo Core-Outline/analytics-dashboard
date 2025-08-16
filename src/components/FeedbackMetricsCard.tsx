@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { MessageCircle, AlertCircle, Users } from 'lucide-react';
-import { useParams } from 'react-router-dom';
-
+import { useLocation} from 'react-router-dom';
 // Header Card Component
 const HeaderCard = () => (
   <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
@@ -64,15 +63,17 @@ const FeedbackMetricsCard: React.FC = () => {
   const [ces, setCes] = useState<any>(null);
   const [issuesTrend, setIssuesTrend] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      fetch(`http://localhost:5000/get-nps-analysis?company_id=${organization_id}`).then(r => r.json()),
-      fetch(`http://localhost:5000/get-csat-analysis?company_id=${organization_id}`).then(r => r.json()),
-      fetch(`http://localhost:5000/get-ces-analysis?company_id=${organization_id}`).then(r => r.json()),
-      fetch(`http://localhost:5000/get-feedback-issues-trend?company_id=${organization_id}`).then(r => r.json()),
+      fetch(`https://data.coreoutline.com/get-nps-analysis?company_id=${organization_id}`).then(r => r.json()),
+      fetch(`https://data.coreoutline.com/get-csat-analysis?company_id=${organization_id}`).then(r => r.json()),
+      fetch(`https://data.coreoutline.com/get-ces-analysis?company_id=${organization_id}`).then(r => r.json()),
+      fetch(`https://data.coreoutline.com/get-feedback-issues-trend?company_id=${organization_id}`).then(r => r.json()),
     ]).then(([npsData, csatData, cesData, issuesTrendData]) => {
       setNps(npsData);
       setCsat(csatData);

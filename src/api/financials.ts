@@ -1,5 +1,5 @@
 export async function fetchRecurringRevenue(timeUnits: string, company: string) {
-  const response = await fetch(`http://localhost:5000/recurring-revenue?time_units=${timeUnits}&company=${company}`);
+  const response = await fetch(`https://data.coreoutline.com/recurring-revenue?time_units=${timeUnits}&company=${company}`);
   if (!response.ok) {
     throw new Error('Network response was not ok');
   }
@@ -10,7 +10,7 @@ export async function fetchRecurringRevenue(timeUnits: string, company: string) 
 
 export async function fetchRevenueGrowthRate(timeUnits: string, company: string) {
   try {
-    const response = await fetch(`http://localhost:5000/revenue-growth-rate?time_units=${timeUnits}&company=${company}`);
+    const response = await fetch(`https://data.coreoutline.com/revenue-growth-rate?time_units=${timeUnits}&company=${company}`);
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }

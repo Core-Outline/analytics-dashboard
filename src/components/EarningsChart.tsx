@@ -1,9 +1,11 @@
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
-import { useParams } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 const EarningsChart: React.FC = () => {
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
   const option = {
     series: [
       {

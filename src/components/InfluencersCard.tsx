@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useRef } from 'react';
 import { Users, Heart, MessageCircle, Share2, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import InfluencerAnalyticsCard from './InfluencerAnalyticsCard';
-import { useParams } from 'react-router-dom';
-
+import { useLocation} from 'react-router-dom';
 interface InfluencersCardProps {
   onInfluencerSelect?: (influencer: any) => void;
 }
@@ -12,7 +11,9 @@ const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect })
   const [selectedInfluencer, setSelectedInfluencer] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const analyticsRef = useRef<HTMLDivElement>(null);
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
   const influencersPerPage = 5;
 
   // Helper to get unique influencer ID (screen_name)
@@ -29,13 +30,13 @@ const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect })
       setLoading(true);
       setError(null);
       try {
-        let dataSourceIds = await fetch(`http://localhost:4000/data-source?type=social_media,twitter,instagram,tiktok&organization_id=${organization_id}`)
+        let dataSourceIds = await fetch(`https://api.coreoutline.com/data-source?type=social_media,twitter,instagram,tiktok&organization_id=${organization_id}`)
         const dataSourceIdsData = await dataSourceIds.json();
         dataSourceIds = dataSourceIdsData.map((ds: any) => ds.DATA_SOURCE_ID);
         
         // Step 1: Fetch influencer queries
         const queriesRes = await fetch(
-          `http://localhost:4000/query?data_source_id=${dataSourceIds.join(",")}&type=twitter_account,instagram_account,tiktok_account,facebook_account`
+          `https://api.coreoutline.com/query?data_source_id=${dataSourceIds.join(",")}&type=twitter_account,instagram_account,tiktok_account,facebook_account`
         );
         const queriesData = await queriesRes.json();
         const queries = Array.from(
@@ -53,7 +54,7 @@ const InfluencersCard: React.FC<InfluencersCardProps> = ({ onInfluencerSelect })
         }
         // Step 2: Fetch influencer metrics
         const metricsRes = await fetch(
-          `http://localhost:5000/get-influencer-metrics?search_type=influencer&influencers=${queries.join(",")}&company_id=${organization_id}`
+          `https://data.coreoutline.com/get-influencer-metrics?search_type=influencer&influencers=${queries.join(",")}&company_id=${organization_id}`
         );
         const metricsData = await metricsRes.json();
         console.log("These are the metrics: ",metricsData);

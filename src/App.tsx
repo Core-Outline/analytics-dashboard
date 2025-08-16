@@ -1,6 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, useParams, useNavigate, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -13,28 +13,17 @@ import IntegrationsPage from './pages/IntegrationsPage';
 import CustomDashboardPage from './pages/CustomDashboardPage';
 import { AuthProvider } from './contexts/AuthContext';
 
-// Type for route parameters
-type RouteParams = {
-  user_id: string;
-  organization_id: string;
-  section?: string;
-};
-
 // Main App component with routing
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/:user_id/:organization_id/*" element={<MainApp />} />
-          {/* Redirect root to a default route */}
-          <Route path="/" element={
-            <Navigate to="/101/301/financials" replace />
-          } />
-          {/* Catch-all route */}
-          <Route path="*" element={
-            <Navigate to="/101/301/financials" replace />
-          } />
+          {/* Single root route — query params control behavior */}
+          <Route path="/" element={<MainApp />} />
+
+          {/* Catch-all redirects back to root with defaults */}
+          <Route path="*" element={<Navigate to="/?user_id=101&organization_id=301" replace />} />
         </Routes>
       </Router>
       <ToastContainer position="top-right" autoClose={5000} />
@@ -42,21 +31,25 @@ function App() {
   );
 }
 
-// MainApp component that handles the main layout and routing
+// MainApp component that handles layout and section rendering
 function MainApp() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
-  const { user_id, organization_id, section = 'financials' } = useParams<keyof RouteParams>() as RouteParams;
-  const [activeSection, setActiveSection] = useState(section);
+  const location = useLocation();
+  
 
-  // Update active section when URL changes
-  React.useEffect(() => {
-    setActiveSection(section);
-  }, [section]);
+  // Extract query params
+  const searchParams = new URLSearchParams(location.search);
+  const user_id = searchParams.get('user_id') || '101';
+  const organization_id = searchParams.get('organization_id') || '301';
+
+  // Keep section only in React state
+  const [activeSection, setActiveSection] = useState<string>('financials');
 
   const handleSectionChange = (newSection: string) => {
     setActiveSection(newSection);
-    navigate(`/${user_id}/${organization_id}/${newSection}`);
+    // Keep same query params, only update section in state
+    navigate(`/?user_id=${user_id}&organization_id=${organization_id}`, { replace: true });
   };
 
   const renderContent = () => {
@@ -81,13 +74,13 @@ function MainApp() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar 
-        activeSection={activeSection} 
+      <Sidebar
+        activeSection={activeSection}
         onSectionChange={handleSectionChange}
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
-      
+
       {/* Main Content */}
       <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
         <Header />

@@ -78,7 +78,7 @@ export const fetchRecurringRevenueData = async (
   company: string
 ): Promise<RecurringRevenueData> => {
   try {
-    const url = `http://localhost:5000/recurring-revenue?time_units=${timeUnits}&company=${company}`;
+    const url = `https://data.coreoutline.com/recurring-revenue?time_units=${timeUnits}&company=${company}`;
     console.log('Fetching recurring revenue from:', url);
     
     const response = await fetch(url);
@@ -124,7 +124,7 @@ export const fetchAnnualRunRateData = async (
   company: string
 ): Promise<RecurringRevenueData> => {
   try {
-    const url = `http://localhost:5000/recurring-revenue?time_units=A&company=${company}`;
+    const url = `https://data.coreoutline.com/recurring-revenue?time_units=A&company=${company}`;
     console.log('Fetching recurring revenue from:', url);
     
     const response = await fetch(url);
@@ -171,7 +171,7 @@ export const fetchRevenueGrowthData = async (
   company: string
 ): Promise<RevenueGrowthData> => {
   try {
-    const url = `http://localhost:5000/revenue-growth-rate?time_units=${timeUnits}&company=${company}`;
+    const url = `https://data.coreoutline.com/revenue-growth-rate?time_units=${timeUnits}&company=${company}`;
     console.log('Fetching revenue growth from:', url);
     
     const response = await fetch(url);
@@ -218,7 +218,7 @@ export const fetchRevenueGrowthRaw = async (
   company: string
 ): Promise<{ date: string[]; amount: number[]; growth: number[] }> => {
   try {
-    const url = `http://localhost:5000/revenue-growth-rate?time_units=${timeUnits}&company=${company}`;
+    const url = `https://data.coreoutline.com/revenue-growth-rate?time_units=${timeUnits}&company=${company}`;
     const response = await fetch(url);
     
     if (!response.ok) {
@@ -256,7 +256,7 @@ export const fetchGrowthPeriodData = async (
   company: string
 ): Promise<{ value: number | string; isLoading: boolean }> => {
   try {
-    const response = await fetch(`http://localhost:5000/growth-period?company=${company}`);
+    const response = await fetch(`https://data.coreoutline.com/growth-period?company=${company}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -285,7 +285,7 @@ export const fetchSalesData = async (
 ): Promise<{ date: string[]; amount: number[] }> => {
 
   try {
-    const url = `http://localhost:5000/sales?time_units=${timeUnits}&company=${company}`;
+    const url = `https://data.coreoutline.com/sales?time_units=${timeUnits}&company=${company}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error('Network response was not ok');
     const data = await response.json();
@@ -436,7 +436,7 @@ export const fetchProductRevenueSharesData = async (
 ): Promise<ProductRevenueSharesData> => {
   
   try {
-    const url = `http://localhost:5000/product-revenue-shares?company=${company}`;
+    const url = `https://data.coreoutline.com/product-revenue-shares?company=${company}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
@@ -465,7 +465,7 @@ export const fetchTopProductsSold = async (
   company: string
 ): Promise<TopProductSold[]> => {
   try {
-    const url = `http://localhost:5000/top-products-sold?time_units=${timeUnits}&company=${company}`;
+    const url = `https://data.coreoutline.com/top-products-sold?time_units=${timeUnits}&company=${company}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();

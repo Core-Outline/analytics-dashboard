@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { X, Key, Database, Upload, ExternalLink, CheckCircle, AlertCircle } from 'lucide-react';
-import { useParams } from 'react-router-dom';
-interface Integration {
+import { useLocation} from 'react-router-dom';interface Integration {
   id: string;
   name: string;
   description: string;
@@ -25,7 +24,9 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
   // Social Media tag input state (must be at component root, not inside renderConnectionForm)
   const [tagInput, setTagInput] = useState('');
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -34,7 +35,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
   // Generic API function for creating a data source
   const createDataSource = async (data: any) => {
     data['organization_id'] = organization_id
-    const res = await fetch('http://localhost:4000/data-source/create-data-source', {
+    const res = await fetch('https://api.coreoutline.com/data-source/create-data-source', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)

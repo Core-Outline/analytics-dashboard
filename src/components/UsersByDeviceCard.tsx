@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
-import { useParams } from 'react-router-dom';
-
+import { useLocation} from 'react-router-dom';
 const UsersByDeviceCard: React.FC<{ data_source_id: string }> = ({ data_source_id }) => {
   const [deviceData, setDeviceData] = useState<{ browser: string[]; count: number[]; percentage: number[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [firstLoad, setFirstLoad] = useState(true);
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
-  const DEVICE_SESSIONS_API_URL = `http://localhost:5000/device-sessions?company=${organization_id}&data_source_id=${data_source_id}`;
+  const DEVICE_SESSIONS_API_URL = `https://data.coreoutline.com/device-sessions?company=${organization_id}&data_source_id=${data_source_id}`;
 
 
   const fetchDeviceData = () => {

@@ -6,8 +6,7 @@ import UsersByDeviceCard from '../components/UsersByDeviceCard';
 import ActiveUsersHeatmap from '../components/ActiveUsersHeatmap';
 import UsersByCountryMap from '../components/UsersByCountryMap';
 import { ChevronDown } from 'lucide-react';
-import { useParams } from 'react-router-dom';
-
+import { useLocation} from 'react-router-dom';
 
 interface DataSource {
   ACCESS_TOKEN: string | null;
@@ -34,8 +33,11 @@ interface DataSource {
 }
 
 const SaasPage: React.FC = () => {
-  const { organization_id } = useParams<{ organization_id: string }>();
-  const USERS_API_URL = `http://localhost:5000/active-users?company=${organization_id}`;
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
+  
+  const USERS_API_URL = `https://data.coreoutline.com/active-users?company=${organization_id}`;
 
   // Users Online state
   const [usersOnline, setUsersOnline] = useState<any[]>([]);
@@ -52,7 +54,7 @@ const SaasPage: React.FC = () => {
       console.log("This is the org id for DS>>>>>>>>>>>>", organization_id)
       try {
         const response = await fetch(
-          `http://localhost:4000/data-source?type=saas&organization_id=${organization_id}`
+          `https://api.coreoutline.com/data-source?type=saas&organization_id=${organization_id}`
         );
         const data = await response.json();
         setDataSources(data);

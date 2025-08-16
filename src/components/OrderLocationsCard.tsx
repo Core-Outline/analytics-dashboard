@@ -3,15 +3,16 @@ import { useEffect, useState } from 'react';
 import * as echarts from 'echarts';
 import ReactECharts from 'echarts-for-react';
 import { RotateCcw, MoreHorizontal, ChevronRight } from 'lucide-react';
-import { useParams } from 'react-router-dom';
-
+import { useLocation} from 'react-router-dom';
 const OrderLocationsCard: React.FC = () => {
   const [mapReady, setMapReady] = useState(false);
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   useEffect(() => {
     // Register a simplified world map using ECharts built-in world map
-    fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
+    fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/masterhttps://data.coreoutline.com/world.geojson')
       .then(response => response.json())
       .then(worldGeoJson => {
         echarts.registerMap('world', worldGeoJson);
@@ -44,7 +45,7 @@ const OrderLocationsCard: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     setError(false);
-    fetch(`http://localhost:5000/user-sessions-country?company=${organization_id}`)
+    fetch(`https://data.coreoutline.com/user-sessions-country?company=${organization_id}`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch');
         return res.json();

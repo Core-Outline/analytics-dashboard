@@ -97,7 +97,7 @@
   </script>
 
   <script>
-    fetch(`http://localhost:4000/get-all-company-data`)
+    fetch(`https://api.coreoutline.com/get-all-company-data`)
       .then(response => response.json())
       .then(data => {
         var companyData = data;
@@ -1898,7 +1898,7 @@
   <script>
 
     function getPageData(type_of_data) {
-      fetch(`http://localhost:5000/get-data`, {
+      fetch(`https://data.coreoutline.com/get-data`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1969,7 +1969,7 @@
 
     function generateViewWithPrompt(prompt) {
       console.log("This is the page data used for the prompt", page_data)
-      fetch(`http://localhost:5000/create-visualization`, {
+      fetch(`https://data.coreoutline.com/create-visualization`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2000,7 +2000,7 @@
     }
 
     function retrieveVisualizations(thread_id) {
-      fetch(`http://localhost:5000/visualizations?user_id=${userToken.USER_ID}&page_id=0c8e0d4f-12ba-4840-ac15-22756dba72ab&thread_id`)
+      fetch(`https://data.coreoutline.com/visualizations?user_id=${userToken.USER_ID}&page_id=0c8e0d4f-12ba-4840-ac15-22756dba72ab&thread_id`)
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -2035,7 +2035,7 @@
   <script src="../vendors/anchorjs/anchor.min.js"></script>
   <script src="../vendors/is/is.min.js"></script>
   <script src="../vendors/echarts/echarts.min.js"></script>
-  <script src="../assets/data/world.js"></script>
+  <script src="../assetshttps://data.coreoutline.com/world.js"></script>
   <script src="../vendors/chart/chart.min.js"></script>
   <script src="../vendors/dayjs/dayjs.min.js"></script>
   <script src="../vendors/fontawesome/all.min.js"></script>

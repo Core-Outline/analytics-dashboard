@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { MoreHorizontal, ChevronRight } from 'lucide-react';
-import { useParams } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 const FeedbackTopicsCard: React.FC = () => {
   const [topicsData, setTopicsData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   useEffect(() => {
     setLoading(true);
-    fetch(`http://localhost:5000/get-feedback-system-topics?company_id=${organization_id}`)
+    fetch(`https://data.coreoutline.com/get-feedback-system-topics?company_id=${organization_id}`)
       .then(res => res.json())
       .then(data => setTopicsData(data))
       .finally(() => setLoading(false));

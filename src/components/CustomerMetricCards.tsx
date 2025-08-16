@@ -1,20 +1,22 @@
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
-import { useParams } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 const CustomerMetricCards: React.FC = () => {
   const [growthData, setGrowthData] = React.useState<number[]>([]);
   const [growthLabels, setGrowthLabels] = React.useState<string[]>([]);
   const [growthLoading, setGrowthLoading] = React.useState(true);
   const [growthError, setGrowthError] = React.useState(false);
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   // Fetch Customer Growth Rate data
   React.useEffect(() => {
     setGrowthLoading(true);
     setGrowthError(false);
-    fetch(`http://127.0.0.1:5000/customer-growth-rate?time_units=M&company_id=${organization_id}`)
+    fetch(`https://data.coreoutline.com/customer-growth-rate?time_units=M&company_id=${organization_id}`)
       .then(res => res.json())
       .then((data) => {
         // data is an array: [{ period, customer_growth, customer_growth_pct }]

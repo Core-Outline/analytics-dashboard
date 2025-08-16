@@ -1,5 +1,5 @@
 {
   "brevoApiKey": "your_brevo_api_key_here",
   "api_base_url": "http://localhost:3000",
-  "data_base_url": "http://localhost:5000"
+  "data_base_url": "/data"
 }

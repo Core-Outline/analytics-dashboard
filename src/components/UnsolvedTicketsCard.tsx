@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Plus, Download, MoreHorizontal, ChevronDown } from 'lucide-react';
-import { useParams } from 'react-router-dom';
-const UnsolvedTicketsCard: React.FC = () => {
+import { useLocation} from 'react-router-dom';const UnsolvedTicketsCard: React.FC = () => {
   const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   useEffect(() => {
     setLoading(true);
     const fetchTickets=async()=>{
-      fetch(`http://localhost:5000/get-feedback?company_id=${organization_id}`)
+      fetch(`https://data.coreoutline.com/get-feedback?company_id=${organization_id}`)
       .then(res => res.json())
       .then(data => setTickets(data))
       .finally(() => setLoading(false));

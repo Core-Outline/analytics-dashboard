@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChevronRight, ChevronLeft, ChevronDown, ChevronUp, BarChart3, Zap, Users, Share2, Heart, Settings, HelpCircle, MessageCircle, LogOut, Plug2 } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 interface SidebarProps {
   activeSection: string;
@@ -11,24 +11,29 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCollapsed, onToggleCollapse }) => {
   const [isDashboardExpanded, setIsDashboardExpanded] = React.useState(true);
-  const { organization_id } = useParams();
+
+  // Extract organization_id from query params
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id') || '301';
+
   const [organizationDetails, setOrganizationDetails] = React.useState({
-      "CONTACT_EMAIL": "",
-      "INDUSTRY": "",
-      "LATEST_PAYMENT": null,
-      "NAME": "",
-      "NUMBER_OF_EMPLOYEES": "",
-      "ORGANIZATION_ID": organization_id,
-      "PRICING_PLAN": null,
-      "WEBSITE": ""
-  })
+    CONTACT_EMAIL: "",
+    INDUSTRY: "",
+    LATEST_PAYMENT: null,
+    NAME: "",
+    NUMBER_OF_EMPLOYEES: "",
+    ORGANIZATION_ID: organization_id,
+    PRICING_PLAN: null,
+    WEBSITE: ""
+  });
 
   React.useEffect(() => {
-    fetch(`http://localhost:4000/organization/${organization_id}`)
+    fetch(`https://api.coreoutline.com/organization/${organization_id}`)
       .then(res => res.json())
       .then(data => setOrganizationDetails(data.data))
-      .finally(() => {});
-  }, []);
+      .catch(() => {});
+  }, [organization_id]);
 
   const navigationItems = [
     { id: 'financials', label: 'Financials', icon: BarChart3 },
@@ -41,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
   ];
 
   return (
-<div className={`${isCollapsed ? 'w-16' : 'w-64'} bg-[#03045e] text-white flex flex-col rounded-r-2xl fixed left-0 top-0 h-screen z-50 transition-all duration-300`}>
+    <div className={`${isCollapsed ? 'w-16' : 'w-64'} bg-[#03045e] text-white flex flex-col rounded-r-2xl fixed left-0 top-0 h-screen z-50 transition-all duration-300`}>
       {/* Logo */}
       <div className={`p-4 flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
         <div className="w-8 h-8 bg-[#00b4d8] rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">

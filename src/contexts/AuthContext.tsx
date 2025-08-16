@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const fetchUserData = async (userId: string) => {
     try {
-      const response = await fetch(`http://localhost:4000/auth/get-user/${userId}`);
+      const response = await fetch(`https://api.coreoutline.com/auth/get-user/${userId}`);
 
       const data = await response.json();
 
@@ -71,7 +71,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const fetchOrganizationData = async (organizationId: string) => {
     try {
-      const response = await fetch(`http://localhost:4000/organization/${organizationId}`);
+      const response = await fetch(`https://api.coreoutline.com/organization/${organizationId}`);
 
       const data = await response.json();
 
@@ -91,7 +91,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     try {
       // Login request
-      const response = await fetch('http://localhost:4000/auth/login', {
+      const response = await fetch('https://api.coreoutline.com/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -137,7 +137,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       // Verify token
-      const verifyResponse = await fetch('http://localhost:4000/auth/verify-token', {
+      const verifyResponse = await fetch('https://api.coreoutline.com/auth/verify-token', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

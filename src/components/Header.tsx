@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Bell, ChevronDown } from 'lucide-react';
-import { useParams } from 'react-router-dom';
-
+import { useLocation} from 'react-router-dom';
 const Header: React.FC = () => {
-  const { user_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const user_id = searchParams.get('user_id');
   const [userName, setUserName] = useState('');
 
   useEffect(() => {
-    fetch(`http://localhost:4000/auth/get-user/${user_id}`)
+    fetch(`https://api.coreoutline.com/auth/get-user/${user_id}`)
       .then(res => res.json())
       .then(data => setUserName(data.data.NAME))
       .finally(() => {});

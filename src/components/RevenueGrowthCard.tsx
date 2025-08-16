@@ -1,7 +1,6 @@
 import React from 'react';
 import { formatAmount, formatGrowth } from '../helpers/financials';
-import { useParams } from 'react-router-dom';
-
+import { useLocation} from 'react-router-dom';
 // Function to get color based on growth percentage
 const getProgressColor = (growth: number): string => {
   const colors = ["#03045e", "#0077b6", "#00b4d8", "#90e0ef", "#caf0f8"];

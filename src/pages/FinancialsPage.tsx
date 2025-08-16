@@ -23,8 +23,7 @@ import TopProductsChart from '../components/TopProductsChart';
 import GrossRevenueCard from '../components/GrossRevenueCard';
 import AdCampaignsCard from '../components/AdCampaignsCard';
 import ProductRevenueSharesCard from '../components/ProductRevenueSharesCard';
-import { useParams } from 'react-router-dom';
-
+import { useLocation} from 'react-router-dom';
 const FinancialsPage: React.FC = () => {
   const [salesTimeUnit, setSalesTimeUnit] = useState('Monthly');
   const [recurringRevenueData, setRecurringRevenueData] = useState<RecurringRevenueData>({
@@ -49,13 +48,16 @@ const FinancialsPage: React.FC = () => {
     growth: 0,
     isLoading: true
   });
-  const { user_id, organization_id } = useParams();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
+  const user_id = searchParams.get('user_id');
+
   const [timeUnits, setTimeUnits] = useState('M');
   const [company, setCompany] = useState(organization_id);
   const [apiConfig, setApiConfig] = useState({
     brevoApiKey: '',
-    apiBaseUrl: 'http://localhost:4000',
-    dataBaseUrl: 'http://localhost:5000'
+    apiBaseUrl: 'https://api.coreoutline.com',
+    dataBaseUrl: '/data'
   });
   const [productRevenueShares, setProductRevenueShares] = useState<ProductRevenueSharesData | null>(null);
   const [productRevenueSharesLoading, setProductRevenueSharesLoading] = useState(true);

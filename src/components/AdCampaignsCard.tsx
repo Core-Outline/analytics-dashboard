@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { ChevronDown } from 'lucide-react';
-import { useParams } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 // Type for ad campaign data from API
 interface AdCampaign {
@@ -27,7 +27,9 @@ const AdCampaignsCard: React.FC = () => {
   const [adData, setAdData] = useState<AdCampaign[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   // Fetch data from API
   useEffect(() => {
@@ -35,7 +37,7 @@ const AdCampaignsCard: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`http://localhost:5000/get-ads-data?company_id=${organization_id}`);
+        const res = await fetch(`https://data.coreoutline.com/get-ads-data?company_id=${organization_id}`);
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         console.log("This is the ads data: ",data)

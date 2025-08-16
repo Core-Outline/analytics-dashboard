@@ -3,18 +3,20 @@ import ReactECharts from 'echarts-for-react';
 
 import { scaleOrdinal } from 'd3-scale';
 import { schemeTableau10 } from 'd3-scale-chromatic';
-import { useParams } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 
 const ConversionsDistributionCard: React.FC = () => {
   const [platformData, setPlatformData] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const colorScale = scaleOrdinal(schemeTableau10);
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   React.useEffect(() => {
     setLoading(true);
-    fetch(`http://localhost:5000/conversions-splits?company_id=${organization_id}`)
+    fetch(`https://data.coreoutline.com/conversions-splits?company_id=${organization_id}`)
       .then(res => res.json())
       .then(data => {
         // Assign a color and readable name for each platform

@@ -1,6 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
-interface InfluencerAnalyticsCardProps {
+import { useLocation} from 'react-router-dom';interface InfluencerAnalyticsCardProps {
   influencer: any;
   influencerId: string;
 }
@@ -28,13 +27,15 @@ const InfluencerAnalyticsCard: React.FC<InfluencerAnalyticsCardProps> = ({ influ
   const [reachTrend, setReachTrend] = React.useState<any[]>([]);
   const [reachTrendLoading, setReachTrendLoading] = React.useState(true);
 
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   React.useEffect(() => {
     if (!influencerId) return;
     // 1. Brand Mentions
     setBrandMentionsLoading(true);
-    fetch(`http://localhost:5000/get-brand-mentions?search_type=influencer&influencers=${influencerId}&company_id=${organization_id}`)
+    fetch(`https://data.coreoutline.com/get-brand-mentions?search_type=influencer&influencers=${influencerId}&company_id=${organization_id}`)
       .then(res => res.json())
       .then(data => setBrandMentions(data.brand_mentions))
       .catch(() => setBrandMentions(null))
@@ -42,7 +43,7 @@ const InfluencerAnalyticsCard: React.FC<InfluencerAnalyticsCardProps> = ({ influ
 
     // 2. Competitor Mentions
     setCompetitorMentionsLoading(true);
-    fetch(`http://localhost:5000/get-competitor-mentions?search_type=influencer&influencers=${influencerId}&company_id=${organization_id}`)
+    fetch(`https://data.coreoutline.com/get-competitor-mentions?search_type=influencer&influencers=${influencerId}&company_id=${organization_id}`)
       .then(res => res.json())
       .then(data => setCompetitorMentions(data.competitor_mentions))
       .catch(() => setCompetitorMentions(null))
@@ -50,7 +51,7 @@ const InfluencerAnalyticsCard: React.FC<InfluencerAnalyticsCardProps> = ({ influ
 
     // 3. Post Categories
     setCategoriesLoading(true);
-    fetch(`http://localhost:5000/get-post-categories?search_type=influencer&influencers=${influencerId}&company_id=${organization_id}`)
+    fetch(`https://data.coreoutline.com/get-post-categories?search_type=influencer&influencers=${influencerId}&company_id=${organization_id}`)
       .then(res => res.json())
       .then(data => setCategories(data))
       .catch(() => setCategories(null))
@@ -58,7 +59,7 @@ const InfluencerAnalyticsCard: React.FC<InfluencerAnalyticsCardProps> = ({ influ
 
     // 4. Caption Relevance
     setCaptionRelevanceLoading(true);
-    fetch(`http://localhost:5000/get-caption-relevance?search_type=influencer&influencers=${influencerId}&company_id=${organization_id}`)
+    fetch(`https://data.coreoutline.com/get-caption-relevance?search_type=influencer&influencers=${influencerId}&company_id=${organization_id}`)
       .then(res => res.json())
       .then(data => setCaptionRelevance(data))
       .catch(() => setCaptionRelevance(null))
@@ -66,7 +67,7 @@ const InfluencerAnalyticsCard: React.FC<InfluencerAnalyticsCardProps> = ({ influ
 
     // 5. Media Relevance
     setMediaRelevanceLoading(true);
-    fetch(`http://localhost:5000/get-media-relevance?search_type=influencer&influencers=${influencerId}&company_id=${organization_id}`)
+    fetch(`https://data.coreoutline.com/get-media-relevance?search_type=influencer&influencers=${influencerId}&company_id=${organization_id}`)
       .then(res => res.json())
       .then(data => setMediaRelevance(data))
       .catch(() => setMediaRelevance(null))
@@ -74,7 +75,7 @@ const InfluencerAnalyticsCard: React.FC<InfluencerAnalyticsCardProps> = ({ influ
 
     // 6. Reach Trend
     setReachTrendLoading(true);
-    fetch(`http://localhost:5000/get-reach-trend?search_type=influencer&influencers=${influencerId}&company_id=${organization_id}`)
+    fetch(`https://data.coreoutline.com/get-reach-trend?search_type=influencer&influencers=${influencerId}&company_id=${organization_id}`)
       .then(res => res.json())
       .then(data => setReachTrend(Array.isArray(data) ? data : []))
       .catch(() => setReachTrend([]))

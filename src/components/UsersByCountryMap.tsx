@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
-import { useParams } from 'react-router-dom';
-
+import { useLocation} from 'react-router-dom';
 interface CountryYearData {
   country: string;
   country_code: string;
@@ -21,13 +20,16 @@ const UsersByCountryMap: React.FC<{ data_source_id: string }> = ({ data_source_i
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { organization_id } = useParams();
-  const USERS_COUNTRY_API = `http://localhost:5000/users-country?time_units=M&company=${organization_id}&data_source_id=${data_source_id}`;
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
+  
+  const USERS_COUNTRY_API = `https://data.coreoutline.com/users-country?time_units=M&company=${organization_id}&data_source_id=${data_source_id}`;
 
 
   // Fetch world map geojson
   useEffect(() => {
-    fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
+    fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/masterhttps://data.coreoutline.com/world.geojson')
       .then(response => response.json())
       .then(worldGeoJson => {
         echarts.registerMap('world', worldGeoJson);

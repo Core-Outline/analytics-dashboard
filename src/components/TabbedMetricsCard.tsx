@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
-import ReactECharts from 'echarts-for-react';
+import { useLocation} from 'react-router-dom';import ReactECharts from 'echarts-for-react';
 
 interface DataSource {
   ACCESS_TOKEN: string | null;
@@ -46,7 +45,9 @@ const TabbedMetricsCard: React.FC<TabbedMetricsCardProps> = ({ dataSourceList: p
   const [durationData, setDurationData] = useState<{ dates: string[]; values: number[] } | null>(null);
   const [durationLoading, setDurationLoading] = useState(false);
   const [currentDataSource, setCurrentDataSource] = useState<DataSource | null>(null);
-  const { organization_id } = useParams<{ organization_id: string }>();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
 
 
@@ -85,11 +86,11 @@ const TabbedMetricsCard: React.FC<TabbedMetricsCardProps> = ({ dataSourceList: p
   
       const dataSourceId = data_source_id;
       console.log("Checking for current data <source:------------------></source:------------------> ",dataSourceId)
-      const USERS_API_URL = `http://localhost:5000/users?time_units=M&company=${organization_id}&data_source_id=${data_source_id}`;
-      const SESSIONS_API_URL = `http://localhost:5000/sessions?time_units=M&company=${organization_id}&data_source_id=${data_source_id}`;
-      const CTR_API_URL = `http://localhost:5000/click-through-rate?time_units=M&company=${organization_id}&data_source_id=${data_source_id}`;
-      const BOUNCE_API_URL = `http://localhost:5000/bounce-rate?time_units=M&company=${organization_id}&data_source_id=${data_source_id}`;
-      const DURATION_API_URL = `http://localhost:5000/session-duration?company=${organization_id}&time_units=M&data_source_id=${data_source_id}`;
+      const USERS_API_URL = `https://data.coreoutline.com/users?time_units=M&company=${organization_id}&data_source_id=${data_source_id}`;
+      const SESSIONS_API_URL = `https://data.coreoutline.com/sessions?time_units=M&company=${organization_id}&data_source_id=${data_source_id}`;
+      const CTR_API_URL = `https://data.coreoutline.com/click-through-rate?time_units=M&company=${organization_id}&data_source_id=${data_source_id}`;
+      const BOUNCE_API_URL = `https://data.coreoutline.com/bounce-rate?time_units=M&company=${organization_id}&data_source_id=${data_source_id}`;
+      const DURATION_API_URL = `https://data.coreoutline.com/session-duration?company=${organization_id}&time_units=M&data_source_id=${data_source_id}`;
   
       if (activeTab === 'Users' && !usersData && !usersLoading) {
         setUsersLoading(true);

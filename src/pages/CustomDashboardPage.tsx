@@ -70,8 +70,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, FileText, MoreHorizontal, Sparkles, BarChart3, Send, Paperclip, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import ReactECharts from 'echarts-for-react';
 import { v4 as uuidv4 } from 'uuid';
-import { useParams } from 'react-router-dom';
-
+import { useLocation} from 'react-router-dom';
 
 const CustomDashboardPage: React.FC = () => {
   // State for visualization modal
@@ -108,11 +107,13 @@ const CustomDashboardPage: React.FC = () => {
   const [dashboards, setDashboards] = useState<DashboardType[]>([]);
   const [dashboardsLoading, setDashboardsLoading] = useState(false);
   const [dashboardsError, setDashboardsError] = useState<string | null>(null);
-  const { organization_id, user_id } = useParams();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
+  const user_id = searchParams.get('user_id');
 
   const getQueryData = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/query-data?query_id=${selectedQuery}`);
+      const res = await fetch(`https://data.coreoutline.com/query-data?query_id=${selectedQuery}`);
       if (!res.ok) throw new Error('Failed to fetch query data');
       const data = await res.json();
       setPageData(data);
@@ -135,7 +136,7 @@ const CustomDashboardPage: React.FC = () => {
     async function fetchQueries() {
       setQueriesLoading(true);
       try {
-        const res = await fetch(`http://localhost:5000/queries?company=${organization_id}&query_type`);
+        const res = await fetch(`https://data.coreoutline.com/queries?company=${organization_id}&query_type`);
         if (!res.ok) throw new Error('Failed to fetch queries');
         const data = await res.json();
         setQueries(data);
@@ -153,7 +154,7 @@ const CustomDashboardPage: React.FC = () => {
     async function fetchDashboards() {
       setDashboardsLoading(true);
       try {
-        const res = await fetch(`http://localhost:5000/custom-dashboards?user_id=${user_id}`);
+        const res = await fetch(`https://data.coreoutline.com/custom-dashboards?user_id=${user_id}`);
         if (!res.ok) throw new Error('Failed to fetch dashboards');
         const dashboardsRaw = await res.json();
         // Ensure all dashboards have query_id for DashboardType compatibility
@@ -192,7 +193,7 @@ const CustomDashboardPage: React.FC = () => {
   // Create a new visualization from prompt using API call
   const createVisualization = async (prompt: string) => {
     try {
-      const response = await fetch('http://localhost:5000/create-visualization', {
+      const response = await fetch('https://data.coreoutline.com/create-visualization', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -243,7 +244,7 @@ const CustomDashboardPage: React.FC = () => {
 
   const editVisualization = async (prompt: string) => {
     try {
-      const response = await fetch('http://localhost:5000/change-visualization', {
+      const response = await fetch('https://data.coreoutline.com/change-visualization', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -300,7 +301,7 @@ const CustomDashboardPage: React.FC = () => {
     await getQueryData();
     try {
       const page_id_param = pageId ;
-      const res = await fetch(`http://localhost:5000/visualizations?user_id=${user_id}&page_id=${page_id_param}&thread_id`);
+      const res = await fetch(`https://data.coreoutline.com/visualizations?user_id=${user_id}&page_id=${page_id_param}&thread_id`);
       if (!res.ok) throw new Error('Failed to fetch visualizations');
       const data: Visualization[] = await res.json();
 
@@ -341,7 +342,7 @@ const CustomDashboardPage: React.FC = () => {
   const fetchEditHistory = async (threadId: string, pageId: string) => {
     setHistoryLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/visualizations?user_id=${user_id}&thread_id=${threadId}&page_id=${pageId}`);
+      const res = await fetch(`https://data.coreoutline.com/visualizations?user_id=${user_id}&thread_id=${threadId}&page_id=${pageId}`);
       if (!res.ok) throw new Error('Failed to fetch edit history');
       const data = await res.json();
       setActiveVizEditHistory(data.filter((viz: Visualization) => viz.is_active == false));
@@ -951,7 +952,7 @@ const chartOption = {
                             className="self-end px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 text-sm shadow"
                             onClick={async () => {
                               try {
-                                await fetch('http://localhost:5000/revert-visualization', {
+                                await fetch('https://data.coreoutline.com/revert-visualization', {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json' },
                                   body: JSON.stringify({

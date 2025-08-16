@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { TopProductSold } from '../helpers/financials';
-import { useParams } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 interface GrossRevenueCardProps {
   data: TopProductSold[];

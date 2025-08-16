@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
-import { useParams } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 const SENTIMENT_COLORS: Record<string, string> = {
   positive: '#10b981', // emerald
@@ -11,16 +11,18 @@ const SENTIMENT_COLORS: Record<string, string> = {
 const SentimentAnalysisCard: React.FC = () => {
   const [sentimentData, setSentimentData] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   React.useEffect(() => {
     setLoading(true);
     const fetchSentimentData = async () => {
-      let dataSourceIds = await fetch(`http://localhost:4000/data-source?type=social_media,twitter,instagram,tiktok&organization_id=${organization_id}`)
+      let dataSourceIds = await fetch(`https://api.coreoutline.com/data-source?type=social_media,twitter,instagram,tiktok&organization_id=${organization_id}`)
       const dataSourceIdsData = await dataSourceIds.json();
       dataSourceIds = dataSourceIdsData.map((ds: any) => ds.DATA_SOURCE_ID);
 
-      fetch(`http://localhost:5000/sentiment?search_type=all&data_source_ids=${dataSourceIds}&company_id=${organization_id}&indices=tiktok,twitter`)
+      fetch(`https://data.coreoutline.com/sentiment?search_type=all&data_source_ids=${dataSourceIds}&company_id=${organization_id}&indices=tiktok,twitter`)
         .then(res => res.json())
         .then(data => {
           // Map API data to chart data

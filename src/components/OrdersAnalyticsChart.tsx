@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { fetchSalesData, getSalesChartData } from '../helpers/financials';
-import { useParams } from 'react-router-dom';
-
+import { useLocation} from 'react-router-dom';
 interface TotalSalesChartProps {
   timeUnit: string;
 }
@@ -11,7 +10,9 @@ const TotalSalesChart: React.FC<TotalSalesChartProps> = ({ timeUnit }) => {
   const [salesData, setSalesData] = useState<{ date: string[]; amount: number[] }>({ date: [], amount: [] });
   const [loading, setLoading] = useState(true);
   const [apiConfig, setApiConfig] = useState<any>(null);
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
   const company = organization_id;
 
   useEffect(() => {

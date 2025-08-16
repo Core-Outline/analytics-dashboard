@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MoreHorizontal } from 'lucide-react';
-import { useParams } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 const CustomerSegmentationCard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Best Customers');
@@ -8,7 +8,9 @@ const CustomerSegmentationCard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   const tabs = [
     'Best Customers',
@@ -41,7 +43,7 @@ const CustomerSegmentationCard: React.FC = () => {
       setError(false);
       try {
         const segment = segmentMap[activeTab] || 'best_customers';
-        const res = await fetch(`http://127.0.0.1:5000/customer-segmentation?company=${organization_id}&segment=${segment}`);
+        const res = await fetch(`https://data.coreoutline.com/customer-segmentation?company=${organization_id}&segment=${segment}`);
         if (!res.ok) throw new Error('Network response was not ok');
         const data = await res.json();
         setCustomers(data);

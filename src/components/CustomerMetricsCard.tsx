@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Users, MapPin, CreditCard, MoreHorizontal } from 'lucide-react';
 import { count } from 'echarts/types/src/component/dataZoom/history.js';
-import { useParams } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 function abbreviateNumber(value: number): string {
   if (value >= 1e9) return (value / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
@@ -23,11 +23,13 @@ const CustomerMetricsCard: React.FC = () => {
   const [transactionLoading, setTransactionLoading] = useState(true);
   const [transactionError, setTransactionError] = useState(false);
 
-  const { organization_id } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   useEffect(() => {
     setUserLoading(true);
-    fetch(`http://localhost:5000/unique-users?company=${organization_id}`)
+    fetch(`https://data.coreoutline.com/unique-users?company=${organization_id}`)
       .then(res => res.json())
       .then(data => {
         setUserCount(data.users);
@@ -39,7 +41,7 @@ const CustomerMetricsCard: React.FC = () => {
       });
 
     setCountryLoading(true);
-    fetch(`http://localhost:5000/unique-countries?company=${organization_id}`)
+    fetch(`https://data.coreoutline.com/unique-countries?company=${organization_id}`)
       .then(res => res.json())
       .then(data => {
         setCountryCount(data.countries);
@@ -51,7 +53,7 @@ const CustomerMetricsCard: React.FC = () => {
       });
 
     setTransactionLoading(true);
-    fetch(`http://localhost:5000/unique-transactions?company=${organization_id}`)
+    fetch(`https://data.coreoutline.com/unique-transactions?company=${organization_id}`)
       .then(res => res.json())
       .then(data => {
         setTransactionCount(data.transactions);
