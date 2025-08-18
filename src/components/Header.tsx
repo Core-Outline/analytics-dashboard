@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Bell, ChevronDown } from 'lucide-react';
 import { useLocation} from 'react-router-dom';
+import { CreateQueryFlow } from './CreateQueryFlow';
 const Header: React.FC = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -18,6 +19,7 @@ const Header: React.FC = () => {
     <header className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
       <h1 className="text-2xl font-medium text-gray-900">Welcome Back, {userName}</h1>
       <div className="flex items-center space-x-4">
+        <CreateQueryFlow />
         <Search className="w-6 h-6 text-gray-400 cursor-pointer" />
         <Bell className="w-6 h-6 text-gray-400 cursor-pointer" />
         <div className="flex items-center space-x-2 cursor-pointer">

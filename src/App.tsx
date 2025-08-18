@@ -12,22 +12,28 @@ import CustomerFeedbackPage from './pages/CustomerFeedbackPage';
 import IntegrationsPage from './pages/IntegrationsPage';
 import CustomDashboardPage from './pages/CustomDashboardPage';
 import { AuthProvider } from './contexts/AuthContext';
+import Integrations from './pages/integrations';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './lib/queryClient';
+import ERDDiagram from './pages/ERDDiagram';
 
 // Main App component with routing
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Single root route — query params control behavior */}
-          <Route path="/" element={<MainApp />} />
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            {/* Single root route — query params control behavior */}
+            <Route path="/" element={<MainApp />} />
 
-          {/* Catch-all redirects back to root with defaults */}
-          <Route path="*" element={<Navigate to="/?user_id=101&organization_id=301" replace />} />
-        </Routes>
-      </Router>
-      <ToastContainer position="top-right" autoClose={5000} />
-    </AuthProvider>
+            {/* Catch-all redirects back to root with defaults */}
+            <Route path="*" element={<Navigate to="/?user_id=101&organization_id=301" replace />} />
+          </Routes>
+        </Router>
+        <ToastContainer position="top-right" autoClose={5000} />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
