@@ -9,6 +9,7 @@ import { type Integration } from '../../shared/schema';
 import { ERDModal } from './erd/ERDModal';
 import { QueryOutputPanel } from './erd/QueryOutputPanel';
 import { toast } from 'sonner';
+import { useLocation } from 'react-router-dom';
 
 interface ApiIntegration {
   organization_id: string;
@@ -75,11 +76,14 @@ export const CreateQueryFlow: React.FC = () => {
   const [outputOpen, setOutputOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selected, setSelected] = useState<{ dataSourceId: string; type: string } | null>(null);
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
 
   const { data: apiIntegrations = [] } = useQuery<ApiIntegration[]>({
     queryKey: ['integrations'],
     queryFn: async () => {
-      const response = await fetch('https://data.coreoutline.com/queries?company=101&query_type');
+      const response = await fetch(`https://data.coreoutline.com/queries?company=${organization_id}&query_type`);
       if (!response.ok) throw new Error('Failed to fetch integrations');
       return response.json();
     },
@@ -89,7 +93,7 @@ export const CreateQueryFlow: React.FC = () => {
     return apiIntegrations.map((apiInt) => {
       const details = getIntegrationDetails(apiInt.data_source_type);
       return {
-        id: `integration-${apiInt.query_id}`,
+        id: `${apiInt.query_id}`,
         name: details.name,
         displayName: apiInt.name,
         description: `${apiInt.query_type || 'N/A'}`,

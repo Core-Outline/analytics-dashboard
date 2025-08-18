@@ -11,6 +11,7 @@ import {
 } from "../components/ui/alert";
 import { IntegrationCard } from "../components/integration-card";
 import { type Integration } from "../../shared/schema";
+import { useLocation } from "react-router-dom";
 
 const categories = [
   { id: "all", label: "All integrations" },
@@ -97,12 +98,16 @@ const getIntegrationDetails = (dataSourceType: string) => {
 export default function Integrations() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const organization_id = searchParams.get('organization_id');
+
 
   // Fetch integrations from the API
   const { data: apiIntegrations = [], isLoading, error } = useQuery<ApiIntegration[]>({
     queryKey: ['integrations'],
     queryFn: async () => {
-      const response = await fetch('https://data.coreoutline.com/queries?company=101&query_type');
+      const response = await fetch(`https://data.coreoutline.com/queries?company=${organization_id}&query_type`);
       if (!response.ok) {
         throw new Error('Failed to fetch integrations');
       }
