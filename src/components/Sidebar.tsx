@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronRight, ChevronLeft, ChevronDown, ChevronUp, BarChart3, Zap, Users, Share2, Heart, Settings, HelpCircle, MessageCircle, LogOut, Plug2 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import SupportTicketModal from './SupportTicketModal';
 
 interface SidebarProps {
   activeSection: string;
@@ -10,12 +11,13 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCollapsed, onToggleCollapse }) => {
-  const [isDashboardExpanded, setIsDashboardExpanded] = React.useState(true);
+  const [isDashboardExpanded, setIsDashboardExpanded] = useState(true);
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
 
   // Extract organization_id from query params
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const organization_id = searchParams.get('organization_id') || '301';
+  const organization_id = searchParams.get('organization_id');
 
   const [organizationDetails, setOrganizationDetails] = React.useState({
     CONTACT_EMAIL: "",
@@ -42,7 +44,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
     { id: 'social-media', label: 'Social Media', icon: Share2 },
     { id: 'customer-feedback', label: 'Customer Feedback', icon: Heart, badge: 2 },
     { id: 'custom-dashboard', label: 'Custom Dashboard', icon: Settings },
-    { id: 'integrations', label: 'Integrations', icon: Plug2 }
+    { id: 'integrations', label: 'Integrations', icon: Plug2 },
+    { id: 'churn', label: 'Churn Analysis', icon: Plug2 }
   ];
 
   return (
@@ -113,18 +116,27 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
 
       {/* Bottom Navigation */}
       <div className="p-3 space-y-1 mt-auto">
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'} px-3 py-2 text-[#caf0f8] hover:text-white cursor-pointer font-medium rounded-lg hover:bg-[#0077b6] transition-colors`}>
+        <div 
+          onClick={() => setIsSupportModalOpen(true)}
+          className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'} px-3 py-2 text-[#caf0f8] hover:text-white cursor-pointer font-medium rounded-lg hover:bg-[#0077b6] transition-colors`}
+        >
           <HelpCircle className="w-4 h-4 flex-shrink-0" />
           {!isCollapsed && <span className="text-sm">Help Centre</span>}
         </div>
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'} px-3 py-2 text-[#caf0f8] hover:text-white cursor-pointer font-medium rounded-lg hover:bg-[#0077b6] transition-colors`}>
+        <div 
+          onClick={() => setIsSupportModalOpen(true)}
+          className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'} px-3 py-2 text-[#caf0f8] hover:text-white cursor-pointer font-medium rounded-lg hover:bg-[#0077b6] transition-colors`}
+        >
           <MessageCircle className="w-4 h-4 flex-shrink-0" />
           {!isCollapsed && <span className="text-sm">Contact us</span>}
         </div>
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'} px-3 py-2 text-[#caf0f8] hover:text-white cursor-pointer font-medium rounded-lg hover:bg-[#0077b6] transition-colors`}>
+        <a 
+          href="https://www.coreoutline.com"
+          className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'} px-3 py-2 text-[#caf0f8] hover:text-white cursor-pointer font-medium rounded-lg hover:bg-[#0077b6] transition-colors no-underline`}
+        >
           <LogOut className="w-4 h-4 flex-shrink-0" />
           {!isCollapsed && <span className="text-sm">Log out</span>}
-        </div>
+        </a>
       </div>
 
       {/* Collapse Toggle Button */}
@@ -134,6 +146,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
       >
         {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
       </button>
+      
+      {/* Support Ticket Modal */}
+      <SupportTicketModal 
+        isOpen={isSupportModalOpen}
+        onClose={() => setIsSupportModalOpen(false)}
+      />
     </div>
   );
 };

@@ -16,6 +16,7 @@ import Integrations from './pages/integrations';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import ERDDiagram from './pages/ERDDiagram';
+import ChurnPrediction from './pages/ChurnPrediction';
 
 // Main App component with routing
 function App() {
@@ -75,6 +76,8 @@ function MainApp() {
       case 'financials':
       default:
         return <FinancialsPage />;
+      case 'churn':
+        return <ChurnPrediction />;
     }
   };
 
