@@ -3,7 +3,7 @@ import { Search, Settings, Database, Share2, CreditCard, FileText, Smartphone, M
 import IntegrationModal from '../components/IntegrationModal';
 
 interface Integration {
-  id: string;
+  type: string;
   name: string;
   description: string;
   icon: string;
@@ -21,40 +21,40 @@ const IntegrationsPage: React.FC = () => {
 
   const integrations: Integration[] = [
     // Databases
-    { id: 'mongodb', name: 'MongoDB', description: 'NoSQL document database for modern applications. Store and query data with flexible schemas.', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg', color: 'bg-green-500', category: 'Database', isConnected: false, connectionType: 'database' },
-    { id: 'mysql', name: 'MySQL', description: 'Popular open-source relational database. Perfect for web applications and data analytics.', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg', color: 'bg-blue-500', category: 'Database', isConnected: false, connectionType: 'database' },
-    { id: 'postgresql', name: 'PostgreSQL', description: 'Advanced open-source relational database with powerful features and SQL compliance.', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg', color: 'bg-blue-600', category: 'Database', isConnected: false, connectionType: 'database' },
-    { id: 'snowflake', name: 'Snowflake', description: 'Cloud data warehouse built for performance, concurrency, and simplicity.', icon: 'https://logos-world.net/wp-content/uploads/2022/11/Snowflake-Symbol.png', color: 'bg-cyan-500', category: 'Database', isConnected: false, connectionType: 'database' },
+    { type: 'mongodb', name: 'MongoDB', description: 'NoSQL document database for modern applications. Store and query data with flexible schemas.', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg', color: 'bg-green-500', category: 'Database', isConnected: false, connectionType: 'database' },
+    { type: 'mysql', name: 'MySQL', description: 'Popular open-source relational database. Perfect for web applications and data analytics.', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg', color: 'bg-blue-500', category: 'Database', isConnected: false, connectionType: 'database' },
+    { type: 'postgresql', name: 'PostgreSQL', description: 'Advanced open-source relational database with powerful features and SQL compliance.', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg', color: 'bg-blue-600', category: 'Database', isConnected: false, connectionType: 'database' },
+    { type: 'snowflake', name: 'Snowflake', description: 'Cloud data warehouse built for performance, concurrency, and simplicity.', icon: 'https://logos-world.net/wp-content/uploads/2022/11/Snowflake-Symbol.png', color: 'bg-cyan-500', category: 'Database', isConnected: false, connectionType: 'database' },
 
     // Advertising
-    { id: 'facebook-ads', name: 'Facebook Ads', description: 'Connect your Facebook advertising account to track campaign performance and ROI metrics.', icon: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png', color: 'bg-blue-600', category: 'Ads', isConnected: false, connectionType: 'oauth' },
-    { id: 'google-ads', name: 'Google Ads', description: 'Integrate with Google Ads to monitor campaigns, keywords, and conversion data.', icon: 'https://developers.google.com/static/ads/images/ads-logo.svg', color: 'bg-red-500', category: 'Ads', isConnected: false, connectionType: 'oauth' },
-    { id: 'twitter-ads', name: 'Twitter Ads', description: 'Analyze Twitter advertising performance, engagement metrics, and audience insights.', icon: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg', color: 'bg-sky-500', category: 'Ads', isConnected: false, connectionType: 'oauth' },
-    { id: 'instagram-ads', name: 'Instagram Ads', description: 'Track Instagram ad campaigns, story promotions, and influencer partnerships.', icon: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png', color: 'bg-pink-500', category: 'Ads', isConnected: false, connectionType: 'oauth' },
+    { type: 'facebook-ads', name: 'Facebook Ads', description: 'Connect your Facebook advertising account to track campaign performance and ROI metrics.', icon: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png', color: 'bg-blue-600', category: 'Ads', isConnected: false, connectionType: 'oauth' },
+    { type: 'google-ads', name: 'Google Ads', description: 'Integrate with Google Ads to monitor campaigns, keywords, and conversion data.', icon: 'https://developers.google.com/static/ads/images/ads-logo.svg', color: 'bg-red-500', category: 'Ads', isConnected: false, connectionType: 'oauth' },
+    { type: 'twitter-ads', name: 'Twitter Ads', description: 'Analyze Twitter advertising performance, engagement metrics, and audience insights.', icon: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg', color: 'bg-sky-500', category: 'Ads', isConnected: false, connectionType: 'oauth' },
+    { type: 'instagram-ads', name: 'Instagram Ads', description: 'Track Instagram ad campaigns, story promotions, and influencer partnerships.', icon: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png', color: 'bg-pink-500', category: 'Ads', isConnected: false, connectionType: 'oauth' },
 
     // Social Media
-    { id: 'social-media', name: 'Social Media', description: 'Comprehensive social media analytics across multiple platforms and channels.', icon: 'https://thumbs.dreamstime.com/b/set-popular-social-media-mobile-apps-round-icons-facebook-tiktok-linkedin-twitter-instagram-others-vector-set-288852969.jpg', color: 'bg-purple-500', category: 'Social Media', isConnected: false, connectionType: 'oauth' },
+    { type: 'social-media', name: 'Social Media', description: 'Comprehensive social media analytics across multiple platforms and channels.', icon: 'https://thumbs.dreamstime.com/b/set-popular-social-media-mobile-apps-round-icons-facebook-tiktok-linkedin-twitter-instagram-others-vector-set-288852969.jpg', color: 'bg-purple-500', category: 'Social Media', isConnected: false, connectionType: 'oauth' },
 
     // Payments
-    { id: 'stripe', name: 'Stripe', description: 'Payment processing analytics, transaction insights, and revenue tracking.', icon: 'https://images.ctfassets.net/fzn2n1nzq965/3AGidihOJl4nH9D1vDjM84/9540155d584be52fc54c443b6efa4ae6/stripe.svg', color: 'bg-indigo-600', category: 'Payments', isConnected: false, connectionType: 'api-key' },
-    { id: 'paypal', name: 'PayPal', description: 'PayPal transaction data, payment analytics, and customer payment behavior.', icon: 'https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg', color: 'bg-blue-500', category: 'Payments', isConnected: false, connectionType: 'oauth' },
-    { id: 'chargebee', name: 'Chargebee', description: 'Subscription billing analytics, recurring revenue insights, and churn analysis.', icon: 'https://www.chargebee.com/static/resources/brand/chargebee-logo-black.svg', color: 'bg-orange-500', category: 'Payments', isConnected: false, connectionType: 'api-key' },
+    { type: 'stripe', name: 'Stripe', description: 'Payment processing analytics, transaction insights, and revenue tracking.', icon: 'https://images.ctfassets.net/fzn2n1nzq965/3AGidihOJl4nH9D1vDjM84/9540155d584be52fc54c443b6efa4ae6/stripe.svg', color: 'bg-indigo-600', category: 'Payments', isConnected: false, connectionType: 'api-key' },
+    { type: 'paypal', name: 'PayPal', description: 'PayPal transaction data, payment analytics, and customer payment behavior.', icon: 'https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg', color: 'bg-blue-500', category: 'Payments', isConnected: false, connectionType: 'oauth' },
+    { type: 'chargebee', name: 'Chargebee', description: 'Subscription billing analytics, recurring revenue insights, and churn analysis.', icon: 'https://www.chargebee.com/static/resources/brand/chargebee-logo-black.svg', color: 'bg-orange-500', category: 'Payments', isConnected: false, connectionType: 'api-key' },
 
     // File Sources
-    { id: 'csv', name: 'CSV', description: 'Upload and analyze data from CSV files with automatic schema detection.', icon: 'https://cdn-icons-png.flaticon.com/512/6133/6133884.png', color: 'bg-green-600', category: 'File Sources', isConnected: false, connectionType: 'file-upload' },
-    { id: 'pdf', name: 'PDF', description: 'Extract and analyze structured data from PDF documents and reports.', icon: 'https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg', color: 'bg-red-600', category: 'File Sources', isConnected: false, connectionType: 'file-upload' },
-    { id: 'google-sheets', name: 'Google Sheets', description: 'Real-time data synchronization with Google Sheets for collaborative analytics.', icon: 'https://upload.wikimedia.org/wikipedia/commons/3/30/Google_Sheets_logo_%282014-2020%29.svg', color: 'bg-green-500', category: 'File Sources', isConnected: false, connectionType: 'oauth' },
+    { type: 'csv', name: 'CSV', description: 'Upload and analyze data from CSV files with automatic schema detection.', icon: 'https://cdn-icons-png.flaticon.com/512/6133/6133884.png', color: 'bg-green-600', category: 'File Sources', isConnected: false, connectionType: 'file-upload' },
+    { type: 'pdf', name: 'PDF', description: 'Extract and analyze structured data from PDF documents and reports.', icon: 'https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg', color: 'bg-red-600', category: 'File Sources', isConnected: false, connectionType: 'file-upload' },
+    { type: 'google-sheets', name: 'Google Sheets', description: 'Real-time data synchronization with Google Sheets for collaborative analytics.', icon: 'https://upload.wikimedia.org/wikipedia/commons/3/30/Google_Sheets_logo_%282014-2020%29.svg', color: 'bg-green-500', category: 'File Sources', isConnected: false, connectionType: 'oauth' },
 
     // App Stores
-    { id: 'play-store', name: 'Play Store', description: 'Android app analytics, download metrics, and Google Play Console data.', icon: 'https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg', color: 'bg-green-600', category: 'App Stores', isConnected: false, connectionType: 'api-key' },
-    { id: 'app-store', name: 'App Store', description: 'iOS app analytics, App Store Connect data, and Apple ecosystem insights.', icon: 'https://developer.apple.com/assets/elements/icons/app-store/app-store-128x128_2x.png', color: 'bg-gray-800', category: 'App Stores', isConnected: false, connectionType: 'api-key' },
+    { type: 'play-store', name: 'Play Store', description: 'Android app analytics, download metrics, and Google Play Console data.', icon: 'https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg', color: 'bg-green-600', category: 'App Stores', isConnected: false, connectionType: 'api-key' },
+    { type: 'app-store', name: 'App Store', description: 'iOS app analytics, App Store Connect data, and Apple ecosystem insights.', icon: 'https://developer.apple.com/assets/elements/icons/app-store/app-store-128x128_2x.png', color: 'bg-gray-800', category: 'App Stores', isConnected: false, connectionType: 'api-key' },
 
     // Communication
-    { id: 'slack', name: 'Slack', description: 'Team communication analytics, workspace insights, and productivity metrics.', icon: 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Slack_icon_2019.svg', color: 'bg-purple-600', category: 'Communication', isConnected: false, connectionType: 'oauth' },
-    { id: 'intercom', name: 'Intercom', description: 'Customer support analytics, conversation insights, and user engagement data.', icon: 'https://static.intercomassets.com/assets/default-avatars/fin-99a8de0b0c8c2c5e2c5b8de0e0e0e0e0.svg', color: 'bg-blue-500', category: 'Communication', isConnected: false, connectionType: 'oauth' },
+    { type: 'slack', name: 'Slack', description: 'Team communication analytics, workspace insights, and productivity metrics.', icon: 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Slack_icon_2019.svg', color: 'bg-purple-600', category: 'Communication', isConnected: false, connectionType: 'oauth' },
+    { type: 'intercom', name: 'Intercom', description: 'Customer support analytics, conversation insights, and user engagement data.', icon: 'https://static.intercomassets.com/assets/default-avatars/fin-99a8de0b0c8c2c5e2c5b8de0e0e0e0e0.svg', color: 'bg-blue-500', category: 'Communication', isConnected: false, connectionType: 'oauth' },
 
     // Analytics
-    { id: 'segment', name: 'Segment', description: 'Customer data platform integration for unified analytics and user tracking.', icon: 'https://segment.com/docs/connections/sources/catalog/libraries/website/javascript/quickstart/images/segment-logo.svg', color: 'bg-green-500', category: 'Analytics', isConnected: false, connectionType: 'api-key' }
+    { type: 'segment', name: 'Segment', description: 'Customer data platform integration for unified analytics and user tracking.', icon: 'https://segment.com/docs/connections/sources/catalog/libraries/website/javascript/quickstart/images/segment-logo.svg', color: 'bg-green-500', category: 'Analytics', isConnected: false, connectionType: 'api-key' }
   ];
 
   const tabs = [
@@ -80,25 +80,25 @@ const IntegrationsPage: React.FC = () => {
     setSelectedIntegration(integration);
   };
 
-  const handleConnectionComplete = (integrationId: string) => {
-    setConnectedIntegrations(prev => new Set([...prev, integrationId]));
+  const handleConnectionComplete = (integrationtype: string) => {
+    setConnectedIntegrations(prev => new Set([...prev, integrationtype]));
     setSelectedIntegration(null);
   };
 
-  const handleDisconnect = (integrationId: string) => {
+  const handleDisconnect = (integrationtype: string) => {
     setConnectedIntegrations(prev => {
       const newSet = new Set(prev);
-      newSet.delete(integrationId);
+      newSet.delete(integrationtype);
       return newSet;
     });
   };
 
-  const toggleConnection = (integrationId: string) => {
-    const isConnected = connectedIntegrations.has(integrationId);
+  const toggleConnection = (integrationtype: string) => {
+    const isConnected = connectedIntegrations.has(integrationtype);
     if (isConnected) {
-      handleDisconnect(integrationId);
+      handleDisconnect(integrationtype);
     } else {
-      setConnectedIntegrations(prev => new Set([...prev, integrationId]));
+      setConnectedIntegrations(prev => new Set([...prev, integrationtype]));
     }
   };
 

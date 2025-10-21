@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Key, Database, Upload, ExternalLink, CheckCircle, AlertCircle } from 'lucide-react';
 import { useLocation} from 'react-router-dom';interface Integration {
-  id: string;
+  type: string;
   name: string;
   description: string;
   icon: string;
@@ -40,6 +40,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
+    console.log("This is the response from creating data source:", res);
     if (!res.ok) throw new Error('Failed to create data source');
     return res.json();
   };
@@ -50,7 +51,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
     setConnectionStatus('testing');
     try {
       let payload = {};
-      switch (integration.id) {
+      switch (integration.type) {
         case 'mysql':
           payload = {
             name: formData.name,
@@ -116,19 +117,18 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
           break;
         case 'social-media':
           payload = {
-            platform: formData.platform,
+            name: formData.name,
             username: formData.username,
-            tags: formData.tags || [],
-            influencers: formData.influencers || [],
-            type: 'social_media',
+            type: formData.platform,
             organization_id: organization_id
           };
           break;
         default:
           payload = formData;
       }
+      console.log('Creating data source with payload:', payload);
       // CSV file upload flow
-      if (integration.id === 'csv' && formData.file) {
+      if (integration.type === 'csv' && formData.file) {
         const createResp = await createDataSource(payload);
         // Upload file to signed URL
         const uploadResp = await fetch(createResp.signed_url, {
@@ -137,11 +137,12 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
         });
         if (!uploadResp.ok) throw new Error('CSV upload failed');
       } else {
+        console.log('Creating data source with payload:', payload);
         await createDataSource(payload);
       }
       setConnectionStatus('success');
       setTimeout(() => {
-        onConnect(integration.id);
+        onConnect(integration.type);
       }, 1500);
     } catch (e) {
       console.error(e)
@@ -155,7 +156,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
     switch (integration.connectionType) {
       case 'oauth':
         // Facebook Ads, Social Media, etc.
-        if (integration.id === 'facebook-ads') {
+        if (integration.type === 'facebook-ads') {
           return (
             <div className="space-y-6">
               <div className="text-center">
@@ -186,14 +187,14 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
             </div>
           );
         }
-         if (integration.id === 'social-media') {
+         if (integration.type === 'social-media') {
           // Social Media: platform dropdown, username, tag chips, influencer usernames (up to 4)
           const platforms = [
-            { value: 'twitter', label: 'Twitter' },
-            { value: 'tiktok', label: 'Tiktok' },
-            { value: 'instagram', label: 'Instagram' },
-            { value: 'linkedin', label: 'LinkedIn' },
-            { value: 'facebook', label: 'Facebook' }
+            { value: 'twitter_account', label: 'Twitter' },
+            { value: 'tiktok_account', label: 'Tiktok' },
+            { value: 'instagram_account', label: 'Instagram' },
+            { value: 'linkedin_account', label: 'LinkedIn' },
+            { value: 'facebook_account', label: 'Facebook' }
           ];
           const tags = formData.tags ? (Array.isArray(formData.tags) ? formData.tags : formData.tags.split(',')) : [];
           const influencers = formData.influencers ? (Array.isArray(formData.influencers) ? formData.influencers : formData.influencers.split(',')) : [];
@@ -213,6 +214,10 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
                     <option value="">Select Platform</option>
                     {platforms.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
                   </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Data Integration Label <span className="text-red-500">*</span></label>
+                  <input type="text" placeholder="MySocialMediaIntegration" value={formData.name || ''} onChange={e => handleInputChange('name', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Username <span className="text-red-500">*</span></label>
@@ -291,7 +296,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
 
       case 'api-key':
         // Stripe (and similar) integration form
-        if (integration.id === 'stripe') {
+        if (integration.type === 'stripe') {
           return (
             <div className="space-y-6">
               <div className="text-center">
@@ -354,7 +359,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Port <span className="text-red-500">*</span></label>
-                <input type="text" placeholder={integration.id === 'mongodb' ? '27017' : integration.id === 'mysql' ? '3306' : '5432'} value={formData.port || ''} onChange={e => handleInputChange('port', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                <input type="text" placeholder={integration.type === 'mongodb' ? '27017' : integration.type === 'mysql' ? '3306' : '5432'} value={formData.port || ''} onChange={e => handleInputChange('port', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -373,17 +378,17 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
                 <input type="text" placeholder="my_database" value={formData.database || ''} onChange={e => handleInputChange('database', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Schema {integration.id === 'postgresql' || integration.id === 'mysql' ? <span className="text-gray-400">(optional)</span> : null}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Schema {integration.type === 'postgresql' || integration.type === 'mysql' ? <span className="text-gray-400">(optional)</span> : null}</label>
                 <input type="text" placeholder="public" value={formData.schema || ''} onChange={e => handleInputChange('schema', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
               </div>
             </div>
-            {integration.id === 'postgresql' && (
+            {integration.type === 'postgresql' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Port <span className="text-red-500">*</span></label>
                 <input type="text" placeholder="5432" value={formData.port || ''} onChange={e => handleInputChange('port', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
               </div>
             )}
-            {integration.id === 'mongodb' && (
+            {integration.type === 'mongodb' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Cluster (optional)</label>
                 <input type="text" placeholder="Cluster name or url" value={formData.cluster || ''} onChange={e => handleInputChange('cluster', e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
@@ -420,7 +425,7 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
                 <label className="block text-sm font-medium text-gray-700 mb-2">Select File <span className="text-red-500">*</span></label>
                 <input
                   type="file"
-                  accept={integration.id === 'csv' ? '.csv' : integration.id === 'pdf' ? '.pdf' : '*'}
+                  accept={integration.type === 'csv' ? '.csv' : integration.type === 'pdf' ? '.pdf' : '*'}
                   onChange={e => {
                     const file = e.target.files?.[0];
                     handleInputChange('file', file);
@@ -436,14 +441,14 @@ const IntegrationModal: React.FC<IntegrationModalProps> = ({ integration, onClos
             <div className="space-y-3">
               <h4 className="font-medium text-gray-900">Supported formats:</h4>
               <ul className="space-y-1 text-sm text-gray-600">
-                {integration.id === 'csv' && (
+                {integration.type === 'csv' && (
                   <>
                     <li>• CSV files (.csv)</li>
                     <li>• Maximum file size: 100MB</li>
                     <li>• UTF-8 encoding recommended</li>
                   </>
                 )}
-                {integration.id === 'pdf' && (
+                {integration.type === 'pdf' && (
                   <>
                     <li>• PDF files (.pdf)</li>
                     <li>• Maximum file size: 50MB</li>
