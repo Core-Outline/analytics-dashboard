@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ChevronRight, ChevronLeft, ChevronDown, ChevronUp, BarChart3, Zap, Users, Share2, Heart, Settings, HelpCircle, MessageCircle, LogOut, Plug2 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import SupportTicketModal from './SupportTicketModal';
@@ -13,6 +13,27 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCollapsed, onToggleCollapse }) => {
   const [isDashboardExpanded, setIsDashboardExpanded] = useState(true);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Ref to hold FormData for uploaded logo (stored in variable named `formData`)
+  const formData = useRef<FormData | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleLogoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const fd = new FormData();
+      fd.append('file', file);
+      // store in the required variable name
+      formData.current = fd;
+      // trigger upload after file selection
+      void uploadLogo();
+    }
+  };
 
   // Extract organization_id from query params
   const location = useLocation();
@@ -27,15 +48,60 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
     NUMBER_OF_EMPLOYEES: "",
     ORGANIZATION_ID: organization_id,
     PRICING_PLAN: null,
-    WEBSITE: ""
+    WEBSITE: "",
+    ORGANIZATION_LOGO: null
   });
 
   React.useEffect(() => {
     fetch(`https://api.coreoutline.com/organization/${organization_id}`)
       .then(res => res.json())
-      .then(data => setOrganizationDetails(data.data))
+      .then((data) => {
+        console.log(data);
+        setOrganizationDetails(data.data)
+    })
       .catch(() => {});
   }, [organization_id]);
+
+  const uploadLogo = async () => {
+    // Minimal safe implementation: use existing endpoint to get signed URL then PUT the file
+    if (!formData.current) return;
+    setIsUploading(true);
+    try {
+      const res = await fetch(`https://api.coreoutline.com/organization/update?id=organization_id&organization_id=${organization_id}&organization_logo`);
+      const data = await res.json();
+      // data.signed_url expected from the API
+      if (data?.signed_url) {
+        // The FormData stored under formData.current contains the file under key 'file'
+        const fileBlob = formData.current.get('file') as Blob | null;
+        if (fileBlob) {
+          const putRes = await fetch(data.signed_url, {
+            method: 'PUT',
+            body: fileBlob
+          });
+          console.log("PUT response:", putRes);
+          // If upload succeeded, refetch organization details and update state
+          if (putRes.ok) {
+            try {
+              const orgRes = await fetch(`https://api.coreoutline.com/organization/${organization_id}`);
+              const orgData = await orgRes.json();
+              if (orgData?.data) {
+                setOrganizationDetails(orgData.data);
+              }
+            } catch (err) {
+              // ignore refetch errors to preserve previous behavior
+            }
+          }
+        }
+
+
+      }
+    } catch (e) {
+      // swallow errors for now (existing code ignored errors)
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
 
   const navigationItems = [
     { id: 'financials', label: 'Financials', icon: BarChart3 },
@@ -52,9 +118,32 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
     <div className={`${isCollapsed ? 'w-16' : 'w-64'} bg-[#03045e] text-white flex flex-col rounded-r-2xl fixed left-0 top-0 h-screen z-50 transition-all duration-300`}>
       {/* Logo */}
       <div className={`p-4 flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
-        <div className="w-8 h-8 bg-[#00b4d8] rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
-          {organizationDetails.NAME.charAt(0).toUpperCase()}
-        </div>
+        {/* Hidden file input used to select logo image */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+
+        {/* Clickable logo - opens file picker */}
+        <button type="button" onClick={handleLogoClick} className="p-0 m-0 bg-transparent border-0 cursor-pointer">
+          <div className="w-18 h-18 bg-[#00b4d8] rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 overflow-hidden">
+            {isUploading ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : organizationDetails?.ORGANIZATION_LOGO ? (
+              <img
+                src={organizationDetails.ORGANIZATION_LOGO}
+                alt={`${organizationDetails.NAME || 'Organization'} logo`}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              (organizationDetails.NAME ? organizationDetails.NAME.charAt(0).toUpperCase() : '')
+            )}
+          </div>
+        </button>
+
         {!isCollapsed && <span className="text-lg font-medium text-white">{organizationDetails.NAME}</span>}
       </div>
 
@@ -99,7 +188,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isCol
                       : 'text-[#caf0f8] hover:text-white hover:bg-[#0077b6]'
                   }`}
                 >
-                  <div className="flex items-center">
+                  <div className="flex items-center space-x-2">
+                    <Icon className="w-4 h-4" />
                     {!isCollapsed && <span className="text-sm">{item.label}</span>}
                   </div>
                   {!isCollapsed && item.badge && (
