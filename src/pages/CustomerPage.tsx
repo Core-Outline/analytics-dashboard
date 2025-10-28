@@ -6,7 +6,7 @@ import OrderLocationsCard from '../components/OrderLocationsCard';
 
 const CustomerPage: React.FC = () => {
   return (
-    <div className="p-8">
+    <div className="bg-gray-50" style={{ marginTop:"2vw", marginLeft:"4vw", borderTopLeftRadius: '2rem', width: "95vw", paddingTop: "8vh", padding: "2rem" }}>
       <CustomerMetricsCard />
       
       {/* Customer Metric Cards */}

@@ -40,7 +40,7 @@ function App() {
 
 // MainApp component that handles layout and section rendering
 function MainApp() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -82,18 +82,21 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar
+    <div className="min-h-screen flex-1 flex flex-col " >
+      <Header />
+      
+
+      {/* Main Content */}
+      <div className={`transition-all duration-300`}>
+        <Sidebar
         activeSection={activeSection}
         onSectionChange={handleSectionChange}
         isCollapsed={sidebarCollapsed}
-        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        onToggleCollapse={() => setSidebarCollapsed(true)}
       />
-
-      {/* Main Content */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
-        <Header />
+      <div className='bg-[#03045e] p-6' style={{ width: "100vw"}}>
         {renderContent()}
+      </div>
       </div>
     </div>
   );

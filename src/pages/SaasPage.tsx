@@ -115,7 +115,7 @@ const SaasPage: React.FC = () => {
     'Custom range...'
   ];
   return (
-    <div className="p-8">
+    <div className="bg-gray-50" style={{ marginTop:"2vw", marginLeft:"4vw", borderTopLeftRadius: '2rem', width: "95vw", paddingTop: "8vh", padding: "2rem" }}>
        <div className="flex justify-end mb-6">
         <div className="relative inline-block text-left">
           <button

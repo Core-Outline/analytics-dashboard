@@ -21,7 +21,7 @@ function ChurnPrediction() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gray-50" style={{ marginTop:"2vw", marginLeft:"4vw", borderTopLeftRadius: '2rem', width: "95vw", paddingTop: "8vh", padding: "2rem" }}>
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="px-6 py-4">

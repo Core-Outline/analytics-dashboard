@@ -8,7 +8,7 @@ import UnsolvedTicketsCard from '../components/UnsolvedTicketsCard';
 
 const CustomerFeedbackPage: React.FC = () => {
   return (
-    <div className="p-8">
+    <div className="bg-gray-50" style={{ marginTop:"2vw", marginLeft:"4vw", borderTopLeftRadius: '2rem', width: "95vw", paddingTop: "8vh", padding: "2rem" }}>
       <div className="grid grid-cols-3 gap-6">
         {/* Feedback Metrics - spans 2 columns */}
         <div className="col-span-2">

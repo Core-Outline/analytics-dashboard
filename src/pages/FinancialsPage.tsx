@@ -167,7 +167,7 @@ const FinancialsPage: React.FC = () => {
   }, [apiConfig.dataBaseUrl, timeUnits, company]);
 
   return (
-    <div className="p-8">
+    <div className="bg-gray-50" style={{ marginTop:"2vw", marginLeft:"4vw", borderTopLeftRadius: '2rem', width: "95vw", paddingTop: "8vh", padding: "2rem" }}>
       {/* Stats Cards */}
       <div className="grid grid-cols-4 gap-6 mb-8">
         {/* Recurring Revenue */}

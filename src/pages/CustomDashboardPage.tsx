@@ -598,7 +598,7 @@ const chartOption = {
   const selectedDashboardName = selectedDashboard ? selectedDashboard.page_name : '';
 
   return (
-    <div className="min-h-screen bg-gray-50 flex relative">
+    <div className="bg-gray-50" style={{ marginTop:"2vw", marginLeft:"4vw", borderTopLeftRadius: '2rem', width: "95vw", paddingTop: "8vh", padding: "2rem" }}>
       {/* Left Sidebar */}
       <div
         className={`${isSidebarCollapsed ? 'w-0' : 'w-80'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300 overflow-hidden`}
