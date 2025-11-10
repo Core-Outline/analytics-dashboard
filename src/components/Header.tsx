@@ -19,7 +19,7 @@ const Header: React.FC = () => {
     <header className="w-full px-8 py-4 flex fixed items-center justify-between bg-[#03045e] text-white z-50 max-h-12">
       <div className="flex items-center">
         <img
-          src="/favicon.png"
+          src="/img/core-outline.png"
           alt="Wallet"
           className="w-8 h-8"
         />
